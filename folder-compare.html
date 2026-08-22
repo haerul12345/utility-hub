@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Utility Hub</title>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap"
+                rel="stylesheet">
+
+        <style>
+                :root {
+                        --bg: #070b14;
+                        --panel: #0d1321;
+                        --panel2: #121a2c;
+
+                        --accent: #00d4ff;
+                        --success: #28ff88;
+                        --warning: #ffb020;
+                        --danger: #ff5f56;
+
+                        --text: #e8eef9;
+                        --muted: #7d8ca5;
+
+                        --border: rgba(0, 212, 255, .14);
+                }
+
+                * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                }
+
+                html,
+                body {
+                        height: 100%;
+                        background: #070b14;
+                        color: var(--text);
+                        font-family: 'JetBrains Mono', monospace;
+
+                        background-image:
+                                linear-gradient(rgba(0, 212, 255, .04) 1px, transparent 1px),
+                                linear-gradient(90deg, rgba(0, 212, 255, .04) 1px, transparent 1px);
+
+                        background-size: 40px 40px;
+                }
+
+                .header {
+                        height: 80px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        padding: 0 30px;
+                        border-bottom: 1px solid var(--border);
+                        background: rgba(7, 11, 20, .85);
+                        backdrop-filter: blur(10px);
+                }
+
+                .brand h1 {
+                        color: var(--accent);
+                        font-size: 30px;
+                        letter-spacing: 4px;
+                }
+
+                .brand p {
+                        color: var(--muted);
+                        font-size: 12px;
+                }
+
+                .header-right {
+                        text-align: right;
+                }
+
+                .header-right .status {
+                        color: var(--success);
+                        border: none;
+                        padding: 0;
+                }
+
+                .header-right p {
+                        color: var(--muted);
+                        font-size: 12px;
+                }
+
+                .container {
+                        max-width: 1500px;
+                        margin: auto;
+                        padding: 25px;
+                }
+
+                .section-title {
+                        color: var(--accent);
+                        margin-bottom: 15px;
+                        letter-spacing: 2px;
+                }
+
+                .module {
+                        background: var(--panel);
+                        border: 1px solid var(--border);
+                        padding: 24px;
+                        position: relative;
+                        margin-bottom: 20px;
+                }
+
+                .module::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 2px;
+                        background: linear-gradient(90deg,
+                                        transparent,
+                                        var(--accent),
+                                        transparent);
+                }
+
+                .telemetry {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                        gap: 15px;
+                        margin-bottom: 25px;
+                }
+
+                .log-terminal {
+                        margin-top: 30px;
+                        background: #05070d;
+                        border: 1px solid var(--border);
+                        padding: 20px;
+                }
+
+                .log-terminal::before {
+                        content: 'SYSTEM LOG';
+                        display: block;
+                        color: var(--accent);
+                        margin-bottom: 15px;
+                }
+
+                .log-line {
+                        margin-bottom: 8px;
+                        color: var(--success);
+                        font-size: 13px;
+                }
+
+                .log-line.warning {
+                        color: var(--warning);
+                }
+
+                .control-panel {
+                        min-height: auto;
+                }
+
+                /*                 .controls {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 12px;
+                        align-items: center;
+                        margin-bottom: 15px;
+                } */
+
+                .controls {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 18px;
+                        margin-bottom: 20px;
+                }
+
+                .folder-picker {
+                        display: flex;
+                        align-items: center;
+                        gap: 15px;
+                        flex-wrap: wrap;
+                        padding: 12px;
+                        background: var(--panel2);
+                        border: 1px solid var(--border);
+                }
+
+                .compare-section {
+                        display: flex;
+                        justify-content: left;
+                        margin-top: 8px;
+                }
+
+                .compare-section .hub-btn {
+                        min-width: 240px;
+                        font-size: 15px;
+                        font-weight: 700;
+                        letter-spacing: 1px;
+                }
+
+                .options {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 15px;
+                        align-items: center;
+                }
+
+                .options label {
+                        color: var(--muted);
+                        font-size: 12px;
+                }
+
+                .hub-btn {
+                        background: #08101d;
+                        color: var(--accent);
+                        border: 1px solid var(--accent);
+                        padding: 12px 18px;
+                        cursor: pointer;
+                        font-family: inherit;
+                        transition: .25s;
+                }
+
+                .hub-btn:hover {
+                        background: rgba(0, 212, 255, .08);
+                }
+
+                .hub-btn:disabled {
+                        opacity: .4;
+                        cursor: not-allowed;
+                }
+
+                .note {
+                        color: var(--muted);
+                        font-size: 12px;
+                }
+
+                table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-top: 15px;
+                        font-size: 12px;
+                }
+
+                th {
+                        color: var(--accent);
+                        text-align: left;
+                        font-size: 11px;
+                        letter-spacing: 1px;
+                }
+
+                th,
+                td {
+                        padding: 12px;
+                        border-bottom: 1px solid var(--border);
+                }
+
+                td {
+                        font-size: 12px;
+                }
+
+                tr:hover {
+                        background: rgba(0, 212, 255, .04);
+                }
+
+                .path {
+                        word-break: break-all;
+                }
+
+                .size {
+                        color: var(--muted);
+                        font-size: 10px;
+                }
+
+                .status {
+                        display: inline-block;
+                        padding: 5px 10px;
+                        font-size: 10px;
+                        border: 1px solid;
+                }
+
+                .status.ok {
+                        color: var(--success);
+                        border-color: var(--success);
+                }
+
+                .status.changed {
+                        color: var(--warning);
+                        border-color: var(--warning);
+                }
+
+                .status.version {
+                        color: var(--accent);
+                        border-color: var(--accent);
+                }
+
+                .status.build {
+                        color: #c084fc;
+                        border-color: #c084fc;
+                }
+
+                .status.onlyA {
+                        color: #facc15;
+                        border-color: #facc15;
+                }
+
+                .status.onlyB {
+                        color: #f472b6;
+                        border-color: #f472b6;
+                }
+
+                .badge {
+                        background: var(--panel);
+                        border: 1px solid var(--border);
+                        padding: 16px;
+                        position: relative;
+                        min-width: 180px;
+                }
+
+                .badge::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 2px;
+                        background: var(--accent);
+                }
+
+                .badge.ok {
+                        color: var(--success);
+                }
+
+                .badge.chg {
+                        color: var(--warning);
+                }
+
+                .badge.version {
+                        color: var(--accent);
+                }
+
+                .badge.build {
+                        color: #c084fc;
+                }
+
+                .badge.onlyA {
+                        color: #facc15;
+                }
+
+                .badge.onlyB {
+                        color: #f472b6;
+                }
+
+                .back-button {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+
+                        background: none;
+                        border: none;
+                        padding: 0;
+                        color: var(--accent);
+                        font: inherit;
+                        font-size: 1rem;
+                        font-weight: 600;
+
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                }
+
+                .back-button:hover {
+                        opacity: 0.75;
+                        transform: translateX(-3px);
+                }
+
+                .back-arrow {
+                        font-size: 1.3rem;
+                        line-height: 1;
+                }
+        </style>
+
+</head>
+
+<body>
+
+        <header class="header">
+                <button class="back-button" onclick="history.back()">
+
+                        <svg class="back-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 12H5" />
+                                <path d="M12 19L5 12L12 5" />
+                        </svg>
+
+                        <span>Back</span>
+                </button>
+
+                <div class="brand">
+                        <h1>FOLDER CHECK</h1>
+                        <p>VERSION-AWARE DIRECTORY COMPARISON ENGINE</p>
+                </div>
+
+                <div class="header-right">
+                        <!-- <div class="status">● ONLINE</div> -->
+                        <p>Version 1.0 © 2026 hji</p>
+                </div>
+
+        </header>
+
+        <div class="container">
+
+                <h3 class="section-title">CONTROL PANEL</h3>
+
+                <div class="module control-panel">
+
+                        <!--                         <div class="controls">
+
+                                <button id="pickA" class="hub-btn">
+                                        📂 PICK FOLDER A
+                                </button>
+
+                                <span id="labelA" class="note">
+                                        No folder selected
+                                </span>
+
+                                <button id="pickB" class="hub-btn">
+                                        📂 PICK FOLDER B
+                                </button>
+
+                                <span id="labelB" class="note">
+                                        No folder selected
+                                </span>
+
+                                <button id="compareBtn" class="hub-btn" disabled>
+                                        🔍 COMPARE
+                                </button>
+
+                        </div> -->
+
+                        <div class="controls">
+
+                                <div class="folder-picker">
+                                        <button id="pickA" class="hub-btn">
+                                                📂 PICK FOLDER A
+                                        </button>
+
+                                        <span id="labelA" class="note">
+                                                No folder selected
+                                        </span>
+                                </div>
+
+                                <div class="folder-picker">
+                                        <button id="pickB" class="hub-btn">
+                                                📂 PICK FOLDER B
+                                        </button>
+
+                                        <span id="labelB" class="note">
+                                                No folder selected
+                                        </span>
+                                </div>
+
+                                <div class="compare-section">
+                                        <button id="compareBtn" class="hub-btn" disabled>
+                                                🔍 COMPARE FOLDERS
+                                        </button>
+                                </div>
+
+                        </div>
+
+                        <div class="options">
+
+                                <label>
+                                        <input type="checkbox" id="onlyChanged">
+                                        SHOW ONLY DIFFERENCES
+                                </label>
+
+                                <label>
+                                        <input type="checkbox" id="caseInsensitive">
+                                        CASE INSENSITIVE FILE NAMES
+                                </label>
+
+                                <button id="exportBtn" class="hub-btn" disabled>
+                                        ⬇ EXPORT JSON
+                                </button>
+
+                        </div>
+
+                </div>
+
+                <h3 class="section-title">SUMMARY</h3>
+
+                <div class="telemetry" id="summary"></div>
+
+                <h3 class="section-title">COMPARISON RESULTS</h3>
+
+                <div class="module">
+
+                        <table id="results">
+
+                                <thead>
+                                        <tr>
+                                                <th>FOLDER A</th>
+                                                <th>STATUS</th>
+                                                <th>FOLDER B</th>
+                                                <th>DETAILS</th>
+                                        </tr>
+                                </thead>
+
+                                <tbody id="resultsBody"></tbody>
+
+                        </table>
+
+                </div>
+
+                <div class="log-terminal">
+
+                        <div class="log-line">
+                                [OK] Folder Comparison Engine Loaded
+                        </div>
+
+                        <div class="log-line">
+                                [OK] SHA256 Hash Service Online
+                        </div>
+
+                        <div class="log-line">
+                                [OK] SemVer Detection Ready
+                        </div>
+
+                        <div class="log-line warning">
+                                [INFO] Awaiting Folder Selection
+                        </div>
+
+                </div>
+
+        </div>
+
+        <script>
+
+                (() => {
+                        // UI refs
+                        const pickA = document.getElementById('pickA');
+                        const pickB = document.getElementById('pickB');
+                        const labelA = document.getElementById('labelA');
+                        const labelB = document.getElementById('labelB');
+                        const compareBtn = document.getElementById('compareBtn');
+                        const exportBtn = document.getElementById('exportBtn');
+                        const onlyChangedEl = document.getElementById('onlyChanged');
+                        const caseInsensitiveEl = document.getElementById('caseInsensitive');
+                        const summaryEl = document.getElementById('summary');
+                        const resultsBody = document.getElementById('resultsBody');
+
+                        // State
+                        let dirA = null, dirB = null;
+                        let reportCache = null;
+
+                        // Helpers
+                        const esc = s => (s ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+                        const fmtSize = bytes => {
+                                if (bytes == null) return '—';
+                                const units = ['B', 'KB', 'MB', 'GB']; let u = 0; let n = bytes;
+                                while (n >= 1024 && u < units.length - 1) { n /= 1024; u++; }
+                                return n.toFixed(n < 10 && u ? 2 : 0) + ' ' + units[u];
+                        };
+                        const sha256 = async (buffer) => {
+                                const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+                                const bytes = new Uint8Array(hashBuffer);
+                                return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+                        };
+
+                        // Parse filename → { base, semver, build, numver, ext, raw }
+                        function parseName(name) {
+                                const clean = name.trim();
+                                const extIdx = clean.lastIndexOf('.');
+                                const ext = extIdx >= 0 ? clean.slice(extIdx + 1).toLowerCase() : '';
+                                const core = extIdx >= 0 ? clean.slice(0, extIdx) : clean;
+
+                                // SemVer like 1.2.3 or 1.2.3-alpha.1
+                                const semverRegex = /\d+\.\d+\.\d+(?:[-._][A-Za-z0-9]+(?:\.\d+)*)?/g;
+                                const matches = [...core.matchAll(semverRegex)];
+
+                                let semver = null, base = core, build = null, numver = null;
+
+                                if (matches.length > 0) {
+                                        const last = matches[matches.length - 1];
+                                        semver = last[0].toLowerCase();
+                                        const start = last.index;
+                                        base = core.slice(0, start).replace(/[-_]+$/, '').toLowerCase();
+                                        // Build token right after semver (e.g., -0117)
+                                        const remainder = core.slice(start + semver.length);
+                                        const mBuild = remainder.match(/^[-_]?(\d{2,})\b/);
+                                        if (mBuild) build = mBuild[1];
+                                } else {
+                                        // No SemVer → detect a numeric version near the end (e.g., 3076, 3089)
+                                        const tokens = core.split(/[-_.]/).filter(Boolean);
+                                        for (let i = tokens.length - 1; i >= 0; i--) {
+                                                const t = tokens[i];
+                                                if (/^\d{3,}$/.test(t) && !/^0+$/.test(t)) {
+                                                        numver = t;
+                                                        // Remove this numeric token once from core to form base
+                                                        const regex = new RegExp('([-_\\.])' + t + '([-_\\.])?');
+                                                        const baseCandidate = core.replace(regex, '$1').replace(/[-_]+$/, '');
+                                                        base = baseCandidate.toLowerCase();
+                                                        break;
+                                                }
+                                        }
+                                        if (!numver) {
+                                                base = base.toLowerCase();
+                                        }
+                                }
+                                return { base, semver, build, numver, ext, raw: name };
+                        }
+
+                        // Pairing: by artifact base + extension (ignores version/build)
+                        const pairingKey = info => info.base + ':::' + info.ext;
+
+                        // FS helpers
+                        async function walkDirectory(rootHandle) {
+                                const files = []; // { rel, handle }
+                                async function recurse(dirHandle, prefix) {
+                                        for await (const [name, handle] of dirHandle.entries()) {
+                                                if (handle.kind === 'file') {
+                                                        const rel = (prefix ? prefix + '/' : '') + name;
+                                                        files.push({ rel, handle });
+                                                } else if (handle.kind === 'directory') {
+                                                        await recurse(handle, (prefix ? prefix + '/' : '') + name);
+                                                }
+                                        }
+                                }
+                                await recurse(rootHandle, '');
+                                return files;
+                        }
+
+                        // Pickers
+                        pickA.addEventListener('click', async () => {
+                                try {
+                                        dirA = await window.showDirectoryPicker({ mode: 'read' });
+                                        labelA.textContent = 'Picked: ' + (dirA.name || '(folder)');
+                                        compareBtn.disabled = !(dirA && dirB);
+                                } catch (e) { console.warn(e); }
+                        });
+                        pickB.addEventListener('click', async () => {
+                                try {
+                                        dirB = await window.showDirectoryPicker({ mode: 'read' });
+                                        labelB.textContent = 'Picked: ' + (dirB.name || '(folder)');
+                                        compareBtn.disabled = !(dirA && dirB);
+                                } catch (e) { console.warn(e); }
+                        });
+
+                        // Compare
+                        compareBtn.addEventListener('click', async () => {
+                                if (!dirA || !dirB) return;
+                                exportBtn.disabled = true;
+                                resultsBody.innerHTML = '';
+                                summaryEl.textContent = '⏳ Comparing…';
+
+                                const ci = caseInsensitiveEl.checked;
+
+                                // Read folder A
+                                const listA = await walkDirectory(dirA);
+                                const mapA = new Map(); // key -> item
+                                for (const { rel, handle } of listA) {
+                                        const name = rel.split('/').pop();
+                                        const normName = ci ? name.toLowerCase() : name;
+                                        const info = parseName(normName);
+                                        const key = pairingKey(info);
+                                        const file = await handle.getFile();
+                                        // If duplicate keys exist, keep the first encountered; adjust if needed
+                                        if (!mapA.has(key)) {
+                                                mapA.set(key, { rel, name: name, info, handle, size: file.size });
+                                        }
+                                }
+
+                                // Read folder B
+                                const listB = await walkDirectory(dirB);
+                                const mapB = new Map();
+                                for (const { rel, handle } of listB) {
+                                        const name = rel.split('/').pop();
+                                        const normName = ci ? name.toLowerCase() : name;
+                                        const info = parseName(normName);
+                                        const key = pairingKey(info);
+                                        const file = await handle.getFile();
+                                        if (!mapB.has(key)) {
+                                                mapB.set(key, { rel, name: name, info, handle, size: file.size });
+                                        }
+                                }
+
+                                // Merge keys
+                                const allKeys = new Set([...mapA.keys(), ...mapB.keys()]);
+
+                                const report = { rows: [], counts: { identical: 0, changed: 0, version: 0, build: 0, onlyA: 0, onlyB: 0 } };
+
+                                for (const key of [...allKeys].sort()) {
+                                        const a = mapA.get(key) || null;
+                                        const b = mapB.get(key) || null;
+
+                                        if (a && !b) {
+                                                report.rows.push({ left: a.name, right: '', status: 'onlyA', sizeA: a.size, sizeB: null, detail: null });
+                                                report.counts.onlyA++;
+                                                continue;
+                                        }
+                                        if (!a && b) {
+                                                report.rows.push({ left: '', right: b.name, status: 'onlyB', sizeA: null, sizeB: b.size, detail: null });
+                                                report.counts.onlyB++;
+                                                continue;
+                                        }
+
+                                        // Both exist — classify by version/build
+                                        const ai = a.info, bi = b.info;
+                                        const verA = ai.semver || ai.numver || null;
+                                        const verB = bi.semver || bi.numver || null;
+
+                                        if (ai.semver && bi.semver) {
+                                                const semverEqual = ai.semver === bi.semver;
+                                                const buildEqual = (ai.build || '') === (bi.build || '');
+                                                if (semverEqual && buildEqual) {
+                                                        // Same version/build → hash compare for exact content
+                                                        const [fileA, fileB] = await Promise.all([a.handle.getFile(), b.handle.getFile()]);
+                                                        const [bufA, bufB] = await Promise.all([fileA.arrayBuffer(), fileB.arrayBuffer()]);
+                                                        const [ha, hb] = await Promise.all([sha256(bufA), sha256(bufB)]);
+                                                        const identical = ha === hb;
+                                                        report.rows.push({
+                                                                left: a.name, right: b.name,
+                                                                status: identical ? 'identical' : 'changed',
+                                                                sizeA: a.size, sizeB: b.size,
+                                                                detail: identical ? null : { reason: 'same version, different content' }
+                                                        });
+                                                        identical ? report.counts.identical++ : report.counts.changed++;
+                                                } else if (semverEqual && !buildEqual) {
+                                                        report.rows.push({
+                                                                left: a.name, right: b.name,
+                                                                status: 'build',
+                                                                sizeA: a.size, sizeB: b.size,
+                                                                detail: { semver: ai.semver, buildA: ai.build || '(none)', buildB: bi.build || '(none)' }
+                                                        });
+                                                        report.counts.build++;
+                                                } else {
+                                                        report.rows.push({
+                                                                left: a.name, right: b.name,
+                                                                status: 'version',
+                                                                sizeA: a.size, sizeB: b.size,
+                                                                detail: { semverA: ai.semver, semverB: bi.semver, buildA: ai.build || '(none)', buildB: bi.build || '(none)' }
+                                                        });
+                                                        report.counts.version++;
+                                                }
+
+                                        } else if (verA && verB) {
+                                                // Numeric version path (no SemVer), e.g., 3076 vs 3089
+                                                if (verA === verB) {
+                                                        // Same numeric version → optional hash compare
+                                                        const [fileA, fileB] = await Promise.all([a.handle.getFile(), b.handle.getFile()]);
+                                                        const [bufA, bufB] = await Promise.all([fileA.arrayBuffer(), fileB.arrayBuffer()]);
+                                                        const [ha, hb] = await Promise.all([sha256(bufA), sha256(bufB)]);
+                                                        const identical = ha === hb;
+                                                        report.rows.push({
+                                                                left: a.name, right: b.name,
+                                                                status: identical ? 'identical' : 'changed',
+                                                                sizeA: a.size, sizeB: b.size,
+                                                                detail: identical ? null : { reason: 'same numeric version, different content' }
+                                                        });
+                                                        identical ? report.counts.identical++ : report.counts.changed++;
+                                                } else {
+                                                        report.rows.push({
+                                                                left: a.name, right: b.name,
+                                                                status: 'version',
+                                                                sizeA: a.size, sizeB: b.size,
+                                                                detail: { numverA: verA, numverB: verB }
+                                                        });
+                                                        report.counts.version++;
+                                                }
+
+                                        } else {
+                                                // No clear version tokens — fallback: if same name then hash; else mark changed
+                                                if (ai.raw === bi.raw) {
+                                                        const [fileA, fileB] = await Promise.all([a.handle.getFile(), b.handle.getFile()]);
+                                                        const [bufA, bufB] = await Promise.all([fileA.arrayBuffer(), fileB.arrayBuffer()]);
+                                                        const [ha, hb] = await Promise.all([sha256(bufA), sha256(bufB)]);
+                                                        const identical = ha === hb;
+                                                        report.rows.push({
+                                                                left: a.name, right: b.name,
+                                                                status: identical ? 'identical' : 'changed',
+                                                                sizeA: a.size, sizeB: b.size,
+                                                                detail: identical ? null : { reason: 'same name, different content' }
+                                                        });
+                                                        identical ? report.counts.identical++ : report.counts.changed++;
+                                                } else {
+                                                        report.rows.push({
+                                                                left: a.name, right: b.name,
+                                                                status: 'changed',
+                                                                sizeA: a.size, sizeB: b.size,
+                                                                detail: { reason: 'no version tokens; names differ' }
+                                                        });
+                                                        report.counts.changed++;
+                                                }
+                                        }
+                                }
+
+                                reportCache = report;
+                                renderSummary(report);
+                                renderSideBySide(report, onlyChangedEl.checked);
+                                exportBtn.disabled = false;
+                        });
+
+                        function renderSummary(report) {
+                                const c = report.counts;
+                                /*     summaryEl.innerHTML =
+                                      '<span class="badge ok">Identical: ' + c.identical + '</span>' +
+                                      '<span class="badge chg">Changed: ' + c.changed + '</span>' +
+                                      '<span class="badge version">Different version: ' + c.version + '</span>' +
+                                      '<span class="badge build">Different build: ' + c.build + '</span>' +
+                                      '<span class="badge onlyA">Only in A: ' + c.onlyA + '</span>' +
+                                      '<span class="badge onlyB">Only in B: ' + c.onlyB + '</span>'; */
+
+                                summaryEl.innerHTML =
+                                        `
+<div class="badge ok">
+  IDENTICAL<br><strong>${c.identical}</strong>
+</div>
+
+<div class="badge chg">
+  CHANGED<br><strong>${c.changed}</strong>
+</div>
+
+<div class="badge version">
+  VERSION DIFF<br><strong>${c.version}</strong>
+</div>
+
+<div class="badge build">
+  BUILD DIFF<br><strong>${c.build}</strong>
+</div>
+
+<div class="badge onlyA">
+  ONLY IN A<br><strong>${c.onlyA}</strong>
+</div>
+
+<div class="badge onlyB">
+  ONLY IN B<br><strong>${c.onlyB}</strong>
+</div>
+`;
+                        }
+
+                        function renderSideBySide(report, onlyChanged = false) {
+                                resultsBody.innerHTML = '';
+                                for (const row of report.rows) {
+                                        // if (onlyChanged && !['changed', 'version', 'build'].includes(row.status)) continue;
+                                        if (onlyChanged && row.status === 'identical') continue;
+
+                                        const tr = document.createElement('tr');
+
+                                        const tdA = document.createElement('td');
+                                        tdA.className = 'path';
+                                        tdA.innerHTML = (row.left ? esc(row.left) : '') + (row.sizeA != null ? ' <span class="size">(' + fmtSize(row.sizeA) + ')</span>' : '');
+                                        tr.appendChild(tdA);
+
+                                        const tdStatus = document.createElement('td');
+                                        tdStatus.innerHTML =
+                                                row.status === 'identical' ? '<span class="status ok">same version (identical)</span>' :
+                                                        row.status === 'changed' ? '<span class="status changed">same version (different content)</span>' :
+                                                                row.status === 'version' ? '<span class="status version">different version</span>' :
+                                                                        row.status === 'build' ? '<span class="status build">different build</span>' :
+                                                                                row.status === 'onlyA' ? '<span class="status onlyA">only in A</span>' :
+                                                                                        row.status === 'onlyB' ? '<span class="status onlyB">only in B</span>' :
+                                                                                                '<span class="status changed">unknown</span>';
+                                        tr.appendChild(tdStatus);
+
+                                        const tdB = document.createElement('td');
+                                        tdB.className = 'path';
+                                        tdB.innerHTML = (row.right ? esc(row.right) : '') + (row.sizeB != null ? ' <span class="size">(' + fmtSize(row.sizeB) + ')</span>' : '');
+                                        tr.appendChild(tdB);
+
+                                        const tdAction = document.createElement('td');
+                                        if (row.status === 'version' || row.status === 'build') {
+                                                const btn = document.createElement('button');
+                                                //btn.className = 'btn';
+                                                btn.className = 'hub-btn';
+                                                btn.textContent = '📄 Details';
+                                                btn.addEventListener('click', () => {
+                                                        const d = row.detail || {};
+                                                        const lines = [];
+                                                        if (row.status === 'version') {
+                                                                if (d.semverA || d.semverB) {
+                                                                        lines.push('Version A: ' + (d.semverA || '(none)'));
+                                                                        lines.push('Version B: ' + (d.semverB || '(none)'));
+                                                                }
+                                                                if (d.numverA || d.numverB) {
+                                                                        lines.push('Numeric A: ' + (d.numverA || '(none)'));
+                                                                        lines.push('Numeric B: ' + (d.numverB || '(none)'));
+                                                                }
+                                                                if (d.buildA || d.buildB) {
+                                                                        lines.push('Build A: ' + (d.buildA || '(none)'));
+                                                                        lines.push('Build B: ' + (d.buildB || '(none)'));
+                                                                }
+                                                        } else {
+                                                                lines.push('Version: ' + (d.semver || '(unknown)'));
+                                                                lines.push('Build A: ' + (d.buildA || '(none)'));
+                                                                lines.push('Build B: ' + (d.buildB || '(none)'));
+                                                        }
+                                                        alert(lines.join('\n'));
+                                                });
+                                                tdAction.appendChild(btn);
+                                        } else if (row.status === 'changed') {
+                                                const btn = document.createElement('button');
+                                                btn.className = 'hub-btn';
+                                                btn.textContent = '📄 Explain';
+                                                btn.addEventListener('click', () => {
+                                                        alert((row.detail && row.detail.reason) ? row.detail.reason : 'Different content.');
+                                                });
+                                                tdAction.appendChild(btn);
+                                        } else {
+                                                const dash = document.createElement('span');
+                                                dash.className = 'note';
+                                                dash.textContent = '—';
+                                                tdAction.appendChild(dash);
+                                        }
+                                        tr.appendChild(tdAction);
+
+                                        resultsBody.appendChild(tr);
+                                }
+                        }
+
+                        // Export JSON
+                        exportBtn.addEventListener('click', () => {
+                                if (!reportCache) return;
+                                const blob = new Blob([JSON.stringify(reportCache, null, 2)], { type: 'application/json' });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                const ts = new Date().toISOString().replace(/[:.]/g, '-');
+                                a.href = url; a.download = 'folder_compare_' + ts + '.json'; a.click();
+                                URL.revokeObjectURL(url);
+                        });
+
+                        // React to filter toggle
+                        onlyChangedEl.addEventListener('change', () => {
+                                if (reportCache) renderSideBySide(reportCache, onlyChangedEl.checked);
+                        });
+
+                })();
+
+        </script>
+
+</body>
+
+</html>

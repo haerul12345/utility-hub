@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<head>
+        <meta charset="utf-8" />
+        <title>Surcharge Calculator – Card Limit Capped by Type Max</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <style>
+                :root {
+                        --bg: #070b14;
+                        --panel: #0d1321;
+                        --panel2: #121a2c;
+
+                        --accent: #00d4ff;
+                        --success: #28ff88;
+                        --warning: #ffb020;
+                        --danger: #ff5f56;
+
+                        --text: #e8eef9;
+                        --muted: #7d8ca5;
+
+                        --border: rgba(0, 212, 255, .14);
+                }
+
+                * {
+                        box-sizing: border-box;
+                        margin: 0;
+                        padding: 0;
+                }
+
+                html,
+                body {
+                        min-height: 100%;
+                        background: #070b14;
+                        color: var(--text);
+                        font-family: 'JetBrains Mono', monospace;
+
+                        background-image:
+                                linear-gradient(rgba(0, 212, 255, .04) 1px, transparent 1px),
+                                linear-gradient(90deg, rgba(0, 212, 255, .04) 1px, transparent 1px);
+
+                        background-size: 40px 40px;
+                }
+
+                /* HEADER */
+
+                .header {
+                        height: 80px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        padding: 0 30px;
+                        border-bottom: 1px solid var(--border);
+                        background: rgba(7, 11, 20, .85);
+                        backdrop-filter: blur(10px);
+                }
+
+                .brand h1 {
+                        color: var(--accent);
+                        font-size: 28px;
+                        letter-spacing: 3px;
+                }
+
+                .brand p {
+                        color: var(--muted);
+                        font-size: 12px;
+                }
+
+                .header-right p {
+                        color: var(--muted);
+                        font-size: 12px;
+                }
+
+                /* CONTENT */
+
+                .container {
+                        max-width: 1500px;
+                        margin: auto;
+                        padding: 25px;
+                }
+
+                main {
+                        display: grid;
+                        grid-template-columns: 1.1fr .9fr;
+                        gap: 20px;
+                }
+
+                @media(max-width:980px) {
+                        main {
+                                grid-template-columns: 1fr;
+                        }
+                }
+
+                /* CARD */
+
+                .card {
+                        background: var(--panel);
+                        border: 1px solid var(--border);
+                        padding: 22px;
+                        position: relative;
+                }
+
+                .card::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 2px;
+                        background: var(--accent);
+                }
+
+                /* FORM GRID */
+
+                .grid-2,
+                .grid-3 {
+                        display: grid;
+                        gap: 15px;
+                }
+
+                .grid-2 {
+                        grid-template-columns: 1fr 1fr;
+                }
+
+                .grid-3 {
+                        grid-template-columns: 1fr 1fr 1fr;
+                }
+
+                @media(max-width:900px) {
+
+                        .grid-2,
+                        .grid-3 {
+                                grid-template-columns: 1fr;
+                        }
+                }
+
+                label {
+                        display: block;
+                        margin-bottom: 8px;
+                        color: var(--accent);
+                        font-size: 13px;
+                }
+
+                .help,
+                .subtitle,
+                .footer-note,
+                .muted {
+                        color: var(--muted);
+                        font-size: 12px;
+                }
+
+                input,
+                select {
+                        width: 100%;
+                        padding: 12px;
+                        background: #08101d;
+                        color: white;
+                        border: 1px solid var(--border);
+                        font-family: inherit;
+                }
+
+                input:focus,
+                select:focus {
+                        outline: none;
+                        border-color: var(--accent);
+                        box-shadow: 0 0 10px rgba(0, 212, 255, .2);
+                }
+
+                /* CHIP */
+
+                .chip {
+                        display: inline-block;
+                        padding: 2px 7px;
+                        border: 1px solid var(--accent);
+                        color: var(--accent);
+                        font-size: 11px;
+                }
+
+                /* DIVIDER */
+
+                .divider {
+                        height: 1px;
+                        background: var(--border);
+                        margin: 20px 0;
+                }
+
+                /* BUTTONS */
+
+                .btn {
+                        border: 1px solid var(--accent);
+                        background: transparent;
+                        color: var(--accent);
+                        padding: 12px 20px;
+                        cursor: pointer;
+                        font-family: inherit;
+                        transition: .25s;
+                }
+
+                .btn:hover {
+                        background: rgba(0, 212, 255, .08);
+                }
+
+                /* KPI */
+
+                .kpis {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 15px;
+                }
+
+                .kpi {
+                        background: #08101d;
+                        border: 1px solid var(--border);
+                        padding: 18px;
+                }
+
+                /* 
+                .kpi h3 {
+                        color: var(--muted);
+                        margin-bottom: 8px;
+                } */
+
+                .kpi h3 {
+                        color: var(--muted);
+                        margin-bottom: 6px;
+                        font-size: 14px;
+                        /* try 14px */
+                }
+
+                .kpi .val {
+                        font-size: 28px;
+                        color: var(--accent);
+                        font-weight: 700;
+                }
+
+                /* OUTPUT */
+
+                .good {
+                        color: var(--success);
+                }
+
+                .bad {
+                        color: var(--danger);
+                }
+
+                .tag {
+                        border: 1px solid var(--accent);
+                        color: var(--accent);
+                        padding: 2px 6px;
+                        font-size: 11px;
+                }
+
+                .explain pre {
+                        white-space: pre-wrap;
+                        line-height: 1.8;
+                        color: var(--text);
+                        background: #08101d;
+                        border: 1px solid var(--border);
+                        padding: 15px;
+                }
+
+                .row {
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                }
+
+                .mono {
+                        font-family: 'JetBrains Mono', monospace;
+                }
+
+                .sr-only {
+                        position: absolute;
+                        left: -99999px;
+                }
+
+                .back-button {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+
+                        background: none;
+                        border: none;
+                        padding: 0;
+                        min-width: 0;
+                        height: auto;
+                        color: var(--accent);
+                        font: inherit;
+                        font-size: 1rem;
+                        font-weight: 600;
+
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                }
+
+                .back-button:hover {
+                        background: none;
+                        opacity: 0.75;
+                        transform: translateX(-3px);
+                }
+
+                .back-arrow {
+                        font-size: 1.3rem;
+                        line-height: 1;
+                }
+
+                .right-column {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 20px;
+                }
+
+                .table-wrapper {
+                        overflow-x: auto;
+                        margin-top: 15px;
+                }
+
+                .scheme-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-size: 10px;
+
+                }
+
+                .scheme-table th,
+                .scheme-table td {
+                        border: 1px solid var(--border);
+                        /* padding: 10px; */
+                        padding: 6px 8px;
+                        /* reduce cell size */
+                        text-align: center;
+                }
+
+                .scheme-table th {
+                        background: #08101d;
+                        color: var(--accent);
+                        white-space: nowrap;
+                }
+
+                .scheme-table td:first-child {
+                        text-align: left;
+                        color: var(--text);
+                        font-weight: 600;
+                }
+
+                .scheme-table input {
+                        width: 100%;
+                        min-width: 65px;
+                        text-align: right;
+                        padding: 5px;
+                        background: #08101d;
+                        border: 1px solid var(--border);
+                        color: var(--text);
+                }
+
+                .help,
+                .subtitle,
+                .footer-note,
+                .muted {
+                        color: var(--muted);
+                        font-size: 10px;
+                }
+
+                section[aria-labelledby="outputs-title"] {
+
+                        margin-top: 20px;
+
+                }
+
+                label {
+                        display: block;
+                        margin-bottom: 8px;
+                        color: var(--accent);
+                        font-size: 11px;
+                        /* was 13px */
+                }
+
+                .chip {
+                        display: inline-block;
+                        padding: 1px 5px;
+                        border: 1px solid var(--accent);
+                        color: var(--accent);
+                        font-size: 9px;
+                        /* was 11px */
+                }
+        </style>
+
+</head>
+
+<body>
+
+
+        <header class="header">
+                <button class="back-button" onclick="history.back()">
+
+                        <svg class="back-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 12H5" />
+                                <path d="M12 19L5 12L12 5" />
+                        </svg>
+
+                        <span>Back</span>
+                </button>
+                <div class="brand">
+                        <h1>SURCHARGE CALCULATOR</h1>
+                        <p>CARD LIMIT CAPPED BY TYPE MAX</p>
+                </div>
+
+                <div class="header-right">
+                        <p>Utility Hub Module</p>
+                </div>
+        </header>
+
+        <div class="container">
+                <main>
+
+                        <div>
+                                <section class="card" aria-labelledby="inputs-title">
+                                        <h2 id="inputs-title" class="sr-only">Inputs</h2>
+
+                                        <div class="grid-3">
+                                                <div>
+                                                        <label for="amount">Base amount <span
+                                                                        class="chip">$</span></label>
+                                                        <input id="amount" type="number" step="0.01" min="0"
+                                                                value="0.00" placeholder="e.g. 10.00" />
+                                                </div>
+                                                <div>
+                                                        <label for="cash">Cash <span class="chip">$</span></label>
+                                                        <input id="cash" type="number" step="0.01" min="0" value="0" />
+                                                        <div class="help">Only added to total.</div>
+                                                </div>
+                                                <div>
+                                                        <label for="tip">Tip <span class="chip">$</span></label>
+                                                        <input id="tip" type="number" step="0.01" min="0" value="0" />
+                                                        <div class="help">Only added to total.</div>
+                                                </div>
+                                        </div>
+
+                                        <div class="divider"></div>
+
+                                        <div class="grid-3">
+
+                                                <div>
+                                                        <label for="schemeSelector">Scheme</label>
+                                                        <select id="schemeSelector">
+                                                                <option value="">Select Scheme</option>
+                                                                <option value="EFTPOS">EFTPOS</option>
+                                                                <option value="Mastercard">Mastercard</option>
+                                                                <option value="Visa">Visa</option>
+                                                                <option value="AMEX">AMEX</option>
+                                                                <option value="JCB">JCB</option>
+                                                                <option value="UPI">UPI</option>
+                                                                <option value="DINERS">DINERS</option>
+                                                        </select>
+                                                        <div class="help">
+                                                                Values will be loaded from Scheme Limits table.
+                                                        </div>
+                                                </div>
+
+                                                <div>
+                                                        <label for="type">Surcharge type</label>
+                                                        <select id="type">
+                                                                <option value="OFF">OFF</option>
+                                                                <option value="FLAT_FEE">FLAT_FEE</option>
+                                                                <option value="PERCENT">PERCENT</option>
+                                                        </select>
+                                                </div>
+
+                                                <div id="percentWrap" style="display:none;">
+                                                        <label for="percent">Max percentage <span
+                                                                        class="chip">%</span></label>
+                                                        <input id="percent" type="number" step="0.01" min="0"
+                                                                placeholder="e.g. 2.50" />
+                                                        <div class="help">Reference only. Does not affect the final
+                                                                surcharge.
+                                                        </div>
+                                                </div>
+
+                                                <div id="flatWrap" style="display:none;">
+                                                        <label for="flatFee">Max amount <span
+                                                                        class="chip">$</span></label>
+                                                        <input id="flatFee" type="number" step="0.01" min="0"
+                                                                placeholder="e.g. 0.30" />
+                                                        <div class="help">Reference only. Does not affect the final
+                                                                surcharge.
+                                                        </div>
+                                                </div>
+                                        </div>
+
+                                        <div class="grid-2">
+                                                <div id="maxAmtWrap">
+                                                        <label for="maxSurchargeAmt">Max amount <span
+                                                                        class="chip">$</span></label>
+                                                        <input id="maxSurchargeAmt" type="number" step="0.01" min="0"
+                                                                placeholder="Required for PERCENT" />
+                                                        <div class="help">Type Max for <b>PERCENT</b>.</div>
+                                                </div>
+
+                                                <div id="pctCapWrap">
+                                                        <label for="surchargePctCap">Max percentage <span class="chip">%
+                                                                        ×
+                                                                        base</span></label>
+                                                        <input id="surchargePctCap" type="number" step="0.01" min="0"
+                                                                placeholder="Required for FLAT_FEE" />
+                                                        <div class="help">Type Max for <b>FLAT_FEE</b>.</div>
+                                                </div>
+                                        </div>
+
+                                        <div class="divider"></div>
+
+                                        <div id="cardSettings" class="grid-3">
+                                                <div>
+                                                        <label for="cardType">Card Type</label>
+                                                        <select id="cardType">
+                                                                <option value="DEBIT">DEBIT</option>
+                                                                <option value="CREDIT">CREDIT</option>
+                                                        </select>
+                                                </div>
+                                                <div>
+                                                        <label id="creditLimitLabel" for="creditLimit">Domestic Credit
+                                                                Limit
+                                                                <span class="chip">% ×
+                                                                        base</span></label>
+                                                        <input id="creditLimit" type="number" step="0.01" min="0"
+                                                                placeholder="e.g. 2.00" />
+                                                        <!-- <div class="help">Card-derived surcharge = amount × this % (when
+                                                        CREDIT).</div> -->
+                                                        <div id="creditLimitHelp" class="help">
+                                                                Card-derived surcharge = amount × this % (when CREDIT).
+                                                        </div>
+                                                </div>
+                                                <div>
+                                                        <label id="debitLimitLabel" for="debitLimit">Domestic Debit
+                                                                Limit <span class="chip">% ×
+                                                                        base</span></label>
+                                                        <input id="debitLimit" type="number" step="0.01" min="0"
+                                                                placeholder="e.g. 3.00" />
+                                                        <!-- <div class="help">Card-derived surcharge = amount × this % (when DEBIT).
+                                                </div> -->
+                                                        <div id="debitLimitHelp" class="help">
+                                                                Card-derived surcharge = amount × this % (when DEBIT).
+                                                        </div>
+                                                </div>
+                                        </div>
+
+                                        <div class="divider"></div>
+                                        <div class="row" style="margin-top: 6px;">
+                                                <button id="resetBtn" class="btn" type="button">Reset</button>
+                                        </div>
+                                </section>
+
+                                <p></p>
+
+                                <section class="card" aria-labelledby="outputs-title">
+                                        <h2 id="outputs-title" class="sr-only">Outputs</h2>
+
+                                        <div id="status" class="muted" aria-live="polite"> Waiting for input…</div>
+                                        <div class="divider"></div>
+
+                                        <div class="kpis">
+                                                <div class="kpi">
+                                                        <h3>Surcharge</h3>
+                                                        <div id="surchargeOut" class="val mono">—</div>
+                                                </div>
+                                                <div class="kpi">
+                                                        <h3 id="totalLabel">Total (Base + Surcharge)</h3>
+                                                        <div id="totalOut" class="val mono">—</div>
+                                                </div>
+                                        </div>
+
+                                        <div class="divider"></div>
+
+                                        <div class="explain">
+                                                <div class="row"><strong>Explanation</strong></div>
+                                                <pre id="explainText" class="mono muted">—</pre>
+                                        </div>
+
+                                        <div class="divider"></div>
+                                        <div class="footer-note">
+                                                Rounding: half‑up to 2 decimals. Percent inputs are plain numbers (e.g.,
+                                                <code>3</code> = 3%).
+                                        </div>
+                                </section>
+                        </div>
+
+
+                        <div class="right-column">
+                                <!-- Scheme Limits Table -->
+                                <section class="card" aria-labelledby="scheme-table-title">
+                                        <h2 id="scheme-table-title" style="text-align: center;">Surcharge Table</h2>
+
+                                        <div class="table-wrapper">
+                                                <table class="scheme-table">
+                                                        <thead>
+                                                                <tr>
+                                                                        <th>Scheme</th>
+                                                                        <th>Domestic Credit Limit</th>
+                                                                        <th>Domestic Debit Limit</th>
+                                                                        <th>Max Amount ($)</th>
+                                                                        <th>Max Percentage (%)</th>
+                                                                </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                                <tr data-scheme="EFTPOS">
+                                                                        <td>EFTPOS</td>
+                                                                        <td><input class="credit-limit" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                        <td><input class="debit-limit" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                        <td><input class="max-amount" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                        <td><input class="max-percent" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                </tr>
+
+                                                                <tr data-scheme="Mastercard">
+                                                                        <td>Mastercard</td>
+                                                                        <td><input class="credit-limit" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                        <td><input class="debit-limit" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                        <td><input class="max-amount" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                        <td><input class="max-percent" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                </tr>
+
+                                                                <tr data-scheme="Visa">
+                                                                        <td>Visa</td>
+                                                                        <td><input class="credit-limit" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                        <td><input class="debit-limit" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                        <td><input class="max-amount" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                        <td><input class="max-percent" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                </tr>
+
+                                                                <tr data-scheme="AMEX">
+                                                                        <td>AMEX</td>
+                                                                        <td><input class="credit-limit" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                        <td><input class="debit-limit" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                        <td><input class="max-amount" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                        <td><input class="max-percent" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                </tr>
+
+                                                                <tr data-scheme="JCB">
+                                                                        <td>JCB</td>
+                                                                        <td><input class="credit-limit" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                        <td><input class="debit-limit" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                        <td><input class="max-amount" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                        <td><input class="max-percent" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                </tr>
+
+                                                                <tr data-scheme="UPI">
+                                                                        <td>UPI</td>
+                                                                        <td><input class="credit-limit" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                        <td><input class="debit-limit" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                        <td><input class="max-amount" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                        <td><input class="max-percent" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                </tr>
+
+                                                                <tr data-scheme="DINERS">
+                                                                        <td>DINERS</td>
+                                                                        <td><input class="credit-limit" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                        <td><input class="debit-limit" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                        <td><input class="max-amount" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                        <td><input class="max-percent" type="number"
+                                                                                        step="0.01" value="0.00"></td>
+                                                                </tr>
+                                                        </tbody>
+                                                </table>
+                                        </div>
+                                </section>
+                                <!-- Outputs -->
+                                <!-- Inputs -->
+
+
+                        </div>
+                </main>
+
+        </div>
+
+</body>
+
+<script>
+
+        document
+                .querySelectorAll('.scheme-table input')
+                .forEach(input => {
+
+                        input.addEventListener('input', () => {
+
+                                const selected =
+                                        el('schemeSelector').value;
+
+                                const row =
+                                        input.closest('tr');
+
+                                if (
+                                        selected &&
+                                        row.dataset.scheme === selected
+                                ) {
+                                        loadSchemeValues();
+                                }
+                        });
+
+                });
+
+        const INF = Number.POSITIVE_INFINITY;
+
+        const el = (id) => document.getElementById(id);
+        const numOrNull = (v) => {
+                if (v === '' || v == null) return null;
+                const n = Number(v);
+                return Number.isFinite(n) ? n : null;
+        };
+        const roundCurrency = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+        const fmt = (n) => (n == null || !Number.isFinite(n)) ? '—' : '$' + roundCurrency(n).toFixed(2);
+
+        function loadSchemeValues() {
+
+                const scheme = el('schemeSelector').value;
+
+                if (!scheme) return;
+
+                const row = document.querySelector(
+                        `tr[data-scheme="${scheme}"]`
+                );
+
+                if (!row) return;
+
+                const credit =
+                        row.querySelector('.credit-limit').value;
+
+                const debit =
+                        row.querySelector('.debit-limit').value;
+
+                const maxAmount =
+                        row.querySelector('.max-amount').value;
+
+                const maxPercent =
+                        row.querySelector('.max-percent').value;
+
+                // Populate calculator
+
+                el('creditLimit').value = credit;
+                el('debitLimit').value = debit;
+                el('maxSurchargeAmt').value = maxAmount;
+                el('surchargePctCap').value = maxPercent;
+
+                handleChange();
+        }
+
+
+        function buildTotalExplain(amount, cash, tip, surcharge, total) {
+                const labelParts = ['amount'];
+                const valueParts = [fmt(amount)];
+
+                if ((Number(cash) || 0) > 0) {
+                        labelParts.push('cash');
+                        valueParts.push(fmt(cash));
+                }
+                if ((Number(tip) || 0) > 0) {
+                        labelParts.push('tip');
+                        valueParts.push(fmt(tip));
+                }
+
+                labelParts.push('surcharge');
+                valueParts.push(fmt(surcharge));
+
+                return `Total = ${labelParts.join(' + ')} = ${valueParts.join(' + ')} = ${fmt(total)}.`;
+        }
+
+
+
+
+
+
+        /** Replace commas with dots, remove spaces, trim */
+        function sanitizeRaw(raw) {
+                if (raw == null) return '';
+                return String(raw).replace(/\s+/g, '').replace(/,/g, '.').trim();
+        }
+
+        /**
+         * If the raw value is a pure integer with >= 3 digits (e.g., "200", "1234"),
+         * divide by 100 and return a *string with exactly 2 decimals* (e.g., "2.00", "12.34").
+         * Otherwise, just normalize separators (',' -> '.') and return as string (unchanged decimals).
+         */
+        function normalizeDivideHundredKeepZeros(raw) {
+                const v = sanitizeRaw(raw);
+                if (v === '') return v;
+
+                if (/^\d{3,}$/.test(v)) {
+                        const n = Number(v) / 100;
+                        // Here we *intentionally* keep 2 decimals to represent cents/percent nicely.
+                        return n.toFixed(2);
+                }
+                return v; // keep what the user typed (with '.' instead of ',')
+        }
+
+        /**
+         * Format back to the input while preserving trailing zeros *if the user had them*.
+         * - If the original (pre-format) string had a '.', we keep as many decimals as typed,
+         *   capped by the field's precision (step).
+         * - If the original had no '.', we don't add ".00" unless you explicitly want that for currencies.
+         *   (We keep it lean for inputs; outputs already show 2 decimals via fmt()).
+         */
+        function formatByStepKeepTypedZeros(inputEl, rawBefore, numericAfter) {
+                const stepAttr = inputEl.getAttribute('step');
+                const step = Number(stepAttr);
+                const hasDot = rawBefore.includes('.');
+
+                // Determine max decimals allowed by step (default: 2)
+                const maxDecimals = (Number.isFinite(step) && step > 0 && step < 0.001) ? 4 : 2;
+
+                // If user had decimals, preserve the *typed* decimal length (incl. zeros), but cap at maxDecimals
+                if (hasDot) {
+                        // Extract how many decimals the user typed (after sanitization/comma->dot)
+                        const rawSan = sanitizeRaw(rawBefore);
+                        const rawDecs = (rawSan.split('.')[1] ?? '').length;
+                        const decs = Math.min(Math.max(0, rawDecs), maxDecimals);
+                        return numericAfter.toFixed(decs);
+                }
+
+                // No decimal typed originally → don’t force .00 in the input UI
+                // (Your outputs use fmt() which already shows 2 decimals in the KPIs)
+                if (Number.isFinite(step) && step > 0 && step < 0.001) {
+                        // high precision field: up to 4 decimals but avoid trailing zeros
+                        const n4 = Math.round(numericAfter * 10000) / 10000;
+                        return n4.toString();
+                } else {
+                        // currency-like input: keep as integer string if user typed integer
+                        const n2 = Math.round(numericAfter * 100) / 100;
+                        // If it's effectively an integer, show integer; else show 2 decimals (for stability)
+                        return Number.isInteger(n2) ? String(n2) : n2.toFixed(2);
+                }
+        }
+
+        /**
+         * Attach behavior for ALL number inputs:
+         * - On paste: convert ',' -> '.', and "200" -> "2.00" (keep zeros)
+         * - On blur/change: same normalization, then re-format while preserving typed zeros
+         */
+        function attachAutoDivide100KeepZeros(inputEl) {
+                if (!inputEl || inputEl.dataset.noAutoDivide === 'true') return;
+                if (inputEl.dataset.autoDivideWired === 'true') return;
+                inputEl.dataset.autoDivideWired = 'true';
+
+                inputEl.addEventListener('paste', (e) => {
+                        const clip = (e.clipboardData || window.clipboardData)?.getData('text') ?? '';
+                        // Normalize separators and possibly divide by 100
+                        const normalized = normalizeDivideHundredKeepZeros(clip);
+                        if (normalized !== sanitizeRaw(clip)) {
+                                e.preventDefault();
+                                inputEl.value = normalized;                      // <- write string, keep zeros
+                                inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+                        }
+                });
+
+                function endEditNormalize() {
+                        const before = inputEl.value;
+                        const normalized = normalizeDivideHundredKeepZeros(before);
+                        const n = Number(sanitizeRaw(normalized));
+                        if (Number.isFinite(n)) {
+                                // Write back with zeros preserved according to what user typed
+                                const finalStr = formatByStepKeepTypedZeros(inputEl, normalized, n);
+                                if (finalStr !== before) {
+                                        inputEl.value = finalStr;
+                                        inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+                                }
+                        } else if (normalized !== before) {
+                                // Non-numeric after cleanup: just write sanitized string (so ',' becomes '.')
+                                inputEl.value = normalized;
+                                inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+                        }
+                }
+
+                inputEl.addEventListener('blur', endEditNormalize);
+                inputEl.addEventListener('change', endEditNormalize);
+        }
+
+        /** Initialize for all current number inputs */
+        function initAutoDivideForAllNumbersKeepZeros() {
+                Array.from(document.querySelectorAll('input[type="number"]'))
+                        .forEach(attachAutoDivide100KeepZeros);
+        }
+
+
+        /**
+         * Force '.' as decimal separator for ALL numeric inputs by rewriting ',' to '.'
+         * Works while typing (input), on paste, and on blur/change.
+         * Safe to run multiple times (idempotent).
+         */
+        function enforceDotDecimalOnAllNumbers() {
+                const inputs = Array.from(document.querySelectorAll('input[type="number"]'));
+
+                inputs.forEach((inp) => {
+                        if (inp.dataset.dotDecimalWired === 'true') return;
+                        inp.dataset.dotDecimalWired = 'true';
+
+                        // While typing: swap ',' -> '.'
+                        inp.addEventListener('input', () => {
+                                const v = inp.value;
+                                if (v && v.includes(',')) {
+                                        const caret = inp.selectionStart;
+                                        const before = v;
+                                        const after = v.replace(/,/g, '.');
+                                        if (after !== before) {
+                                                inp.value = after;
+                                                // Restore caret as best as possible
+                                                const delta = after.length - before.length;
+                                                const newPos = Math.max(0, (caret ?? after.length) + delta);
+                                                // Some browsers may throw; guard it
+                                                try { inp.setSelectionRange(newPos, newPos); } catch { }
+                                                // Trigger your existing calc/render
+                                                inp.dispatchEvent(new Event('input', { bubbles: true }));
+                                        }
+                                }
+                        });
+
+                        // Paste: normalize separators to '.'
+                        inp.addEventListener('paste', (e) => {
+                                const clip = (e.clipboardData || window.clipboardData)?.getData('text') ?? '';
+                                if (/,/.test(clip)) {
+                                        e.preventDefault();
+                                        const sanitized = clip.replace(/\s+/g, '').replace(/,/g, '.');
+                                        // Insert at caret
+                                        const start = inp.selectionStart ?? inp.value.length;
+                                        const end = inp.selectionEnd ?? start;
+                                        const next = inp.value.slice(0, start) + sanitized + inp.value.slice(end);
+                                        inp.value = next;
+                                        inp.dispatchEvent(new Event('input', { bubbles: true }));
+                                }
+                        });
+
+                        // Blur/change: final cleanup (if any stray commas slipped in)
+                        function normalizeOnEnd() {
+                                const v = inp.value;
+                                if (v && v.includes(',')) {
+                                        inp.value = v.replace(/,/g, '.');
+                                        inp.dispatchEvent(new Event('input', { bubbles: true }));
+                                }
+                        }
+                        inp.addEventListener('blur', normalizeOnEnd);
+                        inp.addEventListener('change', normalizeOnEnd);
+                });
+        }
+
+
+
+        /* Calculate final surcharge and total */
+        /*
+          Final rule implementation as per:
+          Final Surcharge = min(Type Max, CardLimit% × Base)  
+          where:
+            - Type Max depends on surcharge type (PERCENT or FLAT_FEE)
+            - CardLimit% depends on card type (DEBIT or CREDIT) and its associated limit percentage  
+          
+          Inputs:
+            - amount: Base amount (number)    
+            - type: Surcharge type ('OFF', 'PERCENT', 'FLAT_FEE')
+            - percent: Percent value for PERCENT type (number, informational only)
+            - flatFee: Flat fee value for FLAT_FEE type (number, informational only)
+            - maxSurchargeAmt: Max Surcharge Amount for PERCENT type (number)
+            - surchargePctCap: Surcharge Percent Cap for FLAT_FEE type (number)
+            - cardType: 'DEBIT' or 'CREDIT'
+            - debitLimitPct: Debit card limit percentage (number)
+            - creditLimitPct: Credit card limit percentage (number)
+            - cash: Cash amount not included in surcharge (number, default 0)
+            - tip: Tip amount not included in surcharge (number, default 0)
+          Outputs:
+            - surcharge: Final calculated surcharge (number)
+            - total: Total amount including base, cash, tip, and surcharge (number)
+            - explain: Step-by-step explanation of the calculation (array of strings)
+        */
+        function calcSurchargeFinal({
+                amount, type,
+                percent, flatFee,
+                maxSurchargeAmt,     // PERCENT type max
+                surchargePctCap,     // FLAT_FEE type max
+                cardType, debitLimitPct, creditLimitPct,
+                cash = 0, tip = 0
+        }) {
+                const explain = [];
+
+                // if (!Number.isFinite(amount) || amount <= 0) {
+                //         //return { error: 'Enter a positive Base amount.', explain, surcharge: 0, total: roundCurrency(cash + tip) };
+                // }
+                /*                 if (!Number.isFinite(amount) || amount <= 0) {
+                                        return {
+                                                error: 'Enter a positive Base amount.',
+                                                explain,
+                                                surcharge: 0,
+                                                total: roundCurrency(cash + tip)
+                                        };
+                                } */
+
+                // Info-only: show type-specific raw value for transparency
+                if (type === 'PERCENT') {
+                        const pctVal = amount * ((percent ?? 0) / 100);
+                        //explain.push(`Type PERCENT → pctValue (info) = ${fmt(amount)} × ${(percent ?? 0)}% = ${fmt(pctVal)}.`);
+                } else if (type === 'FLAT_FEE') {
+                        //explain.push(`Type FLAT_FEE → flat fee (info) = ${fmt(flatFee ?? 0)}.`);
+                }
+
+                // 1) Type Max
+                // Determine Type Max based on surcharge type
+                let typeMax = INF;
+
+                if (type === 'OFF') {
+                        explain.push(`Type OFF → surcharge = 0.`);
+                        const totalOff = roundCurrency(amount + cash + tip);
+                        explain.push(buildTotalExplain(amount, cash, tip, 0, totalOff));
+                        return { surcharge: 0, total: totalOff, explain };
+                }
+                else if (type === 'PERCENT') {
+                        if (maxSurchargeAmt == null) {
+                                return { error: 'Max Surcharge Amount is required for PERCENT type.', explain, surcharge: 0, total: roundCurrency(amount + cash + tip) };
+                        }
+                        typeMax = maxSurchargeAmt;
+                        explain.push(`Type Max (PERCENT) = Max Surcharge Amount = ${fmt(typeMax)}.`);
+                } else if (type === 'FLAT_FEE') {
+                        typeMax = (surchargePctCap != null) ? amount * (surchargePctCap / 100) : INF;
+                        if (Number.isFinite(typeMax)) {
+                                explain.push(`Type Max (FLAT_FEE) = Surcharge % × base = ${(surchargePctCap ?? 0)}% × ${fmt(amount)} = ${fmt(typeMax)}.`);
+                        } else {
+                                explain.push(`Type Max (FLAT_FEE) = ∞ (no % cap provided).`);
+                        }
+                } else {
+                        return { error: 'Unknown type selected.', explain, surcharge: 0, total: roundCurrency(amount + cash + tip) };
+                }
+
+                // 2) Card-limit-derived value
+                /*
+            const cardPct = (cardType === 'DEBIT') ? debitLimitPct : creditLimitPct;
+            let cardLimitValue = INF;
+            if (cardPct != null) {
+              cardLimitValue = amount * (cardPct / 100);
+              explain.push(`Card limit (${cardType}) = ${cardPct}% × ${fmt(amount)} = ${fmt(cardLimitValue)}.`);
+            } else {
+              explain.push(`No ${cardType} limit provided → card limit = ∞.`);
+            }
+              */
+                // 2) Card-limit-derived value
+                const cardLimitInput = (cardType === 'DEBIT')
+                        ? debitLimitPct
+                        : creditLimitPct;
+
+                let cardLimitValue = INF;
+
+                if (cardLimitInput != null) {
+
+                        if (type === 'FLAT_FEE') {
+                                // Card limit is a flat dollar amount
+                                cardLimitValue = cardLimitInput;
+
+                                explain.push(
+                                        `Card limit (${cardType}) = Flat Amount = ${fmt(cardLimitValue)}.`
+                                );
+                        } else {
+                                // OFF/PERCENT -> card limit is % × base
+                                cardLimitValue = amount * (cardLimitInput / 100);
+
+                                explain.push(
+                                        `Card limit (${cardType}) = ${cardLimitInput}% × ${fmt(amount)} = ${fmt(cardLimitValue)}.`
+                                );
+                        }
+
+                } else {
+                        explain.push(`No ${cardType} limit provided → card limit = ∞.`);
+                }
+
+                // 3) Final = min(typeMax, cardLimitValue)
+                let final = Math.min(typeMax, cardLimitValue);
+                explain.push(`Final surcharge = min(Type Max, Card Limit Value) = min(${fmt(typeMax)}, ${fmt(cardLimitValue)}) = ${fmt(final)}.`);
+
+                // 4) Round and total
+                const finalSurcharge = roundCurrency(Math.max(0, final));
+                const total = roundCurrency(amount + cash + tip + finalSurcharge);
+                //explain.push(`Total = amount + cash + tip + surcharge = ${fmt(amount)} + ${fmt(cash)} + ${fmt(tip)} + ${fmt(finalSurcharge)} = ${fmt(total)}.`);
+                explain.push(buildTotalExplain(amount, cash, tip, finalSurcharge, total));
+                return { surcharge: finalSurcharge, total, explain };
+        }
+
+        // --- UI wiring ---
+        const inputs = [
+                'amount', 'cash', 'tip', 'type', 'percent', 'flatFee',
+                'maxSurchargeAmt', 'surchargePctCap', 'cardType', 'debitLimit', 'creditLimit'
+        ];
+        inputs.forEach(id => el(id).addEventListener('input', handleChange));
+        el('resetBtn').addEventListener('click', resetAll);
+        el('schemeSelector').addEventListener('change', loadSchemeValues);
+
+        enforceDotDecimalOnAllNumbers();
+        initAutoDivideForAllNumbersKeepZeros();
+
+        function setTotalLabel(cash, tip) {
+                const parts = ['Base'];
+                if ((Number(cash) || 0) > 0) parts.push('Cash');
+                if ((Number(tip) || 0) > 0) parts.push('Tip');
+                parts.push('Surcharge');
+                el('totalLabel').textContent = `Total (${parts.join(' + ')})`;
+        }
+
+
+
+
+        // Handle input changes
+        // Gather inputs, calculate, and render outputs
+        // Also handles dynamic show/hide of relevant fields
+        // Called on input change
+        // and on reset
+        function handleChange() {
+
+                if (!payload.amount || payload.amount <= 0) {
+                        el('status').innerHTML =
+                                '<strong>Result</strong> <span class="tag">Waiting</span>';
+                        return;
+                }
+
+                const type = el('type').value;
+                /*                 const creditLabel = document.querySelector('label[for="creditLimit"]');
+                                const debitLabel = document.querySelector('label[for="debitLimit"]');
+                
+                                if (type === 'FLAT_FEE') {
+                                        creditLabel.innerHTML =
+                                                'Domestic Credit Limit <span class="chip">$</span>';
+                
+                                        debitLabel.innerHTML =
+                                                'Domestic Debit Limit <span class="chip">$</span>';
+                                } else {
+                                        creditLabel.innerHTML =
+                                                'Domestic Credit Limit <span class="chip">% x base</span>';
+                
+                                        debitLabel.innerHTML =
+                                                'Domestic Debit Limit <span class="chip">% x base</span>';
+                                } */
+
+                const creditHelp = el('creditLimitHelp');
+                const debitHelp = el('debitLimitHelp');
+                const cardSettings = el('cardSettings');
+                const creditLabel = el('creditLimitLabel');
+                const debitLabel = el('debitLimitLabel');
+
+                if (type === 'OFF') {
+
+                        cardSettings.style.display = 'none';
+
+                }
+                else if (type === 'FLAT_FEE') {
+                        cardSettings.style.display = 'grid';
+                        creditHelp.style.display = '';
+                        debitHelp.style.display = '';
+
+                        creditHelp.textContent =
+                                'Fixed surcharge limit for CREDIT cards.';
+
+                        debitHelp.textContent =
+                                'Fixed surcharge limit for DEBIT cards.';
+
+                        creditLabel.innerHTML =
+                                'Domestic Credit Limit <span class="chip">$</span>';
+
+                        debitLabel.innerHTML =
+                                'Domestic Debit Limit <span class="chip">$</span>';
+
+                        creditHelp.textContent =
+                                'Fixed surcharge limit for CREDIT cards.';
+
+                        debitHelp.textContent =
+                                'Fixed surcharge limit for DEBIT cards.';
+
+
+                }
+                else {
+                        cardSettings.style.display = 'grid';
+                        creditHelp.style.display = '';
+                        debitHelp.style.display = '';
+
+                        creditHelp.textContent =
+                                'Card-derived surcharge = amount × this % (when CREDIT).';
+
+                        debitHelp.textContent =
+                                'Card-derived surcharge = amount × this % (when DEBIT).';
+
+                        creditLabel.innerHTML =
+                                'Domestic Credit Limit <span class="chip">% × base</span>';
+
+                        debitLabel.innerHTML =
+                                'Domestic Debit Limit <span class="chip">% × base</span>';
+
+                        creditHelp.textContent =
+                                'Card-derived surcharge = amount × this percentage.';
+
+                        debitHelp.textContent =
+                                'Card-derived surcharge = amount × this percentage.';
+
+                }
+
+                el('percentWrap').style.display = (type === 'PERCENT') ? 'none' : '';
+                el('maxAmtWrap').style.display = (type === 'PERCENT') ? '' : 'none';
+
+                el('pctCapWrap').style.display = (type === 'FLAT_FEE') ? '' : 'none';
+                el('flatWrap').style.display = (type === 'FLAT_FEE') ? 'none' : '';
+
+                if (type === 'OFF') {
+                        el('percentWrap').style.display = 'none';
+                        el('maxAmtWrap').style.display = 'none';
+                        el('pctCapWrap').style.display = 'none';
+                        el('flatWrap').style.display = 'none';
+                }
+                if (type === 'FLAT_FEE') {
+                        el('percentWrap').style.display = 'none';
+                        el('pctCapWrap').style.display = '';
+                }
+                if (type === 'PERCENT') {
+                        el('maxAmtWrap').style.display = '';
+                        el('flatWrap').style.display = 'none';
+                }
+
+                const payload = {
+                        amount: numOrNull(el('amount').value),
+                        cash: numOrNull(el('cash').value) ?? 0,
+                        tip: numOrNull(el('tip').value) ?? 0,
+                        type,
+                        percent: numOrNull(el('percent').value),
+                        flatFee: numOrNull(el('flatFee').value),
+                        maxSurchargeAmt: numOrNull(el('maxSurchargeAmt').value),
+                        surchargePctCap: numOrNull(el('surchargePctCap').value),
+                        cardType: el('cardType').value,
+                        debitLimitPct: numOrNull(el('debitLimit').value),
+                        creditLimitPct: numOrNull(el('creditLimit').value)
+                };
+
+                setTotalLabel(payload.cash, payload.tip);   // <-- add this line
+
+                const result = calcSurchargeFinal(payload);
+                render(result);
+
+        }
+
+        // Render outputs
+        // Update status, surcharge, total, and explanation
+        // Also handles error display
+        // result: {surcharge, total, explain, error}
+        function render(result) {
+                el('status').innerHTML = result.error ? `<strong>Result</strong> <span class="tag"><span class="bad">Error:</span></span>  ${result.error}` : ` <strong>Result</strong> <span class="tag"><span class="good">OK</span></span> `;
+                el('surchargeOut').textContent = result.surcharge != null ? fmt(result.surcharge) : '—';
+                el('totalOut').textContent = result.total != null ? fmt(result.total) : '—';
+                el('explainText').textContent = (result.explain && result.explain.length) ? result.explain.join('\n') : '—';
+        }
+
+        // Reset all inputs and outputs
+
+        function resetAll() {
+                el('amount').value = '0.00';
+                el('cash').value = '0.00';
+                el('tip').value = '0.00';
+                el('type').value = 'OFF';
+                el('percent').value = '';
+                el('flatFee').value = '';
+                el('maxSurchargeAmt').value = '';
+                el('surchargePctCap').value = '';
+                el('cardType').value = 'DEBIT';
+                el('debitLimit').value = '';
+                el('creditLimit').value = '';
+                el('status').textContent = 'Waiting for input…';
+                el('surchargeOut').textContent = '—';
+                el('totalOut').textContent = '—';
+                el('explainText').textContent = '—';
+
+                // Ensure listeners stay attached even after reset (idempotent)
+                enforceDotDecimalOnAllNumbers();
+                initAutoDivideForAllNumbersKeepZeros();
+
+
+                handleChange();
+        }
+
+
+        // Initial
+        resetAll();
+</script>
+</body>
+
+</html>

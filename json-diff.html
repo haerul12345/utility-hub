@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Utility Hub</title>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap"
+                rel="stylesheet">
+
+        <style>
+                :root {
+                        --bg: #070b14;
+                        --panel: #0d1321;
+
+                        --accent: #00d4ff;
+                        --success: #28ff88;
+                        --warning: #ffb020;
+                        --danger: #ff5f56;
+
+                        --text: #e8eef9;
+                        --muted: #7d8ca5;
+
+                        --border: rgba(0, 212, 255, .14);
+
+                        --add: rgba(40, 255, 136, .12);
+                        --rem: rgba(255, 95, 86, .12);
+                        --chg: rgba(255, 176, 32, .12);
+                }
+
+                * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                }
+
+                html,
+                body {
+                        height: 100%;
+
+                        background: #070b14;
+                        color: var(--text);
+
+                        font-family: 'JetBrains Mono', monospace;
+
+                        background-image:
+                                linear-gradient(rgba(0, 212, 255, .04) 1px, transparent 1px),
+                                linear-gradient(90deg, rgba(0, 212, 255, .04) 1px, transparent 1px);
+
+                        background-size: 40px 40px;
+                }
+
+                .header {
+                        height: 80px;
+
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+
+                        padding: 0 30px;
+
+                        border-bottom: 1px solid var(--border);
+
+                        background: rgba(7, 11, 20, .85);
+
+                        backdrop-filter: blur(10px);
+                }
+
+                .brand h1 {
+                        color: var(--accent);
+                        font-size: 28px;
+                        letter-spacing: 3px;
+                }
+
+                .brand p {
+                        color: var(--muted);
+                        font-size: 12px;
+                }
+
+                .status {
+                        color: var(--success);
+                }
+
+                .header-right {
+                        text-align: right;
+                }
+
+                .header-right p {
+                        color: var(--muted);
+                        font-size: 12px;
+                }
+
+                .container {
+                        max-width: 1700px;
+                        margin: auto;
+                        padding: 25px;
+                }
+
+                .telemetry {
+                        display: grid;
+                        grid-template-columns: repeat(4, 1fr);
+                        gap: 15px;
+                        margin-bottom: 25px;
+                }
+
+                .metric {
+                        background: var(--panel);
+                        border: 1px solid var(--border);
+                        padding: 18px;
+                        position: relative;
+                }
+
+                .metric::before {
+                        content: '';
+                        position: absolute;
+                        left: 0;
+                        top: 0;
+                        width: 100%;
+                        height: 2px;
+                        background: var(--accent);
+                }
+
+                .metric label {
+                        display: block;
+                        color: var(--muted);
+                        font-size: 11px;
+                        margin-bottom: 10px;
+                }
+
+                .online {
+                        color: var(--success);
+                }
+
+                .action-bar {
+                        display: flex;
+                        gap: 10px;
+                        flex-wrap: wrap;
+                        margin-bottom: 20px;
+                }
+
+                button {
+                        background: transparent;
+
+                        color: var(--accent);
+
+                        border: 1px solid var(--accent);
+
+                        font-family: inherit;
+
+                        padding: 10px 14px;
+
+                        cursor: pointer;
+
+                        transition: .25s;
+                }
+
+                button:hover {
+                        background: rgba(0, 212, 255, .08);
+
+                        box-shadow:
+                                0 0 12px rgba(0, 212, 255, .15);
+                }
+
+                .grid-2 {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 20px;
+                        margin-bottom: 20px;
+                }
+
+                .panel {
+                        background: var(--panel);
+
+                        border: 1px solid var(--border);
+
+                        position: relative;
+
+                        overflow: hidden;
+                }
+
+                .panel::before {
+                        content: '';
+
+                        position: absolute;
+
+                        left: 0;
+                        top: 0;
+
+                        width: 100%;
+                        height: 2px;
+
+                        background:
+                                linear-gradient(90deg,
+                                        transparent,
+                                        var(--accent),
+                                        transparent);
+                }
+
+                .panel-title {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+
+                        padding: 16px;
+
+                        border-bottom: 1px solid var(--border);
+                }
+
+                .panel-title h2 {
+                        color: var(--accent);
+                }
+
+                .toolbar {
+                        display: flex;
+                        gap: 8px;
+                }
+
+                .status-row {
+                        padding: 10px 16px;
+                        border-bottom: 1px solid var(--border);
+                        color: var(--muted);
+                }
+
+                textarea {
+                        width: 100%;
+                        min-height: 320px;
+
+                        background: #08101d;
+
+                        color: white;
+
+                        border: none;
+
+                        resize: vertical;
+
+                        padding: 16px;
+
+                        font-family: 'JetBrains Mono', monospace;
+                }
+
+                textarea:focus {
+                        outline: none;
+
+                        box-shadow:
+                                inset 0 0 0 1px var(--accent);
+                }
+
+                .diff-panel {
+                        padding-bottom: 16px;
+                }
+
+                #diffWrap {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 20px;
+                        padding: 20px;
+                }
+
+                .tree-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 10px;
+                }
+
+                .tree {
+                        background: #08101d;
+
+                        border: 1px solid var(--border);
+
+                        min-height: 600px;
+                        max-height: 700px;
+
+                        overflow: auto;
+
+                        padding: 12px;
+                }
+
+                .key {
+                        color: var(--accent);
+                }
+
+                .value {
+                        /* color: var(--success); */
+                        color: #fcd34d;
+                }
+
+                .type {
+                        color: #97a7ff;
+                }
+
+                .node {
+                        padding: 4px 8px;
+                        /* margin: 2px 0; */
+                        margin: 2px 0 2px 10px;
+                        border-left: 4px solid transparent;
+                        overflow-wrap: anywhere;
+                }
+
+                .node.added {
+                        background: var(--add);
+                        border-left: 4px solid var(--success);
+                }
+
+                .node.removed {
+                        background: var(--rem);
+                        border-left: 4px solid var(--danger);
+                }
+
+                /*                 .node.changed {
+                        background: var(--chg);
+                        border-left: 4px solid var(--warning);
+                } */
+
+                .node.unmatched {
+                        background: rgba(255, 40, 40, .32);
+                        border-left: 4px solid #ff3030;
+                        color: #ff3030;
+                }
+
+                .node.changed {
+                        background: rgba(255, 176, 32, .28);
+                        border-left: 4px solid #ffb020;
+                }
+
+                /*                 .node.unmatched .value {
+                        color: #ff3030;
+                }
+
+                .node.changed .value {
+                        color: #ffb020;
+                } */
+
+                .legend {
+                        display: flex;
+                        gap: 10px;
+                }
+
+                .tag {
+                        padding: 4px 10px;
+                        border: 1px solid var(--border);
+                }
+
+                .tag.removed {
+                        color: var(--danger);
+                }
+
+                .tag.changed {
+                        color: var(--warning);
+                }
+
+                summary {
+                        cursor: pointer;
+                }
+
+                details {
+                        padding-left: 0;
+                }
+
+                .outputs {
+                        display: none !important;
+                }
+
+                @media(max-width:1000px) {
+
+                        .grid-2 {
+                                grid-template-columns: 1fr;
+                        }
+
+                        #diffWrap {
+                                grid-template-columns: 1fr;
+                        }
+
+                        .telemetry {
+                                grid-template-columns: repeat(2, 1fr);
+                        }
+                }
+
+                @media(max-width:700px) {
+
+                        .telemetry {
+                                grid-template-columns: 1fr;
+                        }
+
+                        .header {
+                                flex-direction: column;
+                                height: auto;
+                                padding: 15px;
+                                gap: 10px;
+                        }
+                }
+
+                .footer {
+                        padding: 14px 20px;
+                        border-top: 1px solid var(--border);
+                        color: var(--muted);
+                        font-size: 12px;
+                        line-height: 1.6;
+
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 6px;
+                }
+
+
+                .back-button {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+
+                        background: none;
+                        border: none;
+                        padding: 0;
+
+                        font: inherit;
+                        font-size: 1rem;
+                        font-weight: 600;
+
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                }
+
+                .back-button:hover {
+                        opacity: 0.75;
+                        transform: translateX(-3px);
+                }
+
+                .back-arrow {
+                        font-size: 1.3rem;
+                        line-height: 1;
+                }
+        </style>
+
+<body>
+
+        <header class="header">
+
+                <!--             <button type="button" onclick="window.location.href='index.html'">
+
+                        <svg class="back-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 12H5" />
+                                <path d="M12 19L5 12L12 5" />
+                        </svg>
+
+                        <span>Back</span>
+                </button> -->
+                <button class="back-button" onclick="history.back()">
+
+                        <svg class="back-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 12H5" />
+                                <path d="M12 19L5 12L12 5" />
+                        </svg>
+
+                        <span>Back</span>
+                </button>
+
+
+                <div class="brand">
+                        <h1>JSON DIFF ENGINE</h1>
+                        <p>DEEP RECURSIVE JSON COMPARISON • OFFLINE MODE • QA TOOLKIT</p>
+                </div>
+                <div class="header-right">
+                        <!-- <div class="status">● ONLINE</div> -->
+                        <p>Version 1.0 © 2026 hji</p>
+                </div>
+        </header>
+
+        <main class="container">
+
+                <!--                 <div class="telemetry">
+
+                        <div class="metric">
+                                <label>LEFT PAYLOAD</label>
+                                <span>READY</span>
+                        </div>
+
+                        <div class="metric">
+                                <label>RIGHT PAYLOAD</label>
+                                <span>READY</span>
+                        </div>
+
+                        <div class="metric">
+                                <label>DIFF ENGINE</label>
+                                <span class="online">ACTIVE</span>
+                        </div>
+
+                        <div class="metric">
+                                <label>MODE</label>
+                                <span>OFFLINE</span>
+                        </div>
+
+                </div> -->
+
+                <div class="action-bar">
+
+                        <button id="btnFormat">FORMAT BOTH</button>
+
+                        <button id="btnMinify">
+                                MINIFY BOTH
+                        </button>
+
+                        <button id="btnSwap">
+                                SWAP
+                        </button>
+
+                        <button id="btnCompare">
+                                COMPARE
+                        </button>
+
+                </div>
+
+                <section class="grid-2">
+
+                        <div class="panel">
+
+                                <div class="panel-title">
+
+                                        <h2>LEFT JSON (A)</h2>
+
+                                        <div class="toolbar">
+                                                <button class="ghost" id="btnPasteLeft">PASTE</button>
+                                                <button class="ghost" id="btnCopyLeft">COPY</button>
+                                                <button class="ghost" id="btnDownloadLeft">DOWNLOAD</button>
+                                        </div>
+
+                                </div>
+
+                                <div class="status-row">
+                                        <span id="statusLeft">Waiting...</span>
+                                </div>
+
+                                <textarea id="left" placeholder="Paste JSON here..."></textarea>
+
+                        </div>
+
+                        <div class="panel">
+
+                                <div class="panel-title">
+
+                                        <h2>RIGHT JSON (B)</h2>
+
+                                        <div class="toolbar">
+                                                <button class="ghost" id="btnPasteRight">PASTE</button>
+                                                <button class="ghost" id="btnCopyRight">COPY</button>
+                                                <button class="ghost" id="btnDownloadRight">DOWNLOAD</button>
+                                        </div>
+
+                                </div>
+
+                                <div class="status-row">
+                                        <span id="statusRight">Waiting...</span>
+                                </div>
+
+                                <textarea id="right" placeholder="Paste JSON here..."></textarea>
+
+                        </div>
+
+                </section>
+
+                <section class="panel diff-panel">
+
+                        <div class="panel-title">
+                                <h2>TREE DIFF ANALYSIS</h2>
+
+                                <div class="legend">
+
+                                        <span class="tag removed">
+                                                UNMATCHED
+                                        </span>
+
+                                        <span class="tag changed">
+                                                CHANGED
+                                        </span>
+
+                                </div>
+                        </div>
+
+                        <div id="diffWrap">
+
+                                <div>
+
+                                        <div class="tree-header">
+
+                                                <span>LEFT TREE (A)</span>
+
+                                                <div>
+
+                                                        <button id="btnExpandLeft">
+                                                                EXPAND ALL
+                                                        </button>
+
+                                                        <button id="btnCollapseLeft">
+                                                                COLLAPSE ALL
+                                                        </button>
+
+                                                </div>
+
+                                        </div>
+
+                                        <div id="treeLeft" class="tree"></div>
+
+                                </div>
+
+                                <div>
+
+                                        <div class="tree-header">
+
+                                                <span>RIGHT TREE (B)</span>
+
+                                                <div>
+
+                                                        <button id="btnExpandRight">
+                                                                EXPAND ALL
+                                                        </button>
+
+                                                        <button id="btnCollapseRight">
+                                                                COLLAPSE ALL
+                                                        </button>
+
+                                                </div>
+
+                                        </div>
+
+                                        <div id="treeRight" class="tree"></div>
+
+                                </div>
+
+                        </div>
+                        <div class="footer">
+                                <div>Hint: Click ▶ to expand/collapse.</div>
+
+                                <div>
+                                        Diff colors:
+                                        <span class="tag removed">
+                                                Unmatched : exists here but not on the other side
+                                        </span>
+                                        <span class="tag changed">
+                                                Changed : different value
+                                        </span>
+                                </div>
+                        </div>
+
+                </section>
+
+        </main>
+
+
+        <script>
+                // ---------- Utilities ----------
+                function stableStringify(value, space = 2) {
+                        const seen = new WeakSet();
+                        const sorter = (a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+                        function walk(v) {
+                                if (v && typeof v === 'object') {
+                                        if (seen.has(v)) return '[Circular]';
+                                        seen.add(v);
+                                        if (Array.isArray(v)) {
+                                                return v.map(walk);
+                                        } else {
+                                                const out = {};
+                                                Object.keys(v).sort(sorter).forEach(k => { out[k] = walk(v[k]); });
+                                                return out;
+                                        }
+                                }
+                                return v;
+                        }
+                        return JSON.stringify(walk(value), null, space);
+                }
+                function tryParse(text) {
+                        try { return { ok: true, value: JSON.parse(text), error: null }; }
+                        catch (e) { return { ok: false, value: null, error: e.message }; }
+                }
+                function download(filename, content) {
+                        const blob = new Blob([content], { type: 'application/json;charset=utf-8' });
+                        const a = document.createElement('a');
+                        a.href = URL.createObjectURL(blob);
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        URL.revokeObjectURL(a.href);
+                        a.remove();
+                }
+                async function copy(text) {
+                        try { await navigator.clipboard.writeText(text); return true; }
+                        catch { return false; }
+                }
+                async function pasteInto(target) {
+                        try {
+                                const text = await navigator.clipboard.readText();
+                                if (typeof text === 'string' && text.length) {
+                                        target.value = text;
+                                        target.dispatchEvent(new Event('input'));
+                                        return true;
+                                }
+                                return false;
+                        } catch {
+                                return false;
+                        }
+                }
+
+                function setStatus(el, ok, msg) {
+                        /*                         el.textContent = msg + ' — ' + (ok ? 'Valid JSON' : 'Invalid JSON');
+                                                el.classList.toggle('ok', ok);
+                                                el.classList.toggle('bad', !ok); */
+                        el.textContent = msg;                        
+                        el.classList.toggle('ok', ok);                        
+                        el.classList.toggle('bad', !ok);
+                }
+
+                // ---------- Diff Engine (path-based) ----------
+                function diffValues(a, b, basePath = '') {
+                        const result = new Map();
+                        const mark = (path, status) => { result.set(path || '$', status); };
+                        const isObj = v => v && typeof v === 'object' && !Array.isArray(v);
+                        const isArr = Array.isArray;
+                        function recur(x, y, path) {
+                                if (x === undefined && y !== undefined) { mark(path, 'added'); return; }
+                                if (x !== undefined && y === undefined) { mark(path, 'removed'); return; }
+                                const bothObj = isObj(x) && isObj(y);
+                                const bothArr = isArr(x) && isArr(y);
+                                if (bothObj) {
+                                        const keys = new Set([...Object.keys(x), ...Object.keys(y)]);
+                                        const sorted = [...keys].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+                                        let anyChange = false;
+                                        for (const k of sorted) {
+                                                const childPath = path ? path + '.' + k : k;
+                                                const beforeSize = result.size;
+                                                recur(x[k], y[k], childPath);
+                                                if (result.size > beforeSize) anyChange = true;
+                                        }
+                                        if (!anyChange) mark(path, 'same');
+                                } else if (bothArr) {
+                                        const maxLen = Math.max(x.length, y.length);
+                                        let anyChange = false;
+                                        for (let i = 0; i < maxLen; i++) {
+                                                const childPath = (path || '$') + '[' + i + ']';
+                                                const beforeSize = result.size;
+                                                recur(x[i], y[i], childPath);
+                                                if (result.size > beforeSize) anyChange = true;
+                                        }
+                                        if (!anyChange) mark(path, 'same');
+                                } else {
+                                        if (JSON.stringify(x) === JSON.stringify(y)) mark(path, 'same');
+                                        else mark(path, 'changed');
+                                }
+                        }
+                        recur(a, b, basePath);
+                        return result;
+                }
+                // ---------- Tree Rendering ----------
+                function renderTree(container, data, diffs, side) {
+                        container.innerHTML = '';
+                        const root = renderNode(data, diffs, '', 0, side);
+                        container.appendChild(root);
+                }
+                function renderNode(value, diffs, path, level, side) {
+                        const nodeEl = document.createElement('div');
+                        nodeEl.className = `node level-${level}`;
+                        const status = diffs.get(path || '$');
+                        if (status) {
+                                /*                                 if (status === 'added') {
+                                                                        nodeEl.classList.add(side === 'right' ? 'added' : 'removed');
+                                                                } else if (status === 'removed') {
+                                                                        nodeEl.classList.add(side === 'right' ? 'removed' : 'added');
+                                                                } else if (status === 'changed') {
+                                                                        nodeEl.classList.add('changed');
+                                                                } */
+                                /*                                 if (status === 'added') {
+                                                                        nodeEl.classList.add('added');
+                                                                } else if (status === 'removed') {
+                                                                        nodeEl.classList.add('removed');
+                                                                } else if (status === 'changed') {
+                                                                        nodeEl.classList.add('changed');
+                                                                } */
+                                if (status === 'added' || status === 'removed') {
+                                        nodeEl.classList.add('unmatched');
+                                } else if (status === 'changed') {
+                                        nodeEl.classList.add('changed');
+                                }
+                        }
+                        const isObj = v => v && typeof v === 'object' && !Array.isArray(v);
+                        const isArr = Array.isArray;
+                        if (isObj(value) || isArr(value)) {
+                                const isArray = Array.isArray(value);
+                                const label = isArray ? `Array[${value.length}]` : 'Object';
+                                const details = document.createElement('details');
+                                if (level < 1) details.open = true;
+                                const summary = document.createElement('summary');
+                                const kspan = document.createElement('span');
+                                kspan.className = 'key';
+                                kspan.textContent = (path || '$');
+                                const tspan = document.createElement('span');
+                                tspan.className = 'type';
+                                tspan.style.marginLeft = '8px';
+                                tspan.textContent = `(${label})`;
+                                summary.appendChild(kspan);
+                                summary.appendChild(tspan);
+                                details.appendChild(summary);
+                                const keys = isArray ? value.map((_, i) => i) : Object.keys(value).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+                                for (const k of keys) {
+                                        const childPath = path ? (isArray ? `${path}[${k}]` : `${path}.${k}`) : (isArray ? `[${k}]` : `${k}`);
+                                        const child = renderNode(value[k], diffs, childPath, level + 1, side);
+                                        details.appendChild(child);
+                                }
+                                nodeEl.appendChild(details);
+                        } else {
+                                const line = document.createElement('div');
+                                const k = document.createElement('span');
+                                k.className = 'key';
+                                k.textContent = (path || '$') + ': ';
+                                const v = document.createElement('span');
+                                v.className = 'value';
+                                v.textContent = String(value);
+                                line.appendChild(k);
+                                line.appendChild(v);
+                                nodeEl.appendChild(line);
+                        }
+                        return nodeEl;
+                }
+                // Expand/collapse helpers
+                function setAllDetails(container, open) {
+                        const nodes = container.querySelectorAll('details');
+                        nodes.forEach(d => d.open = !!open);
+                }
+                // ---------- Wiring UI ----------
+                const $ = s => document.querySelector(s);
+                /*                 const left = $('#left');
+                                const right = $('#right');
+                                const outLeft = $('#outLeft');
+                                const outRight = $('#outRight');
+                                const statusLeft = $('#statusLeft');
+                                const statusRight = $('#statusRight');
+                                const treeLeft = $('#treeLeft');
+                                const treeRight = $('#treeRight'); */
+
+                /*                 function formatBoth() {
+                                        const l = tryParse(left.value.trim());
+                                        const r = tryParse(right.value.trim());
+                                        if (left.value.trim() === '') { setStatus(statusLeft, true, 'Empty'); outLeft.textContent = ''; }
+                                        else if (l.ok) { setStatus(statusLeft, true, 'Valid JSON'); outLeft.textContent = stableStringify(l.value, 2); }
+                                        else { setStatus(statusLeft, false, l.error); outLeft.textContent = ''; }
+                                        if (right.value.trim() === '') { setStatus(statusRight, true, 'Empty'); outRight.textContent = ''; }
+                                        else if (r.ok) { setStatus(statusRight, true, 'Valid JSON'); outRight.textContent = stableStringify(r.value, 2); }
+                                        else { setStatus(statusRight, false, r.error); outRight.textContent = ''; }
+                                } */
+                function formatBoth() {
+                        const l = tryParse(left.value.trim());
+                        const r = tryParse(right.value.trim());
+
+                        if (left.value.trim() === '') {
+                                setStatus(statusLeft, true, 'Empty');
+                        } else if (l.ok) {
+                                left.value = stableStringify(l.value, 2);
+                                setStatus(statusLeft, true, 'Formatted');
+                        } else {
+                                setStatus(statusLeft, false, l.error);
+                        }
+
+                        if (right.value.trim() === '') {
+                                setStatus(statusRight, true, 'Empty');
+                        } else if (r.ok) {
+                                right.value = stableStringify(r.value, 2);
+                                setStatus(statusRight, true, 'Formatted');
+                        } else {
+                                setStatus(statusRight, false, r.error);
+                        }
+                }
+
+                /*                 function minifyBoth() {
+                                        const l = tryParse(left.value.trim());
+                                        const r = tryParse(right.value.trim());
+                                        if (l.ok) { left.value = JSON.stringify(l.value); setStatus(statusLeft, true, 'Minified'); } else { setStatus(statusLeft, false, (l.error || 'Invalid')); }
+                                        if (r.ok) { right.value = JSON.stringify(r.value); setStatus(statusRight, true, 'Minified'); } else { setStatus(statusRight, false, (r.error || 'Invalid')); }
+                                        outLeft.textContent = ''; outRight.textContent = '';
+                                } */
+
+                function minifyBoth() {
+                        const l = tryParse(left.value.trim());
+                        const r = tryParse(right.value.trim());
+
+                        if (l.ok) {
+                                left.value = JSON.stringify(l.value);
+                                setStatus(statusLeft, true, 'Minified');
+                        } else {
+                                setStatus(statusLeft, false, l.error || 'Invalid');
+                        }
+
+                        if (r.ok) {
+                                right.value = JSON.stringify(r.value);
+                                setStatus(statusRight, true, 'Minified');
+                        } else {
+                                setStatus(statusRight, false, r.error || 'Invalid');
+                        }
+                }
+
+                function swapSides() {
+                        const tmp = left.value; left.value = right.value; right.value = tmp; formatBoth();
+                        compareNow();
+                }
+
+                /*                 function compareNow() {
+                                        const lp = tryParse(left.value.trim());
+                                        const rp = tryParse(right.value.trim());
+                                        if (!lp.ok) { setStatus(statusLeft, false, lp.error || 'Invalid JSON'); return; }
+                                        if (!rp.ok) { setStatus(statusRight, false, rp.error || 'Invalid JSON'); return; }
+                                        outLeft.textContent = stableStringify(lp.value, 2);
+                                        outRight.textContent = stableStringify(rp.value, 2);
+                                        setStatus(statusLeft, true, 'Valid JSON'); setStatus(statusRight, true, 'Valid JSON');
+                                        const diffs = diffValues(lp.value, rp.value, '');
+                                        renderTree(treeLeft, lp.value, diffs, 'left');
+                                        renderTree(treeRight, rp.value, diffs, 'right');
+                                } */
+                function compareNow() {
+
+                        const lp = tryParse(left.value.trim());
+                        const rp = tryParse(right.value.trim());
+
+                        if (!lp.ok) {
+                                setStatus(statusLeft, false, lp.error || 'Invalid JSON');
+                                return;
+                        }
+
+                        if (!rp.ok) {
+                                setStatus(statusRight, false, rp.error || 'Invalid JSON');
+                                return;
+                        }
+
+                        setStatus(statusLeft, true, 'Valid JSON');
+                        setStatus(statusRight, true, 'Valid JSON');
+
+
+
+                        const diffs = diffValues(lp.value, rp.value, '');
+
+                        renderTree(treeLeft, lp.value, diffs, 'left');
+                        renderTree(treeRight, rp.value, diffs, 'right');
+                }
+
+                /*                 // Top bar
+                                $('#btnFormat').addEventListener('click', formatBoth);
+                                $('#btnMinify').addEventListener('click', minifyBoth);
+                                $('#btnSwap').addEventListener('click', swapSides);
+                                $('#btnCompare').addEventListener('click', compareNow);
+                                // Paste/Copy/Download for textareas
+                                $('#btnPasteLeft').addEventListener('click', () => pasteInto(left));
+                                $('#btnPasteRight').addEventListener('click', () => pasteInto(right));
+                                $('#btnCopyLeft').addEventListener('click', () => copy(left.value));
+                                $('#btnCopyRight').addEventListener('click', () => copy(right.value));
+                                $('#btnCopyOutLeft').addEventListener('click', () => copy(outLeft.textContent));
+                                $('#btnCopyOutRight').addEventListener('click', () => copy(outRight.textContent));
+                                $('#btnDownloadLeft').addEventListener('click', () => download('left.json', left.value || ''));
+                                $('#btnDownloadRight').addEventListener('click', () => download('right.json', right.value || ''));
+                                $('#btnDownloadOutLeft').addEventListener('click', () => download('left_beautified.json', outLeft.textContent || ''));
+                                $('#btnDownloadOutRight').addEventListener('click', () => download('right_beautified.json', outRight.textContent || ''));
+                                // Expand/Collapse controls for trees
+                                $('#btnExpandLeft').addEventListener('click', () => setAllDetails(treeLeft, true));
+                                $('#btnCollapseLeft').addEventListener('click', () => setAllDetails(treeLeft, false));
+                                $('#btnExpandRight').addEventListener('click', () => setAllDetails(treeRight, true));
+                                $('#btnCollapseRight').addEventListener('click', () => setAllDetails(treeRight, false));
+                                 */
+
+                $('#btnFormat')?.addEventListener('click', formatBoth);
+                $('#btnMinify')?.addEventListener('click', minifyBoth);
+                $('#btnSwap')?.addEventListener('click', swapSides);
+                $('#btnCompare')?.addEventListener('click', compareNow);
+
+                $('#btnPasteLeft')?.addEventListener('click', () => pasteInto(left));
+                $('#btnPasteRight')?.addEventListener('click', () => pasteInto(right));
+
+                $('#btnCopyLeft')?.addEventListener('click', () => copy(left.value));
+                $('#btnCopyRight')?.addEventListener('click', () => copy(right.value));
+
+                $('#btnDownloadLeft')?.addEventListener('click', () => download('left.json', left.value || ''));
+                $('#btnDownloadRight')?.addEventListener('click', () => download('right.json', right.value || ''));
+
+                $('#btnExpandLeft')?.addEventListener('click', () => setAllDetails(treeLeft, true));
+                $('#btnCollapseLeft')?.addEventListener('click', () => setAllDetails(treeLeft, false));
+
+                $('#btnExpandRight')?.addEventListener('click', () => setAllDetails(treeRight, true));
+                $('#btnCollapseRight')?.addEventListener('click', () => setAllDetails(treeRight, false));
+
+                // Live validation feedback
+                let vTimer = null;
+                function validateLive() {
+                        clearTimeout(vTimer);
+                        vTimer = setTimeout(() => {
+                                const l = tryParse(left.value.trim());
+                                const r = tryParse(right.value.trim());
+                                if (left.value.trim() === '') setStatus(statusLeft, true, 'Empty');
+                                else setStatus(statusLeft, l.ok, l.ok ? 'Valid JSON' : (l.error || 'Invalid'));
+                                if (right.value.trim() === '') setStatus(statusRight, true, 'Empty');
+                                else setStatus(statusRight, r.ok, r.ok ? 'Valid JSON' : (r.error || 'Invalid'));
+                        }, 200);
+                }
+                left.addEventListener('input', validateLive);
+                right.addEventListener('input', validateLive);
+                // Keybindings
+                document.addEventListener('keydown', (e) => {
+                        if (e.ctrlKey || e.metaKey) {
+                                const k = e.key.toLowerCase();
+                                if (k === 'b') { e.preventDefault(); formatBoth(); }
+                                if (k === 'd') { e.preventDefault(); compareNow(); }
+                                if (k === 'm') { e.preventDefault(); minifyBoth(); }
+                                if (k === 's') { e.preventDefault(); swapSides(); }
+                        }
+                });
+                // Seed sample
+                left.value = JSON.stringify({ name: "Alpha", version: 1, flags: { enabled: true, beta: false }, list: [1, 2, 3] }, null, 2);
+                right.value = JSON.stringify({ name: "Alpha", version: 2, flags: { enabled: false, gamma: true }, list: [1, 4], extra: "ok", veryLongKeyName: "https://example.com/a/really/long/path/that/should/wrap/and/not/force/horizontal/scrolling" }, null, 2);
+        </script>
+
+</body>
+
+</html>

@@ -1,358 +1,636 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAMAAABHPGVmAAAAtFBMVEX///8AAAD8/Pxvb2///v6VlZVgYGD4+PigoKB6enr/NDSOjo5paGh4eHj/OTlWVlZZWFgGBgakpKRMTEz/MTEhICAqKiq2tra9vb3+RUVDQ0MQDg4fFhb/8/Po6Oj/UFD/6enFxcX/+fn/19f/XV3w8PD/mJj/bGz/pqaBf3+urq7/d3dAMzP9j4/9zMyHh4f8hYXPzMz/r6/i4uKbm5v/3t7Y2dmmLCz/urr/v7/hLi6IVlZOwAOuAAAEI0lEQVRo3u2ZDXOqOhCGg6LUKNEoKigIAoqCiJ+1vff//68bErRw5tweCOmZTscdZzQZhsd3d7P5AuBpT3sav53DpEms96mFjToIpTWRStj8ItdgdDCeqd3PLRnXo1zwvLv600ONmbTD8wuvxxY73CohdyZdOtK8xalFx7s/6gAygbwoTULh09KS2nIpJS9gpWJOylZqgpIQkiOcWtTyEBmsOCmlIUMCAcqWy2MdApFLQzgpFSDsF6F0FQ4IqAABSoJxonwxJNWCK2qpDgGNZF6RUgqSjnhVn94tnEl4q3yFkl8MTwVCXMtyiYe6o6KZOffVhFhvh8D3g3hvAaVoo7TMiIC4bz7SoKZpEAXvxQHY6AuCWDEiBMM2DAg1FFtfAXFjqEF/4znX/donPyOHH/K/BXKDIIqzFztrA8FDTktjIATiGRrakEA0XFrZ3tKmaEjjoGlxA1inKDi8pxJOCNpXwe7yDOg7wIlgGvQ0HO4BobVgyBoS78gxRNBAmhY41H++IxTiBprhAceGxsY72SQDZOBG0NgLhTi25ltgj7TgerrujZTIxImEXA0YuNRDAXHSQYMnkmAIrgVDEIFYAUQI2c4Gpq9/R1oscsTLJBo2ifLehpDk1BpC4qgT5Fby+7Ji+RCd0kyOo43lkAYJ+YF1CaxdawRZwsrAOiAYWCQXkO2JhVxJ3gYeKSuuFyFkvKe1DEWuKEiDrcI2BtSMKN7+eyPj8QRkz0boTVSpP7bbSzocN4YG/zHJZH7z32R9sLvByBIEOZL94/hIg7GPjFu6ZDCPYJnu5m6eoElrSfeoWY+731HIK+il32NdDIQxJDVrvprp2meyj6miPKXifJKH6GP6stE5aw9pc2ejNDbEJsv6SjJG/86QqZfwDULjMCtSuJVMGaO9eBxUUOeZhr/2wHlUoPBCQsbofeyFL7RjcKWZW6RwQkLqdtz8YKyoi3B419VnlCM/ZMpCq+bW6iGmLz0/jhUoBVMKHyRL3nZOCPNP7yNtO+wgJ+R3V0YZLIpCPnYISod2mEO5RuAzSn+Rj4j0OBNZNRkjrJVd8nKcp1zoO6XkzqBj5s6osYLMD3g2RqTxaxb0AWtO6y9TGQWPFumRC7Umm1yyQfJg1FoLZ1oSsCgKUWsWyOKSiFGarP5KUjfrpgGZ6KJW9SnFXGa5dRcCdDNfgutPv/qoT/6xnFbL3GngtD84itzOKayyHJOtntuMNr5oY/rp6erPgQy+H0T9xpD+j4EMnpBnCn8TJT+nCnPHZPg3YvLtIJ2/AemWugL81ZQR1is8ruPJojrkPDZfyz8tr3aPlXsFb6nSqNItzbDMBXPRVlts6tXcm6RX5a0Kpu6k+UvFa0DlUurSP38LtJtWv9A8h9teu7T1kilHqrAM+L0B+il2Pe1pP9j+AwW3ZdTixUYKAAAAAElFTkSuQmCC">
-  <title>ParserSweet // Core Terminal</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Pacifico&display=swap');
 
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Utility Hub</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
     :root {
-      --bg-color: #0a0b10;
-      --card-bg: rgba(16, 18, 27, 0.65);
-      --accent-cyan: #00f0ff;
-      --accent-blue: #0072ff;
-      --text-main: #e2e8f0;
-      --text-muted: #6272a4;
-      --border-color: rgba(0, 240, 255, 0.15);
-      --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+      --bg: #070b14;
+      --panel: #0d1321;
+      --panel2: #121a2c;
+
+      --accent: #00d4ff;
+      --success: #28ff88;
+      --warning: #ffb020;
+      --danger: #ff5f56;
+
+      --text: #e8eef9;
+      --muted: #7d8ca5;
+
+      --border: rgba(0, 212, 255, .14);
     }
 
     * {
-      box-sizing: border-box;
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
     }
 
-    body, html {
+    html,
+    body {
       height: 100%;
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      font-family: var(--font-mono);
-      overflow-x: hidden;
+      background: #070b14;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+
+      background-image:
+        linear-gradient(rgba(0, 212, 255, .04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, .04) 1px, transparent 1px);
+
+      background-size: 40px 40px;
+    }
+
+    /* TOP HEADER */
+
+    .header {
+
+      height: 80px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 0 30px;
+
+      border-bottom: 1px solid var(--border);
+
+      background: rgba(7, 11, 20, .85);
+
+      backdrop-filter: blur(10px);
+    }
+
+    .brand h1 {
+      color: var(--accent);
+      font-size: 30px;
+      letter-spacing: 4px;
+    }
+
+    .brand p {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .header-right {
+      text-align: right;
+    }
+
+    .header-right .status {
+      color: var(--success);
+    }
+
+    .header-right p {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* LAYOUT */
+
+    .container {
+      max-width: 1500px;
+      margin: auto;
+      padding: 25px;
+    }
+
+    /* TELEMETRY */
+
+    .telemetry {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .metric {
+      background: var(--panel);
+
+      border: 1px solid var(--border);
+
+      padding: 18px;
+
       position: relative;
     }
 
-    /* Futuristic Dot-Grid Background Structure */
-    body::before {
+    .metric::before {
       content: '';
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background-image: radial-gradient(rgba(0, 240, 255, 0.08) 1px, transparent 1px);
-      background-size: 24px 24px;
-      z-index: -2;
-      pointer-events: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+
+      width: 100%;
+      height: 2px;
+
+      background: var(--accent);
     }
 
-    /* Ambient Glow Vignette */
-    body::after {
-      content: '';
-      position: fixed;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: 800px; height: 800px;
-      background: radial-gradient(circle, rgba(0, 114, 255, 0.12) 0%, transparent 70%);
-      z-index: -1;
-      pointer-events: none;
-    }
-
-    .screen {
-      display: none;
-      min-height: 100vh;
-      width: 100vw;
-      padding: 40px;
-      animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    .screen.active {
+    .metric label {
       display: block;
-    }
-
-    #home {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-
-    /* System Dashboard Container Card */
-    .card {
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--border-color);
-      padding: 3.5rem 2.5rem;
-      border-radius: 14px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(0, 240, 255, 0.05);
-      text-align: center;
-      max-width: 850px;
-      width: 90%;
-      margin: auto;
-    }
-
-    /* Telemetry Header Line */
-    .telemetry-bar {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-bottom: 2rem;
-      border-bottom: 1px dashed rgba(0, 240, 255, 0.15);
-      padding-bottom: 0.6rem;
-    }
-
-    .status-dot {
-      display: inline-block;
-      width: 6px;
-      height: 6px;
-      background-color: #39ff14;
-      border-radius: 50%;
-      margin-right: 6px;
-      box-shadow: 0 0 8px #39ff14;
-      animation: pulse 1.5s infinite;
-    }
-
-    h1 {
-      font-size: 2.5rem;
-      font-weight: 700;
-      letter-spacing: -1px;
-      background: linear-gradient(135deg, #fff 0%, var(--accent-cyan) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: var(--muted);
+      font-size: 11px;
       margin-bottom: 10px;
     }
 
-    .tagline {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      margin-bottom: 2.5rem;
+    .metric span {
+      font-size: 20px;
     }
 
-    .tagline span {
-      color: var(--accent-cyan);
+    .online {
+      color: var(--success);
     }
 
-    .buttons {
+    /* TOOLS SECTION */
+
+    .section-title {
+      color: var(--accent);
+      margin-bottom: 15px;
+
+      letter-spacing: 2px;
+    }
+
+    .modules {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1rem;
-      margin-top: 2rem;
+
+      grid-template-columns:
+        repeat(auto-fit, minmax(280px, 1fr));
+
+      gap: 18px;
     }
 
-    /* Engineering Link Style Buttons */
-    .btn {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(0, 240, 255, 0.2);
-      border-radius: 8px;
-      padding: 1.2rem 1rem;
-      color: var(--text-main);
-      font-family: var(--font-mono);
-      font-size: 0.9rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      transition: all 0.25s ease;
+    .module {
+
+      background: var(--panel);
+
+      border: 1px solid var(--border);
+
+      min-height: 210px;
+
+      padding: 24px;
+
+      position: relative;
+
+      transition: .25s;
+
+      display: block;
+      color: inherit;
       text-decoration: none;
+
+
     }
 
-    .btn::before {
-      content: '>';
-      color: var(--accent-cyan);
-      margin-right: 8px;
-      opacity: 0.6;
+    .module:hover {
+
+      transform: translateY(-4px);
+
+      border-color: var(--accent);
+
+      box-shadow:
+        0 0 20px rgba(0, 212, 255, .08);
     }
 
-    .btn:hover {
-      background: rgba(0, 240, 255, 0.07);
-      border-color: var(--accent-cyan);
-      box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
-      color: #fff;
-      transform: translateY(-2px);
+    .module::before {
+      content: '';
+
+      position: absolute;
+      top: 0;
+      left: 0;
+
+      width: 100%;
+      height: 2px;
+
+      background:
+        linear-gradient(90deg,
+          transparent,
+          var(--accent),
+          transparent);
     }
 
-    /* Form Fields and Interactive Areas */
-    textarea, pre, input[type="text"] {
-      background: rgba(10, 11, 16, 0.8);
-      border: 1px solid rgba(0, 240, 255, 0.2);
-      color: #fff;
-      font-family: var(--font-mono);
+    .module::after {
+      content: '';
+
+      position: absolute;
+      top: 10px;
+      right: 10px;
+
+      width: 14px;
+      height: 14px;
+
+      border-top: 1px solid var(--accent);
+      border-right: 1px solid var(--accent);
+    }
+
+    .module h3 {
+      margin-bottom: 15px;
+      color: var(--accent);
+    }
+
+    .module p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+      min-height: 80px;
+    }
+
+    .module button {
+
+      width: 100%;
+
+      margin-top: 20px;
+
+      background: transparent;
+
+      color: var(--accent);
+
+      border: 1px solid var(--accent);
+
       padding: 12px;
-      border-radius: 6px;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
+      cursor: pointer;
+
+      font-family: inherit;
+
+      transition: .25s;
     }
 
-    textarea:focus, input[type="text"]:focus {
-      outline: none;
-      border-color: var(--accent-cyan);
-      box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+    .module button:hover {
+
+      background: rgba(0, 212, 255, .08);
     }
 
-    /* Layout Sub-Containers */
-    .flex-container {
-      display: flex;
-      gap: 25px;
+    /* LOG TERMINAL */
+
+    .log-terminal {
+
+      margin-top: 30px;
+
+      background: #05070d;
+
+      border: 1px solid var(--border);
+
+      padding: 20px;
+
+      position: relative;
     }
 
-    .input-container, .output-container {
-      flex: 1;
+    .log-terminal::before {
+      content: 'SYSTEM LOG';
+      display: block;
+
+      color: var(--accent);
+
+      margin-bottom: 15px;
+    }
+
+    .log-line {
+      margin-bottom: 8px;
+      color: var(--success);
+
+      font-size: 13px;
+    }
+
+    .log-line.warning {
+      color: var(--warning);
+    }
+
+    .log-line.error {
+      color: var(--danger);
+    }
+
+    /* FLOATING DOCK */
+
+    .dock {
+
+      position: fixed;
+
+      right: 25px;
+      bottom: 25px;
+
       display: flex;
       flex-direction: column;
-      gap: 20px;
+
+      gap: 10px;
     }
 
-    /* Core Data Extraction Tables */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: rgba(16, 18, 27, 0.6);
-      margin-top: 10px;
-    }
+    .dock button {
 
-    th, td {
-      border: 1px solid rgba(0, 240, 255, 0.15);
-      padding: 10px;
-      color: var(--text-main);
-    }
+      width: 170px;
 
-    th {
-      background: rgba(0, 114, 255, 0.25);
-      color: var(--accent-cyan);
-      font-weight: 600;
-    }
+      background: var(--panel);
 
-    tr:nth-child(even) {
-      background: rgba(255, 255, 255, 0.02);
-    }
+      color: var(--accent);
 
-    /* Utility action controllers */
-    button.convert-btn, button {
-      background: linear-gradient(135deg, var(--accent-blue), #004F6B);
-      color: #fff;
-      border: 1px solid var(--accent-cyan);
-      padding: 10px 22px;
-      border-radius: 20px;
+      border: 1px solid var(--border);
+
+      padding: 12px;
+
       cursor: pointer;
-      font-family: var(--font-mono);
-      transition: all 0.25s ease;
+
+      font-family: inherit;
+
+      transition: .25s;
     }
 
-    button:hover, button.convert-btn:hover {
-      box-shadow: 0 0 12px var(--accent-cyan);
-      transform: scale(1.02);
+    .dock button:hover {
+      background: rgba(0, 212, 255, .08);
     }
 
-    .back-btn {
+    /* MODAL */
+
+    .modal {
+
       position: fixed;
-      bottom: 30px;
-      right: 30px;
-      z-index: 99;
+      inset: 0;
+
+      display: none;
+
+      justify-content: center;
+      align-items: center;
+
+      background: rgba(0, 0, 0, .8);
+
+      z-index: 999;
     }
 
-    /* Side Dashboard Navbars */
-    .side-tab {
-      background-color: #10121b;
-      border: 1px solid var(--accent-cyan);
-      color: var(--accent-cyan);
-      box-shadow: -4px 0 15px rgba(0, 0, 0, 0.5);
+    .modal.active {
+      display: flex;
     }
 
     .modal-content {
-      background-color: var(--bg-color) !important;
-      border: 1px solid var(--accent-cyan);
-      color: var(--text-main);
+
+      width: min(700px, 95%);
+
+      padding: 25px;
+
+      background: var(--panel);
+
+      border: 1px solid var(--accent);
     }
 
-    #primaryTable td.active, #secondaryTable td.active {
-      background-color: rgba(0, 240, 255, 0.25) !important;
-      color: #fff !important;
-      box-shadow: inset 0 0 8px var(--accent-cyan);
+    .modal-content h2 {
+      color: var(--accent);
+      margin-bottom: 15px;
     }
 
-    footer {
-      border-top: 1px dashed rgba(0, 240, 255, 0.15);
-      color: var(--text-muted);
-      padding-top: 1.5rem;
-      margin-top: 3rem;
-      font-size: 0.8rem;
+    input {
+
+      width: 100%;
+
+      padding: 14px;
+
+      background: #08101d;
+
+      color: white;
+
+      border: 1px solid var(--border);
+
+      font-family: inherit;
+
+      margin-bottom: 15px;
     }
 
-    @keyframes fadeIn {
-      0% { opacity: 0; transform: translateY(15px); }
-      100% { opacity: 1; transform: translateY(0); }
+    .modal-content button {
+
+      width: 100%;
+      padding: 14px;
+
+      background: #08101d;
+
+      color: var(--accent);
+
+      border: 1px solid var(--accent);
+
+      cursor: pointer;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 0.5; }
-      50% { opacity: 1; }
+    .result {
+
+      margin-top: 15px;
+
+      min-height: 70px;
+
+      padding: 15px;
+
+      background: #08101d;
+
+      border: 1px solid var(--border);
+
+      word-break: break-word;
+    }
+
+    .close {
+
+      float: right;
+
+      cursor: pointer;
+
+      color: var(--danger);
+    }
+
+    @media(max-width:900px) {
+
+      .telemetry {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+    }
+
+    @media(max-width:600px) {
+
+      .telemetry {
+        grid-template-columns: 1fr;
+      }
+
+      .header {
+        flex-direction: column;
+        height: auto;
+        padding: 20px;
+        gap: 10px;
+      }
+
+      .dock {
+        left: 15px;
+        right: 15px;
+      }
+
+      .dock button {
+        width: 100%;
+      }
+
     }
   </style>
 </head>
+
 <body>
 
-  <div id="overlay"></div>
+  <header class="header">
 
-  <div id="blurWrapper">
-    <div id="home" class="screen active">
-      <div class="card">
-        <div class="telemetry-bar">
-          <div><span class="status-dot"></span>SYS_STATUS: OPTIMAL</div>
-          <div>BUILD_REV: v4.2 // SECURE</div>
-        </div>
-        
-        <div class="header-container">
-          <div id="parserlogo"></div>
-          <h1>ParserSweet Core</h1>
-        </div>
-        <div class="tagline">"Parsing made sweet and simple." Your core infrastructure data streams — let's <span>decode</span> them.</div>
-        
-        <div class="buttons">
-          <a class="btn" href="json.html">JSON Engine</a>
-          <a class="btn" href="cbamti.html">CBA MTI Core</a>
-          <a class="btn" href="receiptparser.html">Receipt Parser</a>
-          <a class="btn" href="base64viewer.html">Base64 Receipt Viewer</a>
-          <a class="btn" href="de22.html">DE22 for EFTEX</a>
-          <a class="btn" href="paymarkhost.html">Paymark Host Record</a>
-        </div>
+    <div class="brand">
+      <h1>UTILITY HUB</h1>
+      <p>YOUR ALL-IN-ONE TOOLKIT FOR EVERYDAY TECHNICAL TASKS</p>
+    </div>
 
-        <footer>
-          &copy; 2026 hji // ALL SUBSYSTEMS OPERATIONAL
-        </footer>
+    <div class="header-right">
+      <!-- <div class="status">● ONLINE</div> -->
+      <p>Version 1.0 © 2026 hji</p>
+    </div>
+
+  </header>
+
+  <div class="container">
+
+    <!--     <h3 class="section-title">ENGINEERING TELEMETRY</h3>
+
+    <div class="telemetry">
+
+      <div class="metric">
+        <label>PARSER STATUS</label>
+        <span class="online">ACTIVE</span>
       </div>
+
+      <div class="metric">
+        <label>ISO8583 ENGINE</label>
+        <span class="online">READY</span>
+      </div>
+
+      <div class="metric">
+        <label>SYSTEM HEALTH</label>
+        <span>99.99%</span>
+      </div>
+
+      <div class="metric">
+        <label>QA NODE</label>
+        <span>JKT-01</span>
+      </div>
+
+    </div> -->
+
+    <h3 class="section-title">TOOLS</h3>
+
+    <div class="modules">
+
+      <!--       <div class="module">module
+        <h3>JSON Diff</h3>
+        <p>Compare two JSON documents with deep recursive analysis, highlight structural and value differences, and
+          quickly identify added, removed, or modified data.</p>
+        <button type="button" onclick="window.location.href='json-diff.html'">
+          OPEN MODULE
+        </button>
+      </div> -->
+      <a class="module" href="json-diff.html">
+        <h3>JSON Diff</h3>
+        <p>
+          Compare two JSON documents with deep recursive analysis, highlight structural
+          and value differences, and quickly identify added, removed, or modified data.
+        </p>
+      </a>
+
+      <!--       <div class="module">
+        <h3>Folder Check</h3>
+        <p>Compare two folders to identify file differences, version changes, content mismatches, and missing files.</p>
+        cbamti.htmlOPEN MODULE</button>
+      </div> -->
+
+      <a class="module" href="folder-compare.html">
+        <h3>Folder Check</h3>
+        <p>
+          Compare two folders to identify file differences, version changes, content mismatches, and missing files.
+        </p>
+      </a>
+
+      <!--       <div class="module">
+        <h3>Rotating password utility</h3>
+        <p>Generate daily password.</p>
+        receiptparser.htmlOPEN MODULE</button>
+      </div> -->
+
+      <a class="module" href="rotating-password.html">
+        <h3>Rotating Password Utility</h3>
+        <p>
+          Generate daily passwords.
+        </p>
+      </a>
+
+<!--       <div class="module">
+        <h3>Surcharge Calculator</h3>
+        <p>Calculate card surcharges using configurable rules, card-specific limits, percentage caps, and precise
+          rounding to determine the final transaction amount.</p>
+        base64viewer.htmlOPEN MODULE</button>
+      </div> -->
+
+      <a class="module" href="surcharge-calculator.html">
+        <h3>Surcharge Calculator</h3>
+        <p>
+          Calculate card surcharges using configurable rules, card-specific limits, percentage caps, and precise
+          rounding to determine the final transaction amount.
+        </p>
+      </a>
+
     </div>
+
+    <div class="log-terminal">
+
+      <div class="log-line">[OK] Parser Engine Initialized</div>
+      <div class="log-line">[OK] ISO8583 Decoder Loaded</div>
+      <div class="log-line">[OK] Receipt Service Online</div>
+      <div class="log-line">[OK] Base64 Imaging Ready</div>
+      <div class="log-line warning">[INFO] Awaiting User Input</div>
+
+    </div>
+
   </div>
 
-  <div class="side-tabs-container">
-    <div class="side-tab" onclick="openModal('modal-hex')">HEX CONVERTER</div>
-    <div class="side-tab" onclick="openModal('modal-bitmap')">BITMAP DECODER</div>
-  </div>
+  <!-- <div class="dock">
 
-  <div id="modal-hex" class="modal-overlay" onclick="closeModal('modal-hex')">
-    <div class="modal-content" onclick="event.stopPropagation()">
-      <button class="close-btn" onclick="closeModal('modal-hex')">X</button>
-      <h2>Hex to ASCII Converter</h2>
-      <input type="text" id="hexInput" placeholder="Enter hex string here...">
-      <button class="convert-btn" onclick="convertHex()">Convert</button>
-      <div id="asciiResult"></div>
+    <button onclick="openHex()">
+        HEX CONVERTER
+    </button>
+
+    <button>
+        BITMAP DECODER
+    </button>
+
+    <button>
+        FIELD INSPECTOR
+    </button>
+
+</div>
+
+<div class="modal" id="hexModal">
+
+    <div class="modal-content">
+
+        <span class="close" onclick="closeHex()">✕</span>
+
+        <h2>HEX → ASCII CONVERTER</h2>
+
+        <input
+            id="hexInput"
+            placeholder="48656C6C6F20576F726C64">
+
+        <button onclick="convertHex()">
+            EXECUTE
+        </button>
+
+        <div id="result" class="result">
+            Awaiting data input...
+        </div>
+
     </div>
-  </div>
+
+</div> -->
 
   <script>
-    function openModal(id) {
-      document.getElementById(id).classList.add('show');
-    }
-    function closeModal(id) {
-      document.getElementById(id).classList.remove('show');
-    }
-    function convertHex() {
-      const hex = document.getElementById('hexInput').value.replace(/\s+/g, '');
-      let str = '';
-      for (let i = 0; i < hex.length; i += 2) {
-        str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-      }
-      document.getElementById('asciiResult').innerText = str || "Invalid Data String.";
-    }
+
+
+
   </script>
+
 </body>
+
 </html>
