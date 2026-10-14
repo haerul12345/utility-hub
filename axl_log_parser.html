@@ -4,7 +4,9 @@
 <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Ingenico Log Analyzer</title>
+        <title>AXL Log Parser</title>
+        <link rel="icon"
+                href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧰</text></svg>">
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -246,16 +248,28 @@
                         flex-wrap: wrap;
                 }
 
+                .summary-content {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 4px;
+                }
+
+                .summary-title {
+                        font-size: 14px;
+                }
+
+                .payload-meta {
+                        color: var(--muted);
+                        font-size: 11px;
+                        line-height: 1.4;
+                }
+
                 .badge {
                         padding: 6px 10px;
                         font-size: 10px;
                         border: 1px solid transparent;
                         letter-spacing: 1px;
                         text-transform: uppercase;
-                }
-
-                .summary-left span:last-child {
-                        font-size: 14px;
                 }
 
                 .request-badge {
@@ -353,9 +367,44 @@
                         white-space: nowrap;
                 }
 
-                .invalid-req { color: var(--request); }
-                .invalid-res { color: var(--response); }
-                .invalid-event { color: var(--event); }
+                .invalid-req {
+                        color: var(--request);
+                }
+
+                .invalid-res {
+                        color: var(--response);
+                }
+
+                .invalid-event {
+                        color: var(--event);
+                }
+
+                .missing-response-summary {
+                        background: var(--panel);
+                        border: 1px solid rgba(255, 176, 32, .35);
+                        border-left: 3px solid var(--warning);
+                        padding: 18px;
+                        margin-bottom: 25px;
+                }
+
+                .missing-response-title {
+                        color: var(--warning);
+                        font-size: 16px;
+                        font-weight: 700;
+                        margin-bottom: 12px;
+                }
+
+                .missing-response-item {
+                        color: var(--text);
+                        font-size: 13px;
+                        line-height: 1.7;
+                }
+
+                .missing-response-item + .missing-response-item {
+                        margin-top: 10px;
+                        padding-top: 10px;
+                        border-top: 1px solid var(--border);
+                }
 
                 .toast {
                         position: fixed;
@@ -383,8 +432,8 @@
 
         <div class="header">
                 <div class="brand">
-                        <h1>AXL LOG ANALYZER</h1>
-                        <p>Parse request, response and event payloads from Ingenico logs</p>
+                        <h1>AXL LOG PARSER</h1>
+                        <p>Parse request, response and event payloads from AXL logs</p>
                 </div>
 
                 <div class="header-right">
@@ -411,6 +460,14 @@
                                 Collapse All
                         </button>
 
+                        <button class="secondary" id="exportHtmlButton" onclick="exportHtmlReport()" disabled>
+                                Export HTML Report
+                        </button>
+
+                        <button class="secondary" id="exportJsonButton" onclick="exportJsonReport()" disabled>
+                                Export JSON
+                        </button>
+
                         <input id="searchInput" class="search-box" placeholder="Search..." onkeyup="filterResults()">
                 </div>
 
@@ -419,6 +476,8 @@
         </div>
 
         <script>
+
+                let lastParseResult = null;
 
                 function countBraces(text) {
 
@@ -458,21 +517,27 @@
                         const lines = logText.split(/\r?\n/);
 
                         let buffer = "";
+                        let bufferTimestamp = "";
                         let active = false;
                         let braceCount = 0;
 
                         for (const line of lines) {
 
                                 const match =
-                                        line.match(/IngenicoAxL:(request|response):\s*(\{.*)?$/);
+                                        //line.match(/IngenicoAxL:(request|response):\s*(\{.*)?$/);
+                                        line.match(/IngenicoAxL:(request|response|event):\s*(\{.*)?$/);
 
                                 if (match) {
 
                                         if (active && buffer.trim()) {
-                                                results.push(buffer);
+                                                results.push({
+                                                        jsonText: buffer,
+                                                        timestamp: bufferTimestamp
+                                                });
                                         }
 
                                         buffer = match[2] || "";
+                                        bufferTimestamp = getLogTimestamp(line);
 
                                         braceCount = countBraces(buffer);
 
@@ -480,8 +545,12 @@
 
                                         if (braceCount === 0 && buffer.trim()) {
 
-                                                results.push(buffer);
+                                                results.push({
+                                                        jsonText: buffer,
+                                                        timestamp: bufferTimestamp
+                                                });
                                                 buffer = "";
+                                                bufferTimestamp = "";
                                                 active = false;
                                         }
 
@@ -495,18 +564,48 @@
 
                                         if (braceCount === 0) {
 
-                                                results.push(buffer);
+                                                results.push({
+                                                        jsonText: buffer,
+                                                        timestamp: bufferTimestamp
+                                                });
                                                 buffer = "";
+                                                bufferTimestamp = "";
                                                 active = false;
                                         }
                                 }
                         }
 
                         if (buffer.trim()) {
-                                results.push(buffer);
+                                results.push({
+                                        jsonText: buffer,
+                                        timestamp: bufferTimestamp
+                                });
                         }
 
                         return results;
+                }
+
+                function getLogTimestamp(line) {
+                        return line.match(
+                                /^\s*((?:\d{4}-\d{2}-\d{2}[T ]|\d{2}-\d{2}\s+)?\d{2}:\d{2}:\d{2}(?:[.,]\d+)?(?:Z|[+-]\d{2}:?\d{2})?)/
+                        )?.[1] || "";
+                }
+
+                function getEntryFlowId(entry) {
+                        const obj = entry.parsedObj || {};
+                        const payload = obj.request || obj.response || obj.event;
+                        const parsedFlowId =
+                                obj.flow_id ||
+                                payload?.flow_id ||
+                                payload?.header?.flow_id;
+                        const rawFlowId = entry.jsonText.match(
+                                /"flow_id"\s*:\s*(?:"([^"]+)"|(\d+))/
+                        );
+                        const flowId = parsedFlowId ?? rawFlowId?.[1] ?? rawFlowId?.[2];
+
+                        return flowId == null || String(flowId).trim() === ""
+                                ? ""
+                                : String(flowId).trim();
                 }
 
                 function escapeHtml(str) {
@@ -623,28 +722,28 @@
                         return "UNKNOWN";
                 }
 
-                function copyJson(index) {
-
-                        const text =
-                                document.getElementById(
-                                        "json-" + index
-                                ).innerText;
-
-                        navigator.clipboard.writeText(text)
-                                .then(() => {
-
-                                        button.innerText = "✓ Copied!";
-                                        button.style.background = "#16a34a";
-
-                                        showToast("JSON copied to clipboard");
-
-                                        setTimeout(() => {
-                                                button.innerText = "Copy";
-                                                button.style.background = "#334155";
-                                        }, 1500);
-                                });
-                }
-
+                /*                 function copyJson(index) {
+                
+                                        const text =
+                                                document.getElementById(
+                                                        "json-" + index
+                                                ).innerText;
+                
+                                        navigator.clipboard.writeText(text)
+                                                .then(() => {
+                
+                                                        button.innerText = "✓ Copied!";
+                                                        button.style.background = "#16a34a";
+                
+                                                        showToast("JSON copied to clipboard");
+                
+                                                        setTimeout(() => {
+                                                                button.innerText = "Copy";
+                                                                button.style.background = "#334155";
+                                                        }, 1500);
+                                                });
+                                }
+                 */
                 function expandAll() {
 
                         document
@@ -680,17 +779,239 @@
                                                         : "none";
                                 });
                 }
+                /*
+                                function parseLogs() {
+                
+                                        const text =
+                                                document.getElementById("input").value;
+                
+                                        const jsonBlocks =
+                                                extractJsonObjects(text);
+                
+                                        const container =
+                                                document.getElementById("results");
+                
+                                        let requestCount = 0;
+                                        let responseCount = 0;
+                                        let eventCount = 0;
+                
+                                        let invalidTotal = 0;
+                                        let invalidRequest = 0;
+                                        let invalidResponse = 0;
+                                        let invalidEvent = 0;
+                
+                
+                                        jsonBlocks.forEach(raw => {
+                
+                                                try {
+                                                        JSON.parse(raw);
+                                                } catch {
+                
+                                                        invalidTotal++;
+                
+                                                        if (raw.includes('"request"'))
+                                                                invalidRequest++;
+                
+                                                        else if (raw.includes('"response"'))
+                                                                invalidResponse++;
+                
+                                                        else if (raw.includes('"event"'))
+                                                                invalidEvent++;
+                                                }
+                
+                                                if (raw.includes('"request"'))
+                                                        requestCount++;
+                
+                                                else if (raw.includes('"response"'))
+                                                        responseCount++;
+                
+                                                else if (raw.includes('"event"'))
+                                                        eventCount++;
+                                        });
+                
+                                        const invalidSummary = `
+                <div class="invalid-summary-card">
+                
+                  <div class="invalid-summary-header">
+                
+                    <div class="invalid-summary-left">
+                
+                        <div class="invalid-summary-total">
+                            ${invalidTotal}
+                        </div>
+                
+                        <div class="invalid-summary-title">
+                            Invalid JSON
+                        </div>
+                
+                    </div>
+                
+                    <div class="invalid-summary-detail">
+                
+                        <span class="invalid-req">
+                            Requests: ${invalidRequest}
+                        </span>
+                
+                        <span class="invalid-res">
+                            Responses: ${invalidResponse}
+                        </span>
+                
+                        <span class="invalid-event">
+                            Events: ${invalidEvent}
+                        </span>
+                
+                    </div>
+                
+                </div>
+                
+                </div>
+                `;
+                
+                                        container.innerHTML = `
+                    <div class="stats">
+                
+                        <div class="stat-card">
+                            <div class="stat-number">${jsonBlocks.length}</div>
+                            <div class="stat-label">Total Payloads</div>
+                        </div>
+                
+                        <div class="stat-card">
+                            <div class="stat-number">${requestCount}</div>
+                            <div class="stat-label">Requests</div>
+                        </div>
+                
+                        <div class="stat-card">
+                            <div class="stat-number">${responseCount}</div>
+                            <div class="stat-label">Responses</div>
+                        </div>
+                
+                        <div class="stat-card">
+                            <div class="stat-number">${eventCount}</div>
+                            <div class="stat-label">Events</div>
+                        </div>
+                
+                ${invalidTotal > 0 ? invalidSummary : ""}
+                
+                    </div>
+                `;
+                
+                
+                
+                                        jsonBlocks.forEach((block, index) => {
+                                                const { jsonText, timestamp } = block;
+                
+                                                const div =
+                                                        document.createElement("div");
+                
+                                                div.className = "json-block";
+                
+                                                try {
+                
+                                                        const obj =
+                                                                JSON.parse(jsonText);
+                
+                                                        const title =
+                                                                getTitle(obj);
+                
+                                                        div.classList.add("valid");
+                
+                                                        let badgeClass =
+                                                                "event-badge";
+                
+                                                        let badgeText =
+                                                                "EVENT";
+                
+                                                        if (title.startsWith("REQUEST")) {
+                                                                badgeClass = "request-badge";
+                                                                badgeText = "REQUEST";
+                                                        }
+                
+                                                        if (title.startsWith("RESPONSE")) {
+                                                                badgeClass = "response-badge";
+                                                                badgeText = "RESPONSE";
+                                                        }
+                
+                                                        const displayTitle = stripTypePrefix(title);
+                
+                                                        div.innerHTML = `
+                <details class="json-details">
+                
+                    <summary>
+                        <div class="summary-left">
+                            <span class="badge ${badgeClass}">
+                                ${badgeText}
+                            </span>
+                
+                            <span>${escapeHtml(displayTitle)}</span>
+                        </div>
+                    </summary>
+                
+                <button
+                    class="copy-btn floating-copy"
+                    onclick="copyJson(${index}, this)">
+                    Copy
+                </button>
+                
+                    <pre id="json-${index}">
+                ${escapeHtml(JSON.stringify(obj, null, 2))}
+                    </pre>
+                
+                </details>
+                            `;
+                
+                                                } catch (err) {
+                
+                                                        div.classList.add("invalid");
+                
+                                                        const title = getTitleFromRawJson(jsonText);
+                
+                                                        let badgeClass = "event-badge";
+                                                        let badgeText = "EVENT";
+                
+                                                        if (title.startsWith("REQUEST")) {
+                                                                badgeClass = "request-badge";
+                                                                badgeText = "REQUEST";
+                                                        }
+                
+                                                        if (title.startsWith("RESPONSE")) {
+                                                                badgeClass = "response-badge";
+                                                                badgeText = "RESPONSE";
+                                                        }
+                
+                                                        const displayTitle = stripTypePrefix(title);
+                
+                                                        div.innerHTML = `
+                <details>
+                
+                    <summary>
+                
+                        <div class="summary-left">
+                
+                            <span class="badge ${badgeClass}">
+                                ${badgeText}
+                            </span>
+                
+                            <span>${escapeHtml(displayTitle)}</span>
+                
+                        </div>
+                
+                    </summary>
+                
+                    <pre>${escapeHtml(jsonText.substring(0, 5000))}</pre>
+                
+                </details>
+                `;
+                                                }
+                
+                                                container.appendChild(div);
+                                        });
+                                }
+                */
 
                 function parseLogs() {
-
-                        const text =
-                                document.getElementById("input").value;
-
-                        const jsonBlocks =
-                                extractJsonObjects(text);
-
-                        const container =
-                                document.getElementById("results");
+                        const text = document.getElementById("input").value;
+                        const jsonBlocks = extractJsonObjects(text);
+                        const container = document.getElementById("results");
 
                         let requestCount = 0;
                         let responseCount = 0;
@@ -701,167 +1022,243 @@
                         let invalidResponse = 0;
                         let invalidEvent = 0;
 
+                        const entries = [];
 
-                        jsonBlocks.forEach(raw => {
+                        // SINGLE PASS
+                        jsonBlocks.forEach((block, index) => {
+                                const { jsonText, timestamp } = block;
+
+                                let type = "event";
+
+                                if (jsonText.includes('"request"')) {
+                                        type = "request";
+                                        requestCount++;
+                                }
+                                else if (jsonText.includes('"response"')) {
+                                        type = "response";
+                                        responseCount++;
+                                }
+                                else if (jsonText.includes('"event"')) {
+                                        type = "event";
+                                        eventCount++;
+                                }
+
+                                let valid = true;
+                                let parsedObj = null;
 
                                 try {
-                                        JSON.parse(raw);
-                                } catch {
+                                        parsedObj = JSON.parse(jsonText);
+                                }
+                                catch {
+                                        valid = false;
 
                                         invalidTotal++;
 
-                                        if (raw.includes('"request"'))
+                                        if (type === "request")
                                                 invalidRequest++;
-
-                                        else if (raw.includes('"response"'))
+                                        else if (type === "response")
                                                 invalidResponse++;
-
-                                        else if (raw.includes('"event"'))
+                                        else
                                                 invalidEvent++;
                                 }
 
-                                if (raw.includes('"request"'))
-                                        requestCount++;
-
-                                else if (raw.includes('"response"'))
-                                        responseCount++;
-
-                                else if (raw.includes('"event"'))
-                                        eventCount++;
+                                entries.push({
+                                        index,
+                                        jsonText,
+                                        timestamp,
+                                        parsedObj,
+                                        valid,
+                                        type
+                                });
                         });
+
+                        // Detect requests without responses
+                        const requests = new Map();
+                        const responses = new Set();
+
+                        entries.forEach(entry => {
+                                const flowId = getEntryFlowId(entry);
+
+                                if (!flowId)
+                                        return;
+
+                                if (entry.type === "request") {
+                                        if (!requests.has(flowId))
+                                                requests.set(flowId, []);
+                                        requests.get(flowId).push(entry);
+                                }
+
+                                if (entry.type === "response") {
+                                        responses.add(flowId);
+                                }
+                        });
+
+                        const missingResponses = [];
+                        const missingResponseWarnings = [];
+
+                        requests.forEach((requestEntries, flowId) => {
+                                if (!responses.has(flowId)) {
+                                        missingResponses.push(flowId);
+                                        requestEntries.forEach(entry => {
+                                                const title = entry.valid
+                                                        ? getTitle(entry.parsedObj)
+                                                        : getTitleFromRawJson(entry.jsonText);
+                                                const requestType = stripTypePrefix(title);
+                                                entry.missingResponse = true;
+                                                entry.missingResponseInfo = {
+                                                        flowId,
+                                                        requestType,
+                                                        valid: entry.valid
+                                                };
+                                                missingResponseWarnings.push({
+                                                        index: entry.index,
+                                                        flowId,
+                                                        requestType,
+                                                        valid: entry.valid
+                                                });
+                                        });
+                                }
+                        });
+
+                        lastParseResult = {
+                                generatedAt: new Date().toISOString(),
+                                summary: {
+                                        totalPayloads: entries.length,
+                                        requests: requestCount,
+                                        responses: responseCount,
+                                        events: eventCount,
+                                        invalid: {
+                                                total: invalidTotal,
+                                                requests: invalidRequest,
+                                                responses: invalidResponse,
+                                                events: invalidEvent
+                                        },
+                                        missingResponses,
+                                        missingResponseWarnings
+                                },
+                                entries
+                        };
+                        document.getElementById("exportHtmlButton").disabled = false;
+                        document.getElementById("exportJsonButton").disabled = false;
 
                         const invalidSummary = `
 <div class="invalid-summary-card">
-
   <div class="invalid-summary-header">
-
     <div class="invalid-summary-left">
-
-        <div class="invalid-summary-total">
-            ${invalidTotal}
-        </div>
-
-        <div class="invalid-summary-title">
-            Invalid JSON
-        </div>
-
+      <div class="invalid-summary-total">${invalidTotal}</div>
+      <div class="invalid-summary-title">Invalid JSON</div>
     </div>
-
     <div class="invalid-summary-detail">
+      <span class="invalid-req">Requests: ${invalidRequest}</span>
+      <span class="invalid-res">Responses: ${invalidResponse}</span>
+      <span class="invalid-event">Events: ${invalidEvent}</span>
+    </div>
+  </div>
+</div>`;
 
-        <span class="invalid-req">
-            Requests: ${invalidRequest}
-        </span>
+                        const missingResponseSummary = missingResponseWarnings.length
+                                ? `
+<div class="missing-response-summary" role="alert">
+    <div class="missing-response-title">⚠ Missing Responses (${missingResponseWarnings.length})</div>
+    ${missingResponseWarnings.map(warning => `
+    <div class="missing-response-item">
+        <strong>REQUEST ${escapeHtml(warning.requestType || "UNKNOWN")}${warning.valid ? "" : " (INVALID JSON)"}</strong><br>
+        No matching RESPONSE found<br>
+        Flow ID: ${escapeHtml(String(warning.flowId))}
+    </div>`).join("")}
+</div>`
+                                : "";
 
-        <span class="invalid-res">
-            Responses: ${invalidResponse}
-        </span>
-
-        <span class="invalid-event">
-            Events: ${invalidEvent}
-        </span>
-
+                        let html = `
+<div class="stats">
+    <div class="stat-card">
+        <div class="stat-number">${jsonBlocks.length}</div>
+        <div class="stat-label">Total Payloads</div>
     </div>
 
-</div>
-
-</div>
-`;
-
-                        container.innerHTML = `
-    <div class="stats">
-
-        <div class="stat-card">
-            <div class="stat-number">${jsonBlocks.length}</div>
-            <div class="stat-label">Total Payloads</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-number">${requestCount}</div>
-            <div class="stat-label">Requests</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-number">${responseCount}</div>
-            <div class="stat-label">Responses</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-number">${eventCount}</div>
-            <div class="stat-label">Events</div>
-        </div>
-
-${invalidTotal > 0 ? invalidSummary : ""}
-
+    <div class="stat-card">
+        <div class="stat-number">${requestCount}</div>
+        <div class="stat-label">Requests</div>
     </div>
+
+    <div class="stat-card">
+        <div class="stat-number">${responseCount}</div>
+        <div class="stat-label">Responses</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-number">${eventCount}</div>
+        <div class="stat-label">Events</div>
+    </div>
+
+    ${invalidTotal > 0 ? invalidSummary : ""}
+</div>
+${missingResponseSummary}
 `;
 
+                        // RENDER USING ALREADY PARSED DATA
+                        entries.forEach(entry => {
 
+                                const {
+                                        index,
+                                        jsonText,
+                                        parsedObj,
+                                        valid
+                                } = entry;
 
-                        jsonBlocks.forEach((jsonText, index) => {
+                                if (valid) {
 
-                                const div =
-                                        document.createElement("div");
+                                        const title = getTitle(parsedObj);
 
-                                div.className = "json-block";
-
-                                try {
-
-                                        const obj =
-                                                JSON.parse(jsonText);
-
-                                        const title =
-                                                getTitle(obj);
-
-                                        div.classList.add("valid");
-
-                                        let badgeClass =
-                                                "event-badge";
-
-                                        let badgeText =
-                                                "EVENT";
+                                        let badgeClass = "event-badge";
+                                        let badgeText = "EVENT";
 
                                         if (title.startsWith("REQUEST")) {
                                                 badgeClass = "request-badge";
                                                 badgeText = "REQUEST";
                                         }
-
-                                        if (title.startsWith("RESPONSE")) {
+                                        else if (title.startsWith("RESPONSE")) {
                                                 badgeClass = "response-badge";
                                                 badgeText = "RESPONSE";
                                         }
 
                                         const displayTitle = stripTypePrefix(title);
+                                        const metadata = [
+                                                getEntryFlowId(entry) && `Flow ID: ${getEntryFlowId(entry)}`,
+                                                entry.timestamp && `Time: ${entry.timestamp}`
+                                        ].filter(Boolean).join(" · ");
 
-                                        div.innerHTML = `
-<details class="json-details">
+                                        html += `
+<div class="json-block valid">
+    <details class="json-details">
 
-    <summary>
-        <div class="summary-left">
-            <span class="badge ${badgeClass}">
-                ${badgeText}
-            </span>
+        <summary>
+            <div class="summary-left">
+                <span class="badge ${badgeClass}">
+                    ${badgeText}
+                </span>
 
-            <span>${escapeHtml(displayTitle)}</span>
-        </div>
-    </summary>
+                <span class="summary-content">
+                    <span class="summary-title">${escapeHtml(displayTitle)}</span>
+                    ${metadata ? `<span class="payload-meta">${escapeHtml(metadata)}</span>` : ""}
+                </span>
+            </div>
+        </summary>
 
-<button
-    class="copy-btn floating-copy"
-    onclick="copyJson(${index}, this)">
-    Copy
-</button>
+        <button
+            class="copy-btn floating-copy"
+            onclick="copyJson(${index}, this)">
+            Copy
+        </button>
 
-    <pre id="json-${index}">
-${escapeHtml(JSON.stringify(obj, null, 2))}
-    </pre>
+        <pre id="json-${index}">
+${escapeHtml(JSON.stringify(parsedObj, null, 2))}
+        </pre>
 
-</details>
-            `;
-
-                                } catch (err) {
-
-                                        div.classList.add("invalid");
+    </details>
+</div>`;
+                                }
+                                else {
 
                                         const title = getTitleFromRawJson(jsonText);
 
@@ -872,198 +1269,325 @@ ${escapeHtml(JSON.stringify(obj, null, 2))}
                                                 badgeClass = "request-badge";
                                                 badgeText = "REQUEST";
                                         }
-
-                                        if (title.startsWith("RESPONSE")) {
+                                        else if (title.startsWith("RESPONSE")) {
                                                 badgeClass = "response-badge";
                                                 badgeText = "RESPONSE";
                                         }
+                                        const metadata = [
+                                                getEntryFlowId(entry) && `Flow ID: ${getEntryFlowId(entry)}`,
+                                                entry.timestamp && `Time: ${entry.timestamp}`
+                                        ].filter(Boolean).join(" · ");
 
-                                        const displayTitle = stripTypePrefix(title);
+                                        html += `
+<div class="json-block invalid">
+    <details>
 
-                                        div.innerHTML = `
-<details>
+        <summary>
+            <div class="summary-left">
 
-    <summary>
+                <span class="badge ${badgeClass}">
+                    ${badgeText}
+                </span>
 
-        <div class="summary-left">
+                <span class="summary-content">
+                    <span class="summary-title">${escapeHtml(stripTypePrefix(title))}</span>
+                    ${metadata ? `<span class="payload-meta">${escapeHtml(metadata)}</span>` : ""}
+                </span>
 
-            <span class="badge ${badgeClass}">
-                ${badgeText}
-            </span>
+            </div>
+        </summary>
 
-            <span>${escapeHtml(displayTitle)}</span>
+        <pre>${escapeHtml(jsonText.substring(0, 5000))}</pre>
 
-        </div>
-
-    </summary>
-
-    <pre>${escapeHtml(jsonText.substring(0, 5000))}</pre>
-
-</details>
-`;
+    </details>
+</div>`;
                                 }
-
-                                container.appendChild(div);
                         });
+
+                        // ONE DOM UPDATE
+                        container.innerHTML = html;
                 }
 
+                function exportJsonReport() {
+                        if (!lastParseResult)
+                                return;
+
+                        const report = {
+                                generatedAt: lastParseResult.generatedAt,
+                                summary: lastParseResult.summary,
+                                entries: lastParseResult.entries.map(entry => ({
+                                        index: entry.index,
+                                        type: entry.type,
+                                        valid: entry.valid,
+                                        raw: entry.jsonText,
+                                        timestamp: entry.timestamp,
+                                        flowId: getEntryFlowId(entry) || null,
+                                        parsed: entry.parsedObj,
+                                        missingResponse: Boolean(entry.missingResponse)
+                                }))
+                        };
+
+                        downloadReport(
+                                JSON.stringify(report, null, 2),
+                                "application/json",
+                                "json"
+                        );
+                }
+
+                function exportHtmlReport() {
+                        if (!lastParseResult)
+                                return;
+
+                        const generatedAt = lastParseResult.generatedAt;
+                        const reportResults = document.getElementById("results").cloneNode(true);
+                        const reportEntries = lastParseResult.entries;
+
+                        reportResults.querySelectorAll(".json-block").forEach((block, index) => {
+                                block.style.display = "";
+                                const entry = reportEntries[index];
+
+                                if (!entry.valid) {
+                                        const pre = block.querySelector("pre");
+                                        if (pre)
+                                                pre.textContent = entry.jsonText;
+                                }
+                        });
+                        reportResults.querySelectorAll("details").forEach(details => {
+                                details.open = true;
+                        });
+                        reportResults.querySelectorAll(".copy-btn").forEach(button => {
+                                button.remove();
+                        });
+
+                        const css = `${document.querySelector("style").textContent}
+
+body {
+    height: auto;
+    min-height: 100vh;
+}
+
+.container {
+    width: 100%;
+}
+`;
+
+                        const reportBodyEndTag = "<" + "/body>";
+                        const reportHtmlEndTag = "<" + "/html>";
+
+const reportHtml = `
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AXL Log Parser Report</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+${css}
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="brand">
+            <h1>AXL LOG PARSER REPORT</h1>
+            <p>Generated ${generatedAt}</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="toolbar">
+            <button class="secondary" onclick="document.querySelectorAll('#report-results details').forEach(details => details.open = true)">Expand All</button>
+            <button class="secondary" onclick="document.querySelectorAll('#report-results details').forEach(details => details.open = false)">Collapse All</button>
+        </div>
+        <div id="report-results">
+${reportResults.innerHTML}
+        </div>
+    </div>
+
+${reportBodyEndTag}
+${reportHtmlEndTag}
+`;
+
+                        downloadReport(reportHtml, "text/html", "html");
+                }
+
+                function downloadReport(content, mimeType, extension) {
+                        const blob = new Blob([content], { type: `${mimeType};charset=utf-8` });
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement("a");
+                        const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+
+                        link.href = url;
+                        link.download = `axl-log-report-${timestamp}.${extension}`;
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+                        setTimeout(() => URL.revokeObjectURL(url), 1000);
+                }
+
+
+                
                 function getTitleFromRawJson(text) {
 
-                        // REQUEST
-                        if (text.includes('"request"')) {
+                                // REQUEST
+                                if (text.includes('"request"')) {
 
-                                const type =
-                                        text.match(/"type"\s*:\s*"([^"]+)"/)?.[1] ||
-                                        text.match(/"txn_type"\s*:\s*"([^"]+)"/)?.[1] ||
-                                        "UNKNOWN";
+                                        const type =
+                                                text.match(/"type"\s*:\s*"([^"]+)"/)?.[1] ||
+                                                text.match(/"txn_type"\s*:\s*"([^"]+)"/)?.[1] ||
+                                                "UNKNOWN";
 
-                                return `REQUEST - ${type}`;
-                        }
-
-                        // RESPONSE
-                        if (text.includes('"response"')) {
-
-                                const type =
-                                        text.match(/"type"\s*:\s*"([^"]+)"/)?.[1] ||
-                                        text.match(/"txn_type"\s*:\s*"([^"]+)"/)?.[1] ||
-                                        "UNKNOWN";
-
-                                return `RESPONSE - ${type}`;
-                        }
-
-                        // EVENT
-                        if (text.includes('"event"')) {
-
-                                const type =
-                                        text.match(/"type"\s*:\s*"([^"]+)"/)?.[1] ||
-                                        text.match(/"txn_type"\s*:\s*"([^"]+)"/)?.[1];
-
-                                const eventType =
-                                        text.match(/"event_type"\s*:\s*"([^"]+)"/)?.[1];
-
-                                const receiptOwner =
-                                        text.match(/"receipt_owner"\s*:\s*"([^"]+)"/)?.[1];
-
-                                const screenName =
-                                        text.match(/"screen_info"\s*:\s*\{[\s\S]*?"name"\s*:\s*"([^"]+)"/)?.[1];
-
-                                const screenTextMatch = text.match(/"screen_info"\s*:\s*\{[\s\S]*?"text"\s*:\s*\[([\s\S]*?)\]/)?.[1];
-                                const screenText = screenTextMatch ? screenTextMatch.match(/"([^"]+)"/g)?.map(value => value.replace(/^"|"$/g, '')).filter(Boolean).join(' ') : '';
-
-                                if (eventType === "print_status" && receiptOwner) {
-                                        return `EVENT - ${eventType} - ${receiptOwner}`;
+                                        return `REQUEST - ${type}`;
                                 }
 
-                                // screen_info special handling
-                                if (eventType === "screen_info") {
-                                        const label = screenName || 'screen_info';
+                                // RESPONSE
+                                if (text.includes('"response"')) {
 
-                                        if (screenText) {
-                                                return `EVENT - ${eventType} - ${label} - [${screenText}]`;
+                                        const type =
+                                                text.match(/"type"\s*:\s*"([^"]+)"/)?.[1] ||
+                                                text.match(/"txn_type"\s*:\s*"([^"]+)"/)?.[1] ||
+                                                "UNKNOWN";
+
+                                        return `RESPONSE - ${type}`;
+                                }
+
+                                // EVENT
+                                if (text.includes('"event"')) {
+
+                                        const type =
+                                                text.match(/"type"\s*:\s*"([^"]+)"/)?.[1] ||
+                                                text.match(/"txn_type"\s*:\s*"([^"]+)"/)?.[1];
+
+                                        const eventType =
+                                                text.match(/"event_type"\s*:\s*"([^"]+)"/)?.[1];
+
+                                        const receiptOwner =
+                                                text.match(/"receipt_owner"\s*:\s*"([^"]+)"/)?.[1];
+
+                                        const screenName =
+                                                text.match(/"screen_info"\s*:\s*\{[\s\S]*?"name"\s*:\s*"([^"]+)"/)?.[1];
+
+                                        const screenTextMatch = text.match(/"screen_info"\s*:\s*\{[\s\S]*?"text"\s*:\s*\[([\s\S]*?)\]/)?.[1];
+                                        const screenText = screenTextMatch ? screenTextMatch.match(/"([^"]+)"/g)?.map(value => value.replace(/^"|"$/g, '')).filter(Boolean).join(' ') : '';
+
+                                        if (eventType === "print_status" && receiptOwner) {
+                                                return `EVENT - ${eventType} - ${receiptOwner}`;
+                                        }
+
+                                        // screen_info special handling
+                                        if (eventType === "screen_info") {
+                                                const label = screenName || 'screen_info';
+
+                                                if (screenText) {
+                                                        return `EVENT - ${eventType} - ${label} - [${screenText}]`;
+                                                }
+
+                                                if (type) {
+                                                        return `EVENT - ${type} - ${eventType} - ${label}`;
+                                                }
+
+                                                return `EVENT - ${eventType} - ${label}`;
+                                        }
+
+                                        if (type && eventType) {
+                                                return `EVENT - ${type} - ${eventType}`;
                                         }
 
                                         if (type) {
-                                                return `EVENT - ${type} - ${eventType} - ${label}`;
+                                                return `EVENT - ${type}`;
                                         }
 
-                                        return `EVENT - ${eventType} - ${label}`;
+                                        if (eventType) {
+                                                return `EVENT - ${eventType}`;
+                                        }
+
+                                        return "EVENT - UNKNOWN";
                                 }
 
-                                if (type && eventType) {
-                                        return `EVENT - ${type} - ${eventType}`;
-                                }
-
-                                if (type) {
-                                        return `EVENT - ${type}`;
-                                }
-
-                                if (eventType) {
-                                        return `EVENT - ${eventType}`;
-                                }
-
-                                return "EVENT - UNKNOWN";
+                                return "INVALID JSON";
                         }
 
-                        return "INVALID JSON";
-                }
+                        /*                 function extractMetadata(raw) {
+                        
+                                                const type =
+                                                        raw.includes('"request"') ? 'REQUEST' :
+                                                                raw.includes('"response"') ? 'RESPONSE' :
+                                                                        raw.includes('"event"') ? 'EVENT' :
+                                                                                'UNKNOWN';
+                        
+                                                const flowId =
+                                                        raw.match(/"flow_id":"([^"]+)"/)?.[1] || '-';
+                        
+                                                const endpoint =
+                                                        raw.match(/"endpoint":"([^"]+)"/)?.[1] || '-';
+                        
+                                                const eventType =
+                                                        raw.match(/"event_type":"([^"]+)"/)?.[1] || '-';
+                        
+                                                const txnType =
+                                                        raw.match(/"txn_type":"([^"]+)"/)?.[1] || '-';
+                        
+                                                return {
+                                                        type,
+                                                        flowId,
+                                                        endpoint,
+                                                        eventType,
+                                                        txnType
+                                                };
+                                        } */
 
-                function extractMetadata(raw) {
+                        function copyJson(index, button) {
 
-                        const type =
-                                raw.includes('"request"') ? 'REQUEST' :
-                                        raw.includes('"response"') ? 'RESPONSE' :
-                                                raw.includes('"event"') ? 'EVENT' :
-                                                        'UNKNOWN';
+                                const text =
+                                        document.getElementById(
+                                                "json-" + index
+                                        ).innerText;
 
-                        const flowId =
-                                raw.match(/"flow_id":"([^"]+)"/)?.[1] || '-';
+                                navigator.clipboard.writeText(text)
+                                        .then(() => {
 
-                        const endpoint =
-                                raw.match(/"endpoint":"([^"]+)"/)?.[1] || '-';
+                                                const originalText = button.innerText;
 
-                        const eventType =
-                                raw.match(/"event_type":"([^"]+)"/)?.[1] || '-';
+                                                button.innerText = "✓ Copied!";
+                                                button.style.background = "#16a34a";
 
-                        const txnType =
-                                raw.match(/"txn_type":"([^"]+)"/)?.[1] || '-';
+                                                showToast("JSON copied to clipboard");
 
-                        return {
-                                type,
-                                flowId,
-                                endpoint,
-                                eventType,
-                                txnType
-                        };
-                }
+                                                setTimeout(() => {
+                                                        button.innerText = originalText;
+                                                        button.style.background = "#334155";
+                                                }, 1500);
 
-                function copyJson(index, button) {
+                                        })
+                                        .catch(() => {
 
-                        const text =
-                                document.getElementById(
-                                        "json-" + index
-                                ).innerText;
+                                                button.innerText = "Failed";
+                                                button.style.background = "#dc2626";
 
-                        navigator.clipboard.writeText(text)
-                                .then(() => {
+                                                setTimeout(() => {
+                                                        button.innerText = "Copy";
+                                                        button.style.background = "#334155";
+                                                }, 1500);
 
-                                        const originalText = button.innerText;
+                                        });
+                        }
 
-                                        button.innerText = "✓ Copied!";
-                                        button.style.background = "#16a34a";
+                        function showToast(message) {
 
-                                        showToast("JSON copied to clipboard");
+                                const toast =
+                                        document.getElementById("toast");
 
-                                        setTimeout(() => {
-                                                button.innerText = originalText;
-                                                button.style.background = "#334155";
-                                        }, 1500);
+                                toast.innerText = message;
+                                toast.classList.add("show");
 
-                                })
-                                .catch(() => {
-
-                                        button.innerText = "Failed";
-                                        button.style.background = "#dc2626";
-
-                                        setTimeout(() => {
-                                                button.innerText = "Copy";
-                                                button.style.background = "#334155";
-                                        }, 1500);
-
-                                });
-                }
-
-                function showToast(message) {
-
-                        const toast =
-                                document.getElementById("toast");
-
-                        toast.innerText = message;
-                        toast.classList.add("show");
-
-                        setTimeout(() => {
-                                toast.classList.remove("show");
-                        }, 2000);
-                }
+                                setTimeout(() => {
+                                        toast.classList.remove("show");
+                                }, 2000);
+                        }
 
 
         </script>
