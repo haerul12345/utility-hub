@@ -697,7 +697,8 @@
                 <section class="logcat-filter" aria-label="Android Studio Logcat filter">
                         <p>Use this filter in Android Studio Logcat to capture AXL requests and responses.</p>
                         <div class="logcat-filter-row">
-                                <code id="logcatFilterText" class="logcat-filter-code">"IngenicoAxL:request:" | "IngenicoAxL:response:"</code>
+                                <!-- <code id="logcatFilterText" class="logcat-filter-code">"IngenicoAxL:request:" | "IngenicoAxL:response:" | "Sent:" | "Received:"</code> -->
+                                <code id="logcatFilterText" class="logcat-filter-code">"IngenicoAxL:request:" | "IngenicoAxL:response:" | tag:NUAClient  & ( "Sent:" | "Received:")</code>
                                 <button class="logcat-copy-button" type="button" onclick="copyLogcatFilter(this)"
                                         aria-label="Copy Logcat filter" title="Copy filter">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
@@ -817,68 +818,80 @@
                         let buffer = "";
                         let bufferTimestamp = "";
                         let active = false;
+                        let waitingForReceivedPayload = false;
                         let braceCount = 0;
 
+                        const finishBuffer = () => {
+                                if (buffer.trim()) {
+                                        results.push({
+                                                jsonText: buffer,
+                                                timestamp: bufferTimestamp
+                                        });
+                                }
+                                buffer = "";
+                                bufferTimestamp = "";
+                                active = false;
+                                braceCount = 0;
+                        };
+
+                        const startBuffer = (jsonText, timestamp) => {
+                                buffer = jsonText;
+                                bufferTimestamp = timestamp;
+                                braceCount = countBraces(buffer);
+                                active = braceCount > 0;
+                                if (braceCount <= 0)
+                                        finishBuffer();
+                        };
+
                         for (const line of lines) {
+                                const axlMatch = line.match(
+                                        /IngenicoAxL:(request|response|event):\s*(\{.*)?$/
+                                );
+                                const sentMatch = line.match(/\bSent:\s*(\{.*)$/);
+                                const receivedMatch = line.match(/\bReceived:\s*(.*)$/);
 
-                                const match =
-                                        //line.match(/IngenicoAxL:(request|response):\s*(\{.*)?$/);
-                                        line.match(/IngenicoAxL:(request|response|event):\s*(\{.*)?$/);
+                                if (axlMatch || sentMatch || receivedMatch) {
+                                        if (active)
+                                                finishBuffer();
 
-                                if (match) {
+                                        waitingForReceivedPayload = false;
+                                        const timestamp = getLogTimestamp(line);
 
-                                        if (active && buffer.trim()) {
-                                                results.push({
-                                                        jsonText: buffer,
-                                                        timestamp: bufferTimestamp
-                                                });
+                                        if (axlMatch) {
+                                                startBuffer(axlMatch[2] || "", timestamp);
+                                        } else if (sentMatch) {
+                                                startBuffer(sentMatch[1], timestamp);
+                                        } else {
+                                                const payloadStart = receivedMatch[1].indexOf("{");
+                                                if (payloadStart >= 0) {
+                                                        startBuffer(receivedMatch[1].slice(payloadStart), timestamp);
+                                                } else {
+                                                        bufferTimestamp = timestamp;
+                                                        waitingForReceivedPayload = true;
+                                                }
                                         }
+                                        continue;
+                                }
 
-                                        buffer = match[2] || "";
-                                        bufferTimestamp = getLogTimestamp(line);
-
-                                        braceCount = countBraces(buffer);
-
-                                        active = braceCount > 0;
-
-                                        if (braceCount === 0 && buffer.trim()) {
-
-                                                results.push({
-                                                        jsonText: buffer,
-                                                        timestamp: bufferTimestamp
-                                                });
-                                                buffer = "";
-                                                bufferTimestamp = "";
-                                                active = false;
+                                if (waitingForReceivedPayload) {
+                                        const payloadStart = line.indexOf("{");
+                                        if (payloadStart >= 0) {
+                                                waitingForReceivedPayload = false;
+                                                startBuffer(line.slice(payloadStart), bufferTimestamp);
                                         }
-
                                         continue;
                                 }
 
                                 if (active) {
-
                                         buffer += "\n" + line;
                                         braceCount += countBraces(line);
-
-                                        if (braceCount === 0) {
-
-                                                results.push({
-                                                        jsonText: buffer,
-                                                        timestamp: bufferTimestamp
-                                                });
-                                                buffer = "";
-                                                bufferTimestamp = "";
-                                                active = false;
-                                        }
+                                        if (braceCount <= 0)
+                                                finishBuffer();
                                 }
                         }
 
-                        if (buffer.trim()) {
-                                results.push({
-                                        jsonText: buffer,
-                                        timestamp: bufferTimestamp
-                                });
-                        }
+                        if (active)
+                                finishBuffer();
 
                         return results;
                 }
@@ -979,6 +992,15 @@
 
                                 const eventType =
                                         resource.event_type;
+
+                                if (eventType === "non_fatal_error_info") {
+                                        const message = resource.error_info?.text ||
+                                                resource.text ||
+                                                obj.event.text;
+                                        if (typeof message === "string" && message.trim()) {
+                                                return `EVENT - ${eventType} - [${message.trim()}]`;
+                                        }
+                                }
 
                                 const screenName =
                                         resource.screen_info?.name;
@@ -1989,8 +2011,16 @@ ${reportHtmlEndTag}
                                         const eventType =
                                                 text.match(/"event_type"\s*:\s*"([^"]+)"/)?.[1];
 
+                                        const eventText =
+                                                text.match(/"error_info"\s*:\s*\{[^}]*"text"\s*:\s*"([^"]+)"/)?.[1] ||
+                                                text.match(/"text"\s*:\s*"([^"]+)"/)?.[1];
+
                                         const receiptOwner =
                                                 text.match(/"receipt_owner"\s*:\s*"([^"]+)"/)?.[1];
+
+                                        if (eventType === "non_fatal_error_info" && eventText) {
+                                                return `EVENT - ${eventType} - [${eventText}]`;
+                                        }
 
                                         const screenName =
                                                 text.match(/"screen_info"\s*:\s*\{[\s\S]*?"name"\s*:\s*"([^"]+)"/)?.[1];
