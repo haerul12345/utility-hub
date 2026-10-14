@@ -419,6 +419,101 @@
                         background: var(--danger);
                 }
 
+                .flow-id-filters,
+                .transaction-type-filters {
+                        display: flex;
+                        flex-wrap: wrap;
+                        align-items: center;
+                        gap: 8px;
+                        margin: 0 0 25px;
+                }
+
+                .request-groups-panel {
+                        border: 1px solid var(--border);
+                        border-radius: 0;
+                        margin-bottom: 25px;
+                        overflow: hidden;
+                }
+
+                .request-groups-header {
+                        background: var(--panel2);
+                        border-bottom: 1px solid var(--border);
+                        color: var(--text);
+                        font-size: 15px;
+                        font-weight: 600;
+                        padding: 12px 16px;
+                }
+
+                .request-groups-content {
+                        padding: 16px 16px 1px;
+                }
+
+                .parsed-payloads-content {
+                        padding: 16px;
+                }
+
+                .payload-overview-content {
+                        padding: 16px 16px 1px;
+                }
+
+                .flow-id-filters[hidden] {
+                        display: none;
+                }
+
+                .flow-id-filter-label {
+                        color: var(--muted);
+                        font-size: 13px;
+                        margin-right: 4px;
+                }
+
+                .flow-id-filter {
+                        background: var(--panel);
+                        border: 1px solid var(--border);
+                        color: var(--text);
+                        cursor: pointer;
+                        font: inherit;
+                        font-size: 12px;
+                        max-width: 100%;
+                        overflow-wrap: anywhere;
+                        padding: 8px 14px;
+                        transition: transform .16s ease, border-color .16s ease, background .16s ease;
+                }
+
+                .transaction-type-filter {
+                        background: var(--panel);
+                        border: 1px solid var(--border);
+                        color: var(--text);
+                        cursor: pointer;
+                        font: inherit;
+                        font-size: 12px;
+                        padding: 8px 14px;
+                        transition: transform .16s ease, border-color .16s ease, background .16s ease;
+                }
+
+                .flow-id-filter:hover,
+                .transaction-type-filter:hover {
+                        transform: translateY(-1px);
+                        border-color: var(--accent);
+                        background: var(--panel2);
+                }
+
+                .flow-id-filter:focus-visible {
+                        outline: 2px solid var(--accent);
+                        outline-offset: 2px;
+                }
+
+                .transaction-type-filter:focus-visible {
+                        outline: 2px solid var(--accent);
+                        outline-offset: 2px;
+                }
+
+                .flow-id-filter[aria-pressed="true"],
+                .transaction-type-filter[aria-pressed="true"] {
+                        border-color: var(--accent);
+                        background: var(--panel2);
+                        box-shadow: 0 0 0 1px rgba(0, 212, 255, .2);
+                }
+
                 .stat-number {
                         font-size: 40px;
                         line-height: 1;
@@ -619,7 +714,8 @@
                         color: var(--event);
                 }
 
-                .missing-response-summary {
+                .missing-response-summary,
+                .payment-idle-warning-summary {
                         background: var(--panel);
                         border: 1px solid rgba(255, 176, 32, .35);
                         border-left: 3px solid var(--warning);
@@ -627,20 +723,23 @@
                         margin-bottom: 25px;
                 }
 
-                .missing-response-title {
+                .missing-response-title,
+                .payment-idle-warning-title {
                         color: var(--warning);
                         font-size: 16px;
                         font-weight: 700;
                         margin-bottom: 12px;
                 }
 
-                .missing-response-item {
+                .missing-response-item,
+                .payment-idle-warning-item {
                         color: var(--text);
                         font-size: 13px;
                         line-height: 1.7;
                 }
 
-                .missing-response-item + .missing-response-item {
+                .missing-response-item + .missing-response-item,
+                .payment-idle-warning-item + .payment-idle-warning-item {
                         margin-top: 10px;
                         padding-top: 10px;
                         border-top: 1px solid var(--border);
@@ -751,6 +850,8 @@
 
                 let lastParseResult = null;
                 let activeResultFilter = "all";
+                let activeFlowFilter = "all";
+                let activeTransactionFilter = "all";
 
                 function setResultControlsEnabled(enabled) {
                         document.getElementById("expandAllButton").disabled = !enabled;
@@ -766,6 +867,8 @@
                 function clearParsedResults() {
                         lastParseResult = null;
                         activeResultFilter = "all";
+                        activeFlowFilter = "all";
+                        activeTransactionFilter = "all";
                         document.getElementById("results").replaceChildren();
                         setResultControlsEnabled(false);
 
@@ -919,12 +1022,68 @@
                                 : String(flowId).trim();
                 }
 
+                function getRequestTransactionType(entry) {
+                        const resource = entry.parsedObj?.request?.resource || {};
+                        const request = entry.parsedObj?.request || {};
+                        const parsedType = resource.txn_type ||
+                                request.txn_type ||
+                                resource.type ||
+                                request.type;
+                        const rawType = entry.jsonText.match(
+                                /"txn_type"\s*:\s*"([^"]+)"/
+                        )?.[1] || entry.jsonText.match(/"type"\s*:\s*"([^"]+)"/)?.[1];
+                        return String(parsedType || rawType || "UNKNOWN").trim() || "UNKNOWN";
+                }
+
+                function getRequestTransactionAmount(entry) {
+                        const request = entry.parsedObj?.request || {};
+                        const resource = request.resource || {};
+                        const amount = resource.amount?.transaction_amount ||
+                                request.amount?.transaction_amount ||
+                                resource.transaction_amount ||
+                                resource.amount;
+                        const value = Number(amount?.value);
+                        const decimalShift = Number(
+                                amount?.decimal_shift ??
+                                resource.amount?.decimal_shift ??
+                                request.amount?.decimal_shift ??
+                                0
+                        );
+
+                        if (!Number.isFinite(value) || !Number.isInteger(decimalShift) ||
+                                decimalShift < 0 || decimalShift > 12)
+                                return "";
+
+                        const majorUnits = value / (10 ** decimalShift);
+                        if (!Number.isFinite(majorUnits))
+                                return "";
+
+                        return new Intl.NumberFormat("en-US", {
+                                style: "currency",
+                                currency: "USD",
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                        }).format(majorUnits);
+                }
+
+                function formatTransactionType(type) {
+                        return type
+                                .replace(/[_-]+/g, " ")
+                                .replace(/\b\w/g, character => character.toUpperCase());
+                }
+
                 function escapeHtml(str) {
 
                         return str
                                 .replaceAll("&", "&amp;")
                                 .replaceAll("<", "&lt;")
                                 .replaceAll(">", "&gt;");
+                }
+
+                function escapeHtmlAttribute(str) {
+                        return escapeHtml(str)
+                                .replaceAll('"', "&quot;")
+                                .replaceAll("'", "&#39;");
                 }
 
                 function stripTypePrefix(title) {
@@ -1238,8 +1397,15 @@
                                                 (activeResultFilter === "invalid"
                                                         ? card.dataset.valid === "false"
                                                         : card.dataset.category === activeResultFilter);
+                                        const flowMatches =
+                                                activeFlowFilter === "all" ||
+                                                card.dataset.flowId === activeFlowFilter;
+                                        const transactionMatches =
+                                                activeTransactionFilter === "all" ||
+                                                card.dataset.transactionGroup === activeTransactionFilter;
                                         const textMatches = card.textContent.toLowerCase().includes(term.toLowerCase());
-                                        const matches = categoryMatches && textMatches;
+                                        const matches = categoryMatches && flowMatches &&
+                                                transactionMatches && textMatches;
                                         card.style.display = matches ? "" : "none";
 
                                         if (!term || !matches)
@@ -1279,6 +1445,35 @@
                                                 });
                                         });
                                 });
+                        updateWarningVisibility(document, activeTransactionFilter, activeFlowFilter);
+                }
+
+                function updateWarningVisibility(root, transactionFilter, flowFilter) {
+                        root.querySelectorAll(".missing-response-summary, .payment-idle-warning-summary")
+                                .forEach(summary => {
+                                        const items = [...summary.querySelectorAll(
+                                                ".missing-response-item, .payment-idle-warning-item"
+                                        )];
+                                        let visibleCount = 0;
+
+                                        items.forEach(item => {
+                                                const transactionMatches = transactionFilter === "all" ||
+                                                        item.dataset.transactionGroup === transactionFilter;
+                                                const flowMatches = flowFilter === "all" ||
+                                                        item.dataset.flowId === flowFilter;
+                                                const matches = transactionMatches && flowMatches;
+                                                item.style.display = matches ? "" : "none";
+                                                if (matches)
+                                                        visibleCount++;
+                                        });
+
+                                        const title = summary.querySelector(
+                                                ".missing-response-title, .payment-idle-warning-title"
+                                        );
+                                        const label = title.dataset.warningLabel;
+                                        title.textContent = `⚠ ${label} (${visibleCount})`;
+                                        summary.style.display = visibleCount ? "" : "none";
+                                });
                 }
 
                 function setResultFilter(category) {
@@ -1287,6 +1482,42 @@
                                 card.setAttribute(
                                         "aria-pressed",
                                         String(card.dataset.filter === activeResultFilter)
+                                );
+                        });
+                        filterResults();
+                }
+
+                function setFlowFilter(flowId) {
+                        activeFlowFilter = activeFlowFilter === flowId ? "all" : flowId;
+                        document.querySelectorAll(".flow-id-filters").forEach(group => {
+                                if (group.dataset.transactionGroup !== activeTransactionFilter)
+                                        return;
+                                group.querySelectorAll(".flow-id-filter").forEach(button => {
+                                button.setAttribute(
+                                        "aria-pressed",
+                                        String(button.dataset.flowFilter === activeFlowFilter)
+                                );
+                                });
+                        });
+                        filterResults();
+                }
+
+                function setTransactionFilter(groupId) {
+                        activeTransactionFilter = groupId;
+                        activeFlowFilter = "all";
+                        document.querySelectorAll(".transaction-type-filter").forEach(button => {
+                                button.setAttribute(
+                                        "aria-pressed",
+                                        String(button.dataset.transactionFilter === activeTransactionFilter)
+                                );
+                        });
+                        document.querySelectorAll(".flow-id-filters").forEach(group => {
+                                group.hidden = group.dataset.transactionGroup !== activeTransactionFilter;
+                        });
+                        document.querySelectorAll(".flow-id-filters:not([hidden]) .flow-id-filter").forEach(button => {
+                                button.setAttribute(
+                                        "aria-pressed",
+                                        String(button.dataset.flowFilter === "all")
                                 );
                         });
                         filterResults();
@@ -1584,7 +1815,71 @@
                                 });
                         });
 
-                        // Detect requests without responses
+                        const transactionGroups = [];
+                        const entriesBeforeFirstRequest = [];
+                        let currentTransactionGroup = null;
+
+                        entries.forEach(entry => {
+                                if (entry.type === "request") {
+                                        currentTransactionGroup = {
+                                                id: String(transactionGroups.length),
+                                                transactionType: getRequestTransactionType(entry),
+                                                transactionAmount: getRequestTransactionAmount(entry),
+                                                entries: [],
+                                                flowIds: new Set()
+                                        };
+                                        transactionGroups.push(currentTransactionGroup);
+                                }
+
+                                if (currentTransactionGroup) {
+                                        entry.transactionGroupId = currentTransactionGroup.id;
+                                        currentTransactionGroup.entries.push(entry);
+                                } else {
+                                        entriesBeforeFirstRequest.push(entry);
+                                }
+                        });
+
+                        if (transactionGroups.length) {
+                                entriesBeforeFirstRequest.forEach(entry => {
+                                        entry.transactionGroupId = transactionGroups[0].id;
+                                        transactionGroups[0].entries.unshift(entry);
+                                });
+                        } else {
+                                entries.forEach(entry => {
+                                        entry.transactionGroupId = "all";
+                                });
+                        }
+
+                        const transactionTypeCounts = new Map();
+                        transactionGroups.forEach(group => {
+                                const key = group.transactionType.toLowerCase();
+                                transactionTypeCounts.set(key, (transactionTypeCounts.get(key) || 0) + 1);
+                        });
+                        const transactionTypeOccurrences = new Map();
+                        transactionGroups.forEach(group => {
+                                const key = group.transactionType.toLowerCase();
+                                const occurrence = (transactionTypeOccurrences.get(key) || 0) + 1;
+                                transactionTypeOccurrences.set(key, occurrence);
+                                const label = formatTransactionType(group.transactionType);
+                                group.label = group.transactionAmount
+                                        ? `${label} - ${group.transactionAmount}`
+                                        : transactionTypeCounts.get(key) > 1
+                                                ? `${label} (${occurrence})`
+                                                : label;
+                        });
+
+                        const flowGroups = transactionGroups.length
+                                ? transactionGroups
+                                : [{ id: "all", entries, flowIds: new Set() }];
+                        flowGroups.forEach(group => {
+                                group.entries.forEach(entry => {
+                                        const flowId = getEntryFlowId(entry);
+                                        if (flowId)
+                                                group.flowIds.add(flowId);
+                                });
+                        });
+
+                        // Detect requests without responses within each transaction segment.
                         const requests = new Map();
                         const responses = new Set();
 
@@ -1594,22 +1889,23 @@
                                 if (!flowId)
                                         return;
 
+                                const key = JSON.stringify([entry.transactionGroupId, flowId]);
                                 if (entry.type === "request") {
-                                        if (!requests.has(flowId))
-                                                requests.set(flowId, []);
-                                        requests.get(flowId).push(entry);
+                                        if (!requests.has(key))
+                                                requests.set(key, { flowId, entries: [] });
+                                        requests.get(key).entries.push(entry);
                                 }
 
                                 if (entry.type === "response") {
-                                        responses.add(flowId);
+                                        responses.add(key);
                                 }
                         });
 
                         const missingResponses = [];
                         const missingResponseWarnings = [];
 
-                        requests.forEach((requestEntries, flowId) => {
-                                if (!responses.has(flowId)) {
+                        requests.forEach(({ flowId, entries: requestEntries }, key) => {
+                                if (!responses.has(key)) {
                                         missingResponses.push(flowId);
                                         requestEntries.forEach(entry => {
                                                 const title = entry.valid
@@ -1625,12 +1921,45 @@
                                                 missingResponseWarnings.push({
                                                         index: entry.index,
                                                         flowId,
+                                                        transactionGroupId: entry.transactionGroupId,
                                                         requestType,
                                                         valid: entry.valid
                                                 });
                                         });
                                 }
                         });
+
+                        const paymentAppIdleFlowIds = new Set();
+
+                        entries.forEach(entry => {
+                                const flowId = getEntryFlowId(entry);
+                                if (!flowId)
+                                        return;
+
+                                const event = entry.parsedObj?.event;
+                                const eventType = event?.resource?.event_type || event?.event_type;
+                                if (entry.type === "event" && eventType === "payment_app_idle")
+                                        paymentAppIdleFlowIds.add(JSON.stringify([
+                                                entry.transactionGroupId,
+                                                flowId
+                                        ]));
+                        });
+
+                        const missingPaymentAppIdleWarnings = flowGroups.flatMap(group =>
+                                [...group.flowIds]
+                                        .filter(flowId => !paymentAppIdleFlowIds.has(JSON.stringify([
+                                                group.id,
+                                                flowId
+                                        ])))
+                                        .map(flowId => ({
+                                                flowId,
+                                                transactionGroupId: group.id
+                                        }))
+                        );
+
+                        activeTransactionFilter = transactionGroups.length
+                                ? transactionGroups[0].id
+                                : "all";
 
                         lastParseResult = {
                                 generatedAt: new Date().toISOString(),
@@ -1646,11 +1975,53 @@
                                                 events: invalidEvent
                                         },
                                         missingResponses,
-                                        missingResponseWarnings
+                                        missingResponseWarnings,
+                                        missingPaymentAppIdleWarnings,
+                                        transactionGroups: transactionGroups.map(group => ({
+                                                id: group.id,
+                                                label: group.label,
+                                                transactionType: group.transactionType,
+                                                transactionAmount: group.transactionAmount || null,
+                                                flowIds: [...group.flowIds]
+                                        }))
                                 },
+                                transactionGroups,
                                 entries
                         };
                         activeResultFilter = "all";
+                        activeFlowFilter = "all";
+
+                        const transactionTypeFilters = transactionGroups.length > 1
+                                ? `
+<div class="transaction-type-filters" role="group" aria-label="Filter results by transaction type">
+    ${transactionGroups.map(group => `
+    <button type="button" class="transaction-type-filter" data-transaction-filter="${group.id}"
+            aria-pressed="${group.id === activeTransactionFilter}"
+            onclick="setTransactionFilter(this.dataset.transactionFilter)">${escapeHtml(group.label)}</button>`).join("")}
+</div>`
+                                : "";
+                        const flowIdFilters = flowGroups.map(group => group.flowIds.size > 1
+                                ? `
+<div class="flow-id-filters" data-transaction-group="${group.id}" role="group"
+        aria-label="Filter results by Flow ID"${group.id === activeTransactionFilter ? "" : " hidden"}>
+    <span class="flow-id-filter-label">Flow ID</span>
+    <button type="button" class="flow-id-filter" data-flow-filter="all"
+            aria-pressed="true" onclick="setFlowFilter(this.dataset.flowFilter)">All</button>
+    ${[...group.flowIds].map(flowId => `
+    <button type="button" class="flow-id-filter" data-flow-filter="${escapeHtmlAttribute(flowId)}"
+            aria-pressed="false" onclick="setFlowFilter(this.dataset.flowFilter)">${escapeHtml(flowId)}</button>`).join("")}
+</div>`
+                                : "").join("");
+                        const requestGroupsPanel = transactionTypeFilters || flowIdFilters
+? `
+<section class="request-groups-panel" aria-label="Request Groups">
+    <div class="request-groups-header">Request Groups</div>
+    <div class="request-groups-content">
+        ${transactionTypeFilters}
+        ${flowIdFilters}
+    </div>
+</section>`
+: "";
 
                         const invalidSummary = `
 <button type="button" class="invalid-summary-card" data-filter="invalid" data-count="${invalidTotal}"
@@ -1671,9 +2042,10 @@
                         const missingResponseSummary = missingResponseWarnings.length
                                 ? `
 <div class="missing-response-summary" role="alert">
-    <div class="missing-response-title">⚠ Missing Responses (${missingResponseWarnings.length})</div>
+    <div class="missing-response-title" data-warning-label="Missing Responses">⚠ Missing Responses (${missingResponseWarnings.length})</div>
     ${missingResponseWarnings.map(warning => `
-    <div class="missing-response-item">
+    <div class="missing-response-item" data-flow-id="${escapeHtmlAttribute(String(warning.flowId))}"
+            data-transaction-group="${escapeHtmlAttribute(warning.transactionGroupId)}">
         <strong>REQUEST ${escapeHtml(warning.requestType || "UNKNOWN")}${warning.valid ? "" : " (INVALID JSON)"}</strong><br>
         No matching RESPONSE found<br>
         Flow ID: ${escapeHtml(String(warning.flowId))}
@@ -1681,7 +2053,22 @@
 </div>`
                                 : "";
 
+                        const paymentIdleWarningSummary = missingPaymentAppIdleWarnings.length
+                                ? `
+<div class="payment-idle-warning-summary" role="alert">
+    <div class="payment-idle-warning-title" data-warning-label="Missing payment_app_idle Events">⚠ Missing payment_app_idle Events (${missingPaymentAppIdleWarnings.length})</div>
+    ${missingPaymentAppIdleWarnings.map(warning => `
+    <div class="payment-idle-warning-item" data-flow-id="${escapeHtmlAttribute(String(warning.flowId))}"
+            data-transaction-group="${escapeHtmlAttribute(warning.transactionGroupId)}">
+        No payment_app_idle event found for Flow ID: ${escapeHtml(String(warning.flowId))}
+    </div>`).join("")}
+</div>`
+                                : "";
+
                         let html = `
+<section class="request-groups-panel payload-overview-panel" aria-label="Payload Overview">
+    <div class="request-groups-header">Payload Overview</div>
+    <div class="payload-overview-content">
 <div class="stats">
     <button type="button" class="stat-card" data-filter="all" data-count="${jsonBlocks.length}"
             aria-pressed="true" onclick="setResultFilter('all')">
@@ -1709,8 +2096,19 @@
 
     ${invalidTotal > 0 ? invalidSummary : ""}
 </div>
+    </div>
+</section>
+${requestGroupsPanel}
 ${missingResponseSummary}
+${paymentIdleWarningSummary}
 `;
+
+                        if (entries.length > 0) {
+                                html += `
+<section class="request-groups-panel parsed-payloads-panel" aria-label="Parsed Payloads">
+    <div class="request-groups-header">Parsed Payloads</div>
+    <div class="parsed-payloads-content">`;
+                        }
 
                         // RENDER USING ALREADY PARSED DATA
                         entries.forEach(entry => {
@@ -1739,13 +2137,16 @@ ${missingResponseSummary}
                                         }
 
                                         const displayTitle = stripTypePrefix(title);
+                                        const flowId = getEntryFlowId(entry);
                                         const metadata = [
-                                                getEntryFlowId(entry) && `Flow ID: ${getEntryFlowId(entry)}`,
+                                                flowId && `Flow ID: ${flowId}`,
                                                 entry.timestamp && `Time: ${entry.timestamp}`
                                         ].filter(Boolean).join(" · ");
 
                                         html += `
-<div class="json-block valid" data-category="${entry.type}" data-valid="true">
+<div class="json-block valid" data-category="${entry.type}" data-valid="true"
+        data-flow-id="${escapeHtmlAttribute(flowId)}"
+        data-transaction-group="${escapeHtmlAttribute(entry.transactionGroupId)}">
     <details class="json-details">
 
         <summary>
@@ -1789,13 +2190,16 @@ ${escapeHtml(JSON.stringify(parsedObj, null, 2))}
                                                 badgeClass = "response-badge";
                                                 badgeText = "RESPONSE";
                                         }
+                                        const flowId = getEntryFlowId(entry);
                                         const metadata = [
-                                                getEntryFlowId(entry) && `Flow ID: ${getEntryFlowId(entry)}`,
+                                                flowId && `Flow ID: ${flowId}`,
                                                 entry.timestamp && `Time: ${entry.timestamp}`
                                         ].filter(Boolean).join(" · ");
 
                                         html += `
-<div class="json-block invalid" data-category="${entry.type}" data-valid="false">
+<div class="json-block invalid" data-category="${entry.type}" data-valid="false"
+        data-flow-id="${escapeHtmlAttribute(flowId)}"
+        data-transaction-group="${escapeHtmlAttribute(entry.transactionGroupId)}">
     <details>
 
         <summary>
@@ -1820,6 +2224,12 @@ ${escapeHtml(JSON.stringify(parsedObj, null, 2))}
                                 }
                         });
 
+                        if (entries.length > 0) {
+                                html += `
+    </div>
+</section>`;
+                        }
+
                         // ONE DOM UPDATE
                         container.innerHTML = html;
                         setResultControlsEnabled(entries.length > 0);
@@ -1833,6 +2243,7 @@ ${escapeHtml(JSON.stringify(parsedObj, null, 2))}
                         const report = {
                                 generatedAt: lastParseResult.generatedAt,
                                 summary: lastParseResult.summary,
+                                transactionGroups: lastParseResult.summary.transactionGroups,
                                 entries: lastParseResult.entries.map(entry => ({
                                         index: entry.index,
                                         type: entry.type,
@@ -1840,6 +2251,10 @@ ${escapeHtml(JSON.stringify(parsedObj, null, 2))}
                                         raw: entry.jsonText,
                                         timestamp: entry.timestamp,
                                         flowId: getEntryFlowId(entry) || null,
+                                        transactionGroupId: entry.transactionGroupId,
+                                        transactionGroup: lastParseResult.transactionGroups.find(
+                                                group => group.id === entry.transactionGroupId
+                                        )?.label || null,
                                         parsed: entry.parsedObj,
                                         missingResponse: Boolean(entry.missingResponse)
                                 }))
@@ -1859,9 +2274,15 @@ ${escapeHtml(JSON.stringify(parsedObj, null, 2))}
                         const generatedAt = lastParseResult.generatedAt;
                         const reportResults = document.getElementById("results").cloneNode(true);
                         const reportEntries = lastParseResult.entries;
+                        const initialTransactionFilter = lastParseResult.transactionGroups.length
+                                ? lastParseResult.transactionGroups[0].id
+                                : "all";
 
                         reportResults.querySelectorAll(".json-block").forEach((block, index) => {
-                                block.style.display = "";
+                                block.style.display = initialTransactionFilter === "all" ||
+                                        block.dataset.transactionGroup === initialTransactionFilter
+                                        ? ""
+                                        : "none";
                                 const entry = reportEntries[index];
 
                                 if (!entry.valid) {
@@ -1879,6 +2300,19 @@ ${escapeHtml(JSON.stringify(parsedObj, null, 2))}
                         reportResults.querySelectorAll(".stat-card, .invalid-summary-card").forEach(card => {
                                 card.setAttribute("aria-pressed", String(card.dataset.filter === "all"));
                         });
+                        reportResults.querySelectorAll(".transaction-type-filter").forEach(button => {
+                                button.setAttribute(
+                                        "aria-pressed",
+                                        String(button.dataset.transactionFilter === initialTransactionFilter)
+                                );
+                        });
+                        reportResults.querySelectorAll(".flow-id-filter").forEach(button => {
+                                button.setAttribute("aria-pressed", String(button.dataset.flowFilter === "all"));
+                        });
+                        reportResults.querySelectorAll(".flow-id-filters").forEach(group => {
+                                group.hidden = group.dataset.transactionGroup !== initialTransactionFilter;
+                        });
+                        updateWarningVisibility(reportResults, initialTransactionFilter, "all");
                         reportResults.querySelectorAll("mark.search-highlight").forEach(mark => {
                                 mark.replaceWith(document.createTextNode(mark.textContent));
                         });
@@ -1899,21 +2333,98 @@ body {
                         const reportHtmlEndTag = "<" + "/html>";
                         const reportScriptEndTag = "<" + "/script>";
                         const reportFilterScript = `
-function setResultFilter(category) {
-    var cards = document.querySelectorAll("#report-results .stat-card, #report-results .invalid-summary-card");
+var activeReportCategoryFilter = "all";
+var activeReportFlowFilter = "all";
+var activeReportTransactionFilter = "${initialTransactionFilter}";
+
+function updateReportWarningVisibility() {
+    var summaries = document.querySelectorAll(
+        "#report-results .missing-response-summary, #report-results .payment-idle-warning-summary"
+    );
+
+    summaries.forEach(function (summary) {
+        var items = summary.querySelectorAll(
+            ".missing-response-item, .payment-idle-warning-item"
+        );
+        var visibleCount = 0;
+
+        items.forEach(function (item) {
+            var transactionMatches = activeReportTransactionFilter === "all" ||
+                item.dataset.transactionGroup === activeReportTransactionFilter;
+            var flowMatches = activeReportFlowFilter === "all" ||
+                item.dataset.flowId === activeReportFlowFilter;
+            var matches = transactionMatches && flowMatches;
+            item.style.display = matches ? "" : "none";
+            if (matches)
+                visibleCount++;
+        });
+
+        var title = summary.querySelector(
+            ".missing-response-title, .payment-idle-warning-title"
+        );
+        title.textContent = "⚠ " + title.dataset.warningLabel + " (" + visibleCount + ")";
+        summary.style.display = visibleCount ? "" : "none";
+    });
+}
+
+function applyReportFilters() {
     var results = document.querySelectorAll("#report-results .json-block");
 
-    cards.forEach(function (card) {
-        card.setAttribute("aria-pressed", String(card.dataset.filter === category));
-    });
-
     results.forEach(function (result) {
-        var matches = category === "all" ||
-            (category === "invalid"
+        var categoryMatches = activeReportCategoryFilter === "all" ||
+            (activeReportCategoryFilter === "invalid"
                 ? result.dataset.valid === "false"
-                : result.dataset.category === category);
-        result.style.display = matches ? "" : "none";
+                : result.dataset.category === activeReportCategoryFilter);
+        var flowMatches = activeReportFlowFilter === "all" ||
+            result.dataset.flowId === activeReportFlowFilter;
+        var transactionMatches = activeReportTransactionFilter === "all" ||
+            result.dataset.transactionGroup === activeReportTransactionFilter;
+        result.style.display = categoryMatches && flowMatches && transactionMatches ? "" : "none";
     });
+    updateReportWarningVisibility();
+}
+
+function setResultFilter(category) {
+    var cards = document.querySelectorAll("#report-results .stat-card, #report-results .invalid-summary-card");
+    activeReportCategoryFilter = activeReportCategoryFilter === category ? "all" : category;
+
+    cards.forEach(function (card) {
+        card.setAttribute("aria-pressed", String(card.dataset.filter === activeReportCategoryFilter));
+    });
+    applyReportFilters();
+}
+
+function setFlowFilter(flowId) {
+    var buttons = [];
+    document.querySelectorAll("#report-results .flow-id-filters").forEach(function (group) {
+        if (group.dataset.transactionGroup === activeReportTransactionFilter)
+            buttons = group.querySelectorAll(".flow-id-filter");
+    });
+    activeReportFlowFilter = activeReportFlowFilter === flowId ? "all" : flowId;
+
+    buttons.forEach(function (button) {
+        button.setAttribute("aria-pressed", String(button.dataset.flowFilter === activeReportFlowFilter));
+    });
+    applyReportFilters();
+}
+
+function setTransactionFilter(groupId) {
+    var buttons = document.querySelectorAll("#report-results .transaction-type-filter");
+    activeReportTransactionFilter = groupId;
+    activeReportFlowFilter = "all";
+
+    buttons.forEach(function (button) {
+        button.setAttribute("aria-pressed", String(button.dataset.transactionFilter === groupId));
+    });
+    document.querySelectorAll("#report-results .flow-id-filters").forEach(function (group) {
+        group.hidden = group.dataset.transactionGroup !== groupId;
+        if (!group.hidden) {
+            group.querySelectorAll(".flow-id-filter").forEach(function (button) {
+                button.setAttribute("aria-pressed", String(button.dataset.flowFilter === "all"));
+            });
+        }
+    });
+    applyReportFilters();
 }
 `;
 
