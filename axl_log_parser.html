@@ -26,7 +26,7 @@
 
                         --text: #e8eef9;
                         --muted: #7d8ca5;
-                        --border: rgba(0, 212, 255, .14);
+                        --border: rgba(0, 212, 255, .26);
 
                         --request: #00d4ff;
                         --response: #28ff88;
@@ -46,20 +46,41 @@
                         color: var(--text);
                         font-family: 'JetBrains Mono', monospace;
                         background-image:
-                                linear-gradient(rgba(0, 212, 255, .04) 1px, transparent 1px),
-                                linear-gradient(90deg, rgba(0, 212, 255, .04) 1px, transparent 1px);
+                                linear-gradient(rgba(0, 212, 255, .075) 1px, transparent 1px),
+                                linear-gradient(90deg, rgba(0, 212, 255, .075) 1px, transparent 1px);
                         background-size: 40px 40px;
                 }
 
                 .header {
                         height: 80px;
-                        display: flex;
+                        display: grid;
+                        grid-template-columns: 1fr auto 1fr;
                         align-items: center;
-                        justify-content: space-between;
                         padding: 0 30px;
                         border-bottom: 1px solid var(--border);
                         background: rgba(7, 11, 20, .85);
                         backdrop-filter: blur(10px);
+                }
+
+                .back-button {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-self: start;
+                        gap: 8px;
+                        background: none;
+                        border: none;
+                        padding: 0;
+                        color: var(--accent);
+                        font: inherit;
+                        font-size: 14px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all .2s ease;
+                }
+
+                .back-button:hover {
+                        opacity: .75;
+                        transform: translateX(-3px);
                 }
 
                 .brand h1 {
@@ -68,12 +89,17 @@
                         letter-spacing: 3px;
                 }
 
+                .brand {
+                        text-align: center;
+                }
+
                 .brand p {
                         color: var(--muted);
                         font-size: 12px;
                 }
 
                 .header-right {
+                        justify-self: end;
                         text-align: right;
                 }
 
@@ -91,10 +117,98 @@
                         margin-top: 0;
                 }
 
+                @media (max-width: 650px) {
+                        .header {
+                                grid-template-columns: auto 1fr auto;
+                                gap: 10px;
+                                padding: 0 14px;
+                        }
+
+                        .brand h1 {
+                                font-size: 18px;
+                                letter-spacing: 2px;
+                        }
+
+                        .brand p,
+                        .header-right p {
+                                font-size: 9px;
+                        }
+
+                        .back-button {
+                                font-size: 12px;
+                        }
+                }
+
                 .container {
                         max-width: 1700px;
                         margin: auto;
                         padding: 25px;
+                }
+
+                .logcat-filter {
+                        width: fit-content;
+                        max-width: 100%;
+                        margin: 0 auto 24px;
+                        text-align: center;
+                }
+
+                .logcat-filter p {
+                        margin-bottom: 10px;
+                        color: var(--text);
+                        font-size: 13px;
+                }
+
+                .logcat-filter-row {
+                        display: flex;
+                        align-items: stretch;
+                        width: fit-content;
+                        max-width: 100%;
+                        margin: 0 auto;
+                        background: rgba(7, 11, 20, .9);
+                        border: 1px solid var(--border);
+                }
+
+                .logcat-filter-code {
+                        flex: 0 1 auto;
+                        min-width: 0;
+                        padding: 12px 16px;
+                        color: var(--accent);
+                        font-size: 13px;
+                        line-height: 1.5;
+                        text-align: left;
+                        white-space: nowrap;
+                        overflow-x: auto;
+                        user-select: all;
+                }
+
+                .logcat-copy-button {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        flex: 0 0 48px;
+                        border: 0;
+                        border-left: 1px solid var(--accent);
+                        padding: 10px;
+                }
+
+                .logcat-copy-button svg {
+                        width: 18px;
+                        height: 18px;
+                }
+
+                @media (max-width: 600px) {
+                        .logcat-filter p {
+                                font-size: 11px;
+                        }
+
+                        .logcat-filter-code {
+                                padding: 10px;
+                                font-size: 11px;
+                        }
+
+                        .logcat-filter-row {
+                                width: 100%;
+                        }
                 }
 
                 textarea {
@@ -109,7 +223,7 @@
                         font-family: 'JetBrains Mono', monospace;
                         font-size: 13px;
                         line-height: 1.6;
-                        box-shadow: inset 0 0 18px rgba(0, 212, 255, .04);
+                        box-shadow: inset 0 0 18px rgba(0, 212, 255, .06);
                 }
 
                 textarea:focus {
@@ -139,6 +253,17 @@
                         box-shadow: 0 0 12px rgba(0, 212, 255, .15);
                 }
 
+                button:disabled {
+                        opacity: .4;
+                        cursor: not-allowed;
+                        box-shadow: none;
+                }
+
+                button:disabled:hover {
+                        background: transparent;
+                        box-shadow: none;
+                }
+
                 .search-box {
                         flex: 1;
                         min-width: 250px;
@@ -147,6 +272,71 @@
                         border: 1px solid var(--border);
                         padding: 10px 14px;
                         font-family: inherit;
+                }
+
+                .search-box:disabled {
+                        opacity: .45;
+                        cursor: not-allowed;
+                }
+
+                .search-wrapper {
+                        position: relative;
+                        flex: 1;
+                        min-width: 250px;
+                }
+
+                .search-wrapper .search-box {
+                        width: 100%;
+                }
+
+                .search-suggestions {
+                        position: absolute;
+                        top: calc(100% + 4px);
+                        left: 0;
+                        right: 0;
+                        z-index: 100;
+                        display: none;
+                        max-height: 240px;
+                        overflow-y: auto;
+                        background: var(--panel);
+                        border: 1px solid var(--border);
+                        box-shadow: 0 8px 20px rgba(0, 0, 0, .4);
+                }
+
+                .search-suggestions.open {
+                        display: block;
+                }
+
+                .search-suggestion {
+                        display: block;
+                        width: 100%;
+                        padding: 9px 12px;
+                        border: 0;
+                        border-bottom: 1px solid var(--border);
+                        color: var(--text);
+                        text-align: left;
+                        font: inherit;
+                        font-size: 12px;
+                }
+
+                .search-suggestion-kind {
+                        display: inline-block;
+                        min-width: 48px;
+                        margin-right: 10px;
+                        color: var(--muted);
+                        font-size: 10px;
+                        letter-spacing: .5px;
+                        text-transform: uppercase;
+                }
+
+                .search-suggestion:last-child {
+                        border-bottom: 0;
+                }
+
+                .search-suggestion:hover,
+                .search-suggestion.active {
+                        background: rgba(0, 212, 255, .1);
+                        box-shadow: none;
                 }
 
                 .stats {
@@ -163,6 +353,50 @@
                         padding: 18px;
                         position: relative;
                         min-height: 110px;
+                }
+
+                button.stat-card,
+                button.invalid-summary-card {
+                        display: block;
+                        width: 100%;
+                        color: var(--text);
+                        font: inherit;
+                        text-align: left;
+                        transition: transform .16s ease, border-color .16s ease, background .16s ease;
+                }
+
+                button.stat-card {
+                        cursor: pointer;
+                }
+
+                button.stat-card:hover,
+                button.invalid-summary-card:hover {
+                        transform: translateY(-2px);
+                        border-color: var(--accent);
+                        background: var(--panel2);
+                        box-shadow: 0 5px 16px rgba(0, 212, 255, .1);
+                }
+
+                button.stat-card:active,
+                button.invalid-summary-card:active {
+                        transform: translateY(0) scale(.99);
+                }
+
+                button.stat-card:focus-visible,
+                button.invalid-summary-card:focus-visible {
+                        outline: 2px solid var(--accent);
+                        outline-offset: 2px;
+                }
+
+                button.stat-card[aria-pressed="true"],
+                button.invalid-summary-card[aria-pressed="true"] {
+                        border-color: var(--accent);
+                        background: var(--panel2);
+                        box-shadow: 0 0 0 1px rgba(0, 212, 255, .2);
+                }
+
+                button.invalid-summary-card {
+                        cursor: pointer;
                 }
 
                 .stat-card::before {
@@ -262,6 +496,12 @@
                         color: var(--muted);
                         font-size: 11px;
                         line-height: 1.4;
+                }
+
+                mark.search-highlight {
+                        background: var(--warning);
+                        color: var(--bg);
+                        padding: 0 1px;
                 }
 
                 .badge {
@@ -431,6 +671,16 @@
 <body>
 
         <div class="header">
+                <button class="back-button" type="button" onclick="history.back()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                                aria-hidden="true">
+                                <path d="M19 12H5" />
+                                <path d="M12 19L5 12L12 5" />
+                        </svg>
+                        <span>Back</span>
+                </button>
+
                 <div class="brand">
                         <h1>AXL LOG PARSER</h1>
                         <p>Parse request, response and event payloads from AXL logs</p>
@@ -444,7 +694,22 @@
 
         <div class="container">
 
-                <textarea id="input" placeholder="Paste logs here..."></textarea>
+                <section class="logcat-filter" aria-label="Android Studio Logcat filter">
+                        <p>Use this filter in Android Studio Logcat to capture AXL requests and responses.</p>
+                        <div class="logcat-filter-row">
+                                <code id="logcatFilterText" class="logcat-filter-code">"IngenicoAxL:request:" | "IngenicoAxL:response:"</code>
+                                <button class="logcat-copy-button" type="button" onclick="copyLogcatFilter(this)"
+                                        aria-label="Copy Logcat filter" title="Copy filter">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <rect x="8" y="8" width="12" height="12" rx="1.5" />
+                                                <path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8" />
+                                        </svg>
+                                </button>
+                        </div>
+                </section>
+
+                <textarea id="input" placeholder="Paste logs here..." oninput="clearParsedResults()"></textarea>
 
                 <div class="toolbar">
 
@@ -452,11 +717,11 @@
                                 Parse Logs
                         </button>
 
-                        <button class="secondary" onclick="expandAll()">
+                        <button class="secondary" id="expandAllButton" onclick="expandAll()" disabled>
                                 Expand All
                         </button>
 
-                        <button class="secondary" onclick="collapseAll()">
+                        <button class="secondary" id="collapseAllButton" onclick="collapseAll()" disabled>
                                 Collapse All
                         </button>
 
@@ -468,7 +733,13 @@
                                 Export JSON
                         </button>
 
-                        <input id="searchInput" class="search-box" placeholder="Search..." onkeyup="filterResults()">
+                        <div class="search-wrapper">
+                                <input id="searchInput" class="search-box" placeholder="Search..." autocomplete="off" disabled
+                                        role="combobox" aria-autocomplete="list" aria-expanded="false"
+                                        aria-controls="searchSuggestions"
+                                        oninput="handleSearchInput()" onkeydown="handleSearchKeydown(event)">
+                                <div id="searchSuggestions" class="search-suggestions" role="listbox"></div>
+                        </div>
                 </div>
 
                 <div id="results"></div>
@@ -478,6 +749,33 @@
         <script>
 
                 let lastParseResult = null;
+                let activeResultFilter = "all";
+
+                function setResultControlsEnabled(enabled) {
+                        document.getElementById("expandAllButton").disabled = !enabled;
+                        document.getElementById("collapseAllButton").disabled = !enabled;
+                        document.getElementById("exportHtmlButton").disabled = !enabled;
+                        document.getElementById("exportJsonButton").disabled = !enabled;
+                        document.getElementById("searchInput").disabled = !enabled;
+                        document.querySelectorAll(".stat-card, .invalid-summary-card").forEach(card => {
+                                card.disabled = !enabled || Number(card.dataset.count) === 0;
+                        });
+                }
+
+                function clearParsedResults() {
+                        lastParseResult = null;
+                        activeResultFilter = "all";
+                        document.getElementById("results").replaceChildren();
+                        setResultControlsEnabled(false);
+
+                        const searchInput = document.getElementById("searchInput");
+                        searchInput.value = "";
+                        searchInput.setAttribute("aria-expanded", "false");
+                        searchInput.removeAttribute("aria-activedescendant");
+                        document.getElementById("searchSuggestions").replaceChildren();
+                        document.getElementById("searchSuggestions").classList.remove("open");
+                        activeSuggestionIndex = -1;
+                }
 
                 function countBraces(text) {
 
@@ -758,26 +1056,218 @@
                                 .forEach(d => d.open = false);
                 }
 
+                let activeSuggestionIndex = -1;
+
+                function getSearchSuggestions() {
+                        const keys = new Set();
+                        const values = new Set();
+
+                        function visit(value) {
+                                if (Array.isArray(value)) {
+                                        value.forEach(visit);
+                                        return;
+                                }
+
+                                if (typeof value === "string") {
+                                        const normalized = value.trim();
+                                        if (normalized && normalized.length <= 100)
+                                                values.add(normalized);
+                                        return;
+                                }
+
+                                if (typeof value === "number" || typeof value === "boolean") {
+                                        values.add(String(value));
+                                        return;
+                                }
+
+                                if (value && typeof value === "object") {
+                                        Object.entries(value).forEach(([key, child]) => {
+                                                keys.add(key);
+                                                visit(child);
+                                        });
+                                }
+                        }
+
+                        lastParseResult?.entries.forEach(entry => {
+                                if (entry.valid)
+                                        visit(entry.parsedObj);
+                        });
+
+                        return [
+                                ...[...keys].map(value => ({ value, kind: "Key" })),
+                                ...[...values].map(value => ({ value, kind: "Value" }))
+                        ].sort((a, b) =>
+                                a.value.localeCompare(b.value) || a.kind.localeCompare(b.kind)
+                        );
+                }
+
+                function handleSearchInput() {
+                        activeSuggestionIndex = -1;
+                        filterResults();
+                        updateSearchSuggestions();
+                }
+
+                function updateSearchSuggestions() {
+                        const input = document.getElementById("searchInput");
+                        const list = document.getElementById("searchSuggestions");
+                        const query = input.value.trim().toLowerCase();
+
+                        list.replaceChildren();
+
+                        if (!query) {
+                                list.classList.remove("open");
+                                input.setAttribute("aria-expanded", "false");
+                                return;
+                        }
+
+                        const suggestions = getSearchSuggestions()
+                                .filter(suggestion => suggestion.value.toLowerCase().includes(query))
+                                .slice(0, 8);
+
+                        suggestions.forEach((suggestion, index) => {
+                                const option = document.createElement("button");
+                                option.type = "button";
+                                option.className = "search-suggestion";
+                                option.id = `search-suggestion-${index}`;
+                                option.setAttribute("role", "option");
+                                option.setAttribute("aria-selected", "false");
+                                option.dataset.searchValue = suggestion.value;
+                                const kind = document.createElement("span");
+                                kind.className = "search-suggestion-kind";
+                                kind.textContent = suggestion.kind;
+                                const value = document.createElement("span");
+                                value.textContent = suggestion.value;
+                                option.append(kind, value);
+                                option.addEventListener("mousedown", event => event.preventDefault());
+                                option.addEventListener("click", () => selectSearchSuggestion(suggestion.value));
+                                list.appendChild(option);
+                        });
+
+                        const isOpen = suggestions.length > 0;
+                        list.classList.toggle("open", isOpen);
+                        input.setAttribute("aria-expanded", String(isOpen));
+                }
+
+                function selectSearchSuggestion(key) {
+                        const input = document.getElementById("searchInput");
+                        input.value = key;
+                        document.getElementById("searchSuggestions").classList.remove("open");
+                        input.setAttribute("aria-expanded", "false");
+                        activeSuggestionIndex = -1;
+                        filterResults();
+                        input.focus();
+                }
+
+                function handleSearchKeydown(event) {
+                        const input = event.currentTarget;
+                        const list = document.getElementById("searchSuggestions");
+                        const options = [...list.querySelectorAll(".search-suggestion")];
+
+                        if (event.key === "Escape") {
+                                list.classList.remove("open");
+                                input.setAttribute("aria-expanded", "false");
+                                activeSuggestionIndex = -1;
+                                return;
+                        }
+
+                        if (!options.length || !list.classList.contains("open"))
+                                return;
+
+                        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+                                event.preventDefault();
+                                const direction = event.key === "ArrowDown" ? 1 : -1;
+                                activeSuggestionIndex =
+                                        (activeSuggestionIndex + direction + options.length) % options.length;
+                                options.forEach((option, index) => {
+                                        const active = index === activeSuggestionIndex;
+                                        option.classList.toggle("active", active);
+                                        option.setAttribute("aria-selected", String(active));
+                                });
+                                input.setAttribute(
+                                        "aria-activedescendant",
+                                        options[activeSuggestionIndex].id
+                                );
+                                return;
+                        }
+
+                        if (event.key === "Enter" && activeSuggestionIndex >= 0) {
+                                event.preventDefault();
+                                selectSearchSuggestion(options[activeSuggestionIndex].dataset.searchValue || "");
+                        }
+                }
+
                 function filterResults() {
 
-                        const term =
-                                document
-                                        .getElementById("searchInput")
-                                        .value
-                                        .toLowerCase();
+                        const term = document
+                                .getElementById("searchInput")
+                                .value
+                                .trim();
 
                         document
                                 .querySelectorAll(".json-block")
                                 .forEach(card => {
+                                        card.querySelectorAll("mark.search-highlight").forEach(mark => {
+                                                mark.replaceWith(document.createTextNode(mark.textContent));
+                                        });
+                                        card.normalize();
 
-                                        const text =
-                                                card.innerText.toLowerCase();
+                                        const categoryMatches =
+                                                activeResultFilter === "all" ||
+                                                (activeResultFilter === "invalid"
+                                                        ? card.dataset.valid === "false"
+                                                        : card.dataset.category === activeResultFilter);
+                                        const textMatches = card.textContent.toLowerCase().includes(term.toLowerCase());
+                                        const matches = categoryMatches && textMatches;
+                                        card.style.display = matches ? "" : "none";
 
-                                        card.style.display =
-                                                text.includes(term)
-                                                        ? ""
-                                                        : "none";
+                                        if (!term || !matches)
+                                                return;
+
+                                        const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+                                        const matcher = new RegExp(escapedTerm, "gi");
+                                        card.querySelectorAll("pre").forEach(result => {
+                                                const walker = document.createTreeWalker(result, NodeFilter.SHOW_TEXT);
+                                                const textNodes = [];
+
+                                                while (walker.nextNode())
+                                                        textNodes.push(walker.currentNode);
+
+                                                textNodes.forEach(node => {
+                                                        const text = node.nodeValue;
+                                                        matcher.lastIndex = 0;
+                                                        if (!matcher.test(text))
+                                                                return;
+
+                                                        matcher.lastIndex = 0;
+                                                        const fragment = document.createDocumentFragment();
+                                                        let lastIndex = 0;
+
+                                                        text.replace(matcher, (match, offset) => {
+                                                                fragment.appendChild(document.createTextNode(text.slice(lastIndex, offset)));
+                                                                const highlight = document.createElement("mark");
+                                                                highlight.className = "search-highlight";
+                                                                highlight.textContent = match;
+                                                                fragment.appendChild(highlight);
+                                                                lastIndex = offset + match.length;
+                                                                return match;
+                                                        });
+
+                                                        fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+                                                        node.replaceWith(fragment);
+                                                });
+                                        });
                                 });
+                }
+
+                function setResultFilter(category) {
+                        activeResultFilter = activeResultFilter === category ? "all" : category;
+                        document.querySelectorAll(".stat-card, .invalid-summary-card").forEach(card => {
+                                card.setAttribute(
+                                        "aria-pressed",
+                                        String(card.dataset.filter === activeResultFilter)
+                                );
+                        });
+                        filterResults();
                 }
                 /*
                                 function parseLogs() {
@@ -1138,11 +1628,11 @@
                                 },
                                 entries
                         };
-                        document.getElementById("exportHtmlButton").disabled = false;
-                        document.getElementById("exportJsonButton").disabled = false;
+                        activeResultFilter = "all";
 
                         const invalidSummary = `
-<div class="invalid-summary-card">
+<button type="button" class="invalid-summary-card" data-filter="invalid" data-count="${invalidTotal}"
+        aria-pressed="false" onclick="setResultFilter('invalid')">
   <div class="invalid-summary-header">
     <div class="invalid-summary-left">
       <div class="invalid-summary-total">${invalidTotal}</div>
@@ -1154,7 +1644,7 @@
       <span class="invalid-event">Events: ${invalidEvent}</span>
     </div>
   </div>
-</div>`;
+</button>`;
 
                         const missingResponseSummary = missingResponseWarnings.length
                                 ? `
@@ -1171,25 +1661,29 @@
 
                         let html = `
 <div class="stats">
-    <div class="stat-card">
+    <button type="button" class="stat-card" data-filter="all" data-count="${jsonBlocks.length}"
+            aria-pressed="true" onclick="setResultFilter('all')">
         <div class="stat-number">${jsonBlocks.length}</div>
         <div class="stat-label">Total Payloads</div>
-    </div>
+    </button>
 
-    <div class="stat-card">
+    <button type="button" class="stat-card" data-filter="request" data-count="${requestCount}"
+            aria-pressed="false" onclick="setResultFilter('request')">
         <div class="stat-number">${requestCount}</div>
         <div class="stat-label">Requests</div>
-    </div>
+    </button>
 
-    <div class="stat-card">
+    <button type="button" class="stat-card" data-filter="response" data-count="${responseCount}"
+            aria-pressed="false" onclick="setResultFilter('response')">
         <div class="stat-number">${responseCount}</div>
         <div class="stat-label">Responses</div>
-    </div>
+    </button>
 
-    <div class="stat-card">
+    <button type="button" class="stat-card" data-filter="event" data-count="${eventCount}"
+            aria-pressed="false" onclick="setResultFilter('event')">
         <div class="stat-number">${eventCount}</div>
         <div class="stat-label">Events</div>
-    </div>
+    </button>
 
     ${invalidTotal > 0 ? invalidSummary : ""}
 </div>
@@ -1229,7 +1723,7 @@ ${missingResponseSummary}
                                         ].filter(Boolean).join(" · ");
 
                                         html += `
-<div class="json-block valid">
+<div class="json-block valid" data-category="${entry.type}" data-valid="true">
     <details class="json-details">
 
         <summary>
@@ -1279,7 +1773,7 @@ ${escapeHtml(JSON.stringify(parsedObj, null, 2))}
                                         ].filter(Boolean).join(" · ");
 
                                         html += `
-<div class="json-block invalid">
+<div class="json-block invalid" data-category="${entry.type}" data-valid="false">
     <details>
 
         <summary>
@@ -1306,6 +1800,8 @@ ${escapeHtml(JSON.stringify(parsedObj, null, 2))}
 
                         // ONE DOM UPDATE
                         container.innerHTML = html;
+                        setResultControlsEnabled(entries.length > 0);
+                        handleSearchInput();
                 }
 
                 function exportJsonReport() {
@@ -1358,6 +1854,12 @@ ${escapeHtml(JSON.stringify(parsedObj, null, 2))}
                         reportResults.querySelectorAll(".copy-btn").forEach(button => {
                                 button.remove();
                         });
+                        reportResults.querySelectorAll(".stat-card, .invalid-summary-card").forEach(card => {
+                                card.setAttribute("aria-pressed", String(card.dataset.filter === "all"));
+                        });
+                        reportResults.querySelectorAll("mark.search-highlight").forEach(mark => {
+                                mark.replaceWith(document.createTextNode(mark.textContent));
+                        });
 
                         const css = `${document.querySelector("style").textContent}
 
@@ -1373,6 +1875,25 @@ body {
 
                         const reportBodyEndTag = "<" + "/body>";
                         const reportHtmlEndTag = "<" + "/html>";
+                        const reportScriptEndTag = "<" + "/script>";
+                        const reportFilterScript = `
+function setResultFilter(category) {
+    var cards = document.querySelectorAll("#report-results .stat-card, #report-results .invalid-summary-card");
+    var results = document.querySelectorAll("#report-results .json-block");
+
+    cards.forEach(function (card) {
+        card.setAttribute("aria-pressed", String(card.dataset.filter === category));
+    });
+
+    results.forEach(function (result) {
+        var matches = category === "all" ||
+            (category === "invalid"
+                ? result.dataset.valid === "false"
+                : result.dataset.category === category);
+        result.style.display = matches ? "" : "none";
+    });
+}
+`;
 
 const reportHtml = `
 <html>
@@ -1408,6 +1929,8 @@ ${reportResults.innerHTML}
         </div>
     </div>
 
+<script>
+${reportFilterScript}${reportScriptEndTag}
 ${reportBodyEndTag}
 ${reportHtmlEndTag}
 `;
@@ -1426,6 +1949,7 @@ ${reportHtmlEndTag}
                         document.body.appendChild(link);
                         link.click();
                         link.remove();
+                        showToast(extension === "html" ? "HTML report download started" : "JSON export download started");
                         setTimeout(() => URL.revokeObjectURL(url), 1000);
                 }
 
@@ -1587,6 +2111,47 @@ ${reportHtmlEndTag}
                                 setTimeout(() => {
                                         toast.classList.remove("show");
                                 }, 2000);
+                        }
+
+                        function copyLogcatFilter(button) {
+                                const filter = document.getElementById("logcatFilterText").textContent;
+                                const copyWithFallback = () => {
+                                        const temporaryInput = document.createElement("textarea");
+                                        temporaryInput.value = filter;
+                                        temporaryInput.setAttribute("readonly", "");
+                                        temporaryInput.style.position = "fixed";
+                                        temporaryInput.style.opacity = "0";
+                                        document.body.appendChild(temporaryInput);
+                                        temporaryInput.select();
+                                        const copied = document.execCommand("copy");
+                                        temporaryInput.remove();
+                                        return copied;
+                                };
+
+                                const confirmCopied = () => {
+                                        showToast("Logcat filter copied to clipboard");
+                                        button.title = "Copied";
+                                        setTimeout(() => {
+                                                button.title = "Copy filter";
+                                        }, 1500);
+                                };
+
+                                if (!navigator.clipboard?.writeText) {
+                                        if (copyWithFallback())
+                                                confirmCopied();
+                                        else
+                                                showToast("Could not copy the Logcat filter");
+                                        return;
+                                }
+
+                                navigator.clipboard.writeText(filter)
+                                        .then(confirmCopied)
+                                        .catch(() => {
+                                                if (copyWithFallback())
+                                                        confirmCopied();
+                                                else
+                                                        showToast("Could not copy the Logcat filter");
+                                        });
                         }
 
 
