@@ -287,6 +287,35 @@
 
                 .search-wrapper .search-box {
                         width: 100%;
+                        padding-right: 40px;
+                }
+
+                .search-clear-button {
+                        position: absolute;
+                        top: 50%;
+                        right: 8px;
+                        display: none;
+                        align-items: center;
+                        justify-content: center;
+                        width: 26px;
+                        height: 26px;
+                        padding: 0;
+                        border: 0;
+                        background: transparent;
+                        color: var(--muted);
+                        font-size: 20px;
+                        line-height: 1;
+                        transform: translateY(-50%);
+                }
+
+                .search-clear-button.visible {
+                        display: flex;
+                }
+
+                .search-clear-button:hover {
+                        background: transparent;
+                        color: var(--text);
+                        box-shadow: none;
                 }
 
                 .search-suggestions {
@@ -436,12 +465,25 @@
                 }
 
                 .request-groups-header {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        flex-wrap: wrap;
+                        gap: 8px 16px;
                         background: var(--panel2);
                         border-bottom: 1px solid var(--border);
                         color: var(--text);
                         font-size: 15px;
                         font-weight: 600;
                         padding: 12px 16px;
+                }
+
+                .active-filter-info {
+                        color: var(--muted);
+                        font-size: 11px;
+                        font-weight: 400;
+                        line-height: 1.5;
+                        text-align: right;
                 }
 
                 .request-groups-content {
@@ -838,6 +880,9 @@
                                         role="combobox" aria-autocomplete="list" aria-expanded="false"
                                         aria-controls="searchSuggestions"
                                         oninput="handleSearchInput()" onkeydown="handleSearchKeydown(event)">
+                                <button type="button" id="searchClearButton" class="search-clear-button"
+                                        aria-label="Clear search" title="Clear search"
+                                        onclick="clearSearch()" disabled>&times;</button>
                                 <div id="searchSuggestions" class="search-suggestions" role="listbox"></div>
                         </div>
                 </div>
@@ -859,6 +904,7 @@
                         document.getElementById("exportHtmlButton").disabled = !enabled;
                         document.getElementById("exportJsonButton").disabled = !enabled;
                         document.getElementById("searchInput").disabled = !enabled;
+                        document.getElementById("searchClearButton").disabled = !enabled;
                         document.querySelectorAll(".stat-card, .invalid-summary-card").forEach(card => {
                                 card.disabled = !enabled || Number(card.dataset.count) === 0;
                         });
@@ -874,6 +920,7 @@
 
                         const searchInput = document.getElementById("searchInput");
                         searchInput.value = "";
+                        updateSearchClearButton();
                         searchInput.setAttribute("aria-expanded", "false");
                         searchInput.removeAttribute("aria-activedescendant");
                         document.getElementById("searchSuggestions").replaceChildren();
@@ -1251,8 +1298,13 @@
 
                                 if (typeof value === "string") {
                                         const normalized = value.trim();
-                                        if (normalized && normalized.length <= 100)
-                                                values.add(normalized);
+                                        const suggestionValue = normalized.length >= 2 &&
+                                                normalized.startsWith('"') &&
+                                                normalized.endsWith('"')
+                                                ? normalized.slice(1, -1)
+                                                : normalized;
+                                        if (suggestionValue && suggestionValue.length <= 100)
+                                                values.add(suggestionValue);
                                         return;
                                 }
 
@@ -1286,6 +1338,20 @@
                         activeSuggestionIndex = -1;
                         filterResults();
                         updateSearchSuggestions();
+                        updateSearchClearButton();
+                }
+
+                function updateSearchClearButton() {
+                        const input = document.getElementById("searchInput");
+                        const button = document.getElementById("searchClearButton");
+                        button.classList.toggle("visible", Boolean(input.value));
+                }
+
+                function clearSearch() {
+                        const input = document.getElementById("searchInput");
+                        input.value = "";
+                        handleSearchInput();
+                        input.focus();
                 }
 
                 function updateSearchSuggestions() {
@@ -1336,6 +1402,7 @@
                         input.setAttribute("aria-expanded", "false");
                         activeSuggestionIndex = -1;
                         filterResults();
+                        updateSearchClearButton();
                         input.focus();
                 }
 
@@ -1446,6 +1513,44 @@
                                         });
                                 });
                         updateWarningVisibility(document, activeTransactionFilter, activeFlowFilter);
+                        updateActiveFilterInfo(document, {
+                                transactionFilter: activeTransactionFilter,
+                                flowFilter: activeFlowFilter,
+                                categoryFilter: activeResultFilter,
+                                searchTerm: term
+                        });
+                }
+
+                function updateActiveFilterInfo(root, filters) {
+                        const info = root.querySelector(".active-filter-info");
+                        if (!info)
+                                return;
+
+                        const activeFilters = [];
+                        const transactionButton = [...root.querySelectorAll(".transaction-type-filter")]
+                                .find(button => button.dataset.transactionFilter === filters.transactionFilter);
+                        if (transactionButton)
+                                activeFilters.push(`Request Group: ${transactionButton.textContent.trim()}`);
+
+                        if (filters.flowFilter !== "all")
+                                activeFilters.push(`Flow ID: ${filters.flowFilter}`);
+
+                        const categoryLabels = {
+                                request: "Requests",
+                                response: "Responses",
+                                event: "Events",
+                                invalid: "Invalid JSON"
+                        };
+                        if (categoryLabels[filters.categoryFilter])
+                                activeFilters.push(`Type: ${categoryLabels[filters.categoryFilter]}`);
+
+                        if (filters.searchTerm)
+                                activeFilters.push(`Search: ${filters.searchTerm}`);
+
+                        info.textContent = activeFilters.length
+                                ? `Active filters: ${activeFilters.join(" · ")}`
+                                : "";
+                        info.hidden = activeFilters.length === 0;
                 }
 
                 function updateWarningVisibility(root, transactionFilter, flowFilter) {
@@ -2106,7 +2211,10 @@ ${paymentIdleWarningSummary}
                         if (entries.length > 0) {
                                 html += `
 <section class="request-groups-panel parsed-payloads-panel" aria-label="Parsed Payloads">
-    <div class="request-groups-header">Parsed Payloads</div>
+    <div class="request-groups-header">
+        <span>Parsed Payloads</span>
+        <span class="active-filter-info" aria-live="polite" hidden></span>
+    </div>
     <div class="parsed-payloads-content">`;
                         }
 
@@ -2313,6 +2421,12 @@ ${escapeHtml(JSON.stringify(parsedObj, null, 2))}
                                 group.hidden = group.dataset.transactionGroup !== initialTransactionFilter;
                         });
                         updateWarningVisibility(reportResults, initialTransactionFilter, "all");
+                        updateActiveFilterInfo(reportResults, {
+                                transactionFilter: initialTransactionFilter,
+                                flowFilter: "all",
+                                categoryFilter: "all",
+                                searchTerm: ""
+                        });
                         reportResults.querySelectorAll("mark.search-highlight").forEach(mark => {
                                 mark.replaceWith(document.createTextNode(mark.textContent));
                         });
@@ -2336,6 +2450,39 @@ body {
 var activeReportCategoryFilter = "all";
 var activeReportFlowFilter = "all";
 var activeReportTransactionFilter = "${initialTransactionFilter}";
+
+function updateReportActiveFilterInfo() {
+    var info = document.querySelector("#report-results .active-filter-info");
+    if (!info)
+        return;
+
+    var activeFilters = [];
+    var transactionButton = Array.prototype.find.call(
+        document.querySelectorAll("#report-results .transaction-type-filter"),
+        function (button) {
+            return button.dataset.transactionFilter === activeReportTransactionFilter;
+        }
+    );
+    if (transactionButton)
+        activeFilters.push("Request Group: " + transactionButton.textContent.trim());
+
+    if (activeReportFlowFilter !== "all")
+        activeFilters.push("Flow ID: " + activeReportFlowFilter);
+
+    var categoryLabels = {
+        request: "Requests",
+        response: "Responses",
+        event: "Events",
+        invalid: "Invalid JSON"
+    };
+    if (categoryLabels[activeReportCategoryFilter])
+        activeFilters.push("Type: " + categoryLabels[activeReportCategoryFilter]);
+
+    info.textContent = activeFilters.length
+        ? "Active filters: " + activeFilters.join(" · ")
+        : "";
+    info.hidden = activeFilters.length === 0;
+}
 
 function updateReportWarningVisibility() {
     var summaries = document.querySelectorAll(
@@ -2382,6 +2529,7 @@ function applyReportFilters() {
         result.style.display = categoryMatches && flowMatches && transactionMatches ? "" : "none";
     });
     updateReportWarningVisibility();
+    updateReportActiveFilterInfo();
 }
 
 function setResultFilter(category) {
