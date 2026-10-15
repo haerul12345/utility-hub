@@ -231,6 +231,92 @@
                         border-color: var(--accent);
                 }
 
+                .mode-switch-row {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 14px;
+                        margin: 0 auto 18px;
+                        color: var(--text);
+                        font-size: 13px;
+                }
+
+                .mode-switch {
+                        position: relative;
+                        display: inline-flex;
+                        width: 48px;
+                        height: 26px;
+                        flex: 0 0 auto;
+                        cursor: pointer;
+                }
+
+                .mode-switch input {
+                        position: absolute;
+                        width: 1px;
+                        height: 1px;
+                        opacity: 0;
+                }
+
+                .mode-switch-track {
+                        width: 100%;
+                        height: 100%;
+                        border: 1px solid var(--accent);
+                        border-radius: 13px;
+                        background: rgba(0, 212, 255, .12);
+                        transition: background .2s ease;
+                }
+
+                .mode-switch-track::after {
+                        position: absolute;
+                        top: 4px;
+                        left: 4px;
+                        width: 16px;
+                        height: 16px;
+                        border-radius: 50%;
+                        background: var(--accent);
+                        content: "";
+                        transition: transform .2s ease;
+                }
+
+                .mode-switch input:checked + .mode-switch-track {
+                        background: rgba(40, 255, 136, .16);
+                        border-color: var(--success);
+                }
+
+                .mode-switch input:checked + .mode-switch-track::after {
+                        background: var(--success);
+                        transform: translateX(22px);
+                }
+
+                .mode-switch input:focus-visible + .mode-switch-track {
+                        outline: 2px solid var(--text);
+                        outline-offset: 3px;
+                }
+
+                .device-section {
+                        margin-bottom: 18px;
+                        text-align: center;
+                }
+
+                .device-status {
+                        min-height: 1.5em;
+                        margin-top: 10px;
+                        color: var(--muted);
+                        font-size: 12px;
+                }
+
+                .device-status.error,
+                .device-info.error {
+                        color: var(--danger);
+                        font-weight: 700;
+                }
+
+                .device-info {
+                        margin-top: 6px;
+                        color: var(--success);
+                        font-size: 12px;
+                }
+
                 .toolbar {
                         display: flex;
                         gap: 10px;
@@ -457,6 +543,37 @@
                         margin: 0 0 25px;
                 }
 
+                .transaction-type-filters {
+                        display: grid;
+                        grid-template-columns: minmax(0, 1fr);
+                }
+
+                .transaction-type-columns {
+                        display: grid;
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        gap: 24px;
+                }
+
+                .transaction-type-column {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 8px;
+                        min-width: 0;
+                }
+
+                .transaction-request-group {
+                        display: flex;
+                        flex-wrap: wrap;
+                        align-items: flex-start;
+                        gap: 8px;
+                        min-width: 0;
+                }
+
+                .transaction-type-column + .transaction-type-column {
+                        border-left: 2px solid var(--border);
+                        padding-left: 24px;
+                }
+
                 .request-groups-panel {
                         border: 1px solid var(--border);
                         border-radius: 0;
@@ -528,7 +645,10 @@
                         cursor: pointer;
                         font: inherit;
                         font-size: 12px;
+                        min-width: 0;
+                        overflow-wrap: anywhere;
                         padding: 8px 14px;
+                        text-align: left;
                         transition: transform .16s ease, border-color .16s ease, background .16s ease;
                 }
 
@@ -780,8 +900,8 @@
                         line-height: 1.7;
                 }
 
-                .missing-response-item + .missing-response-item,
-                .payment-idle-warning-item + .payment-idle-warning-item {
+                .missing-response-item+.missing-response-item,
+                .payment-idle-warning-item+.payment-idle-warning-item {
                         margin-top: 10px;
                         padding-top: 10px;
                         border-top: 1px solid var(--border);
@@ -813,9 +933,8 @@
 
         <div class="header">
                 <button class="back-button" type="button" onclick="history.back()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
-                                aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M19 12H5" />
                                 <path d="M12 19L5 12L12 5" />
                         </svg>
@@ -839,19 +958,43 @@
                         <p>Use this filter in Android Studio Logcat to capture AXL requests and responses.</p>
                         <div class="logcat-filter-row">
                                 <!-- <code id="logcatFilterText" class="logcat-filter-code">"IngenicoAxL:request:" | "IngenicoAxL:response:" | "Sent:" | "Received:"</code> -->
-                                <code id="logcatFilterText" class="logcat-filter-code">"IngenicoAxL:request:" | "IngenicoAxL:response:" | tag:NUAClient  & ( "Sent:" | "Received:")</code>
+                                <code id="logcatFilterText"
+                                        class="logcat-filter-code">"IngenicoAxL:request:" | "IngenicoAxL:response:" | tag:NUAClient  & ( "Sent:" | "Received:")</code>
                                 <button class="logcat-copy-button" type="button" onclick="copyLogcatFilter(this)"
                                         aria-label="Copy Logcat filter" title="Copy filter">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                                                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                                 <rect x="8" y="8" width="12" height="12" rx="1.5" />
-                                                <path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8" />
+                                                <path
+                                                        d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8" />
                                         </svg>
                                 </button>
                         </div>
                 </section>
 
-                <textarea id="input" placeholder="Paste logs here..." oninput="clearParsedResults()"></textarea>
+                <div class="mode-switch-row">
+                        <span id="pasteModeLabel">Paste logs</span>
+                        <label class="mode-switch" aria-label="Switch between pasted logs and ADB helper">
+                                <input type="checkbox" id="modeToggle" aria-labelledby="pasteModeLabel deviceModeLabel">
+                                <span class="mode-switch-track" aria-hidden="true"></span>
+                        </label>
+                        <span id="deviceModeLabel">Read from ADB helper</span>
+                </div>
+
+                <div id="pasteSection">
+                        <textarea id="logInput" placeholder="Paste logcat here..." oninput="clearParsedResults()"></textarea>
+                </div>
+
+                <div id="deviceSection" class="device-section" style="display:none;">
+                        <button id="readLogcatButton" type="button" onclick="toggleLiveReading()">
+                                Start Live Reading
+                        </button>
+                        <div id="deviceStatus" class="device-status" role="status" aria-live="polite">
+                                Streams matching lines live from the ADB helper.
+                        </div>
+                        <div id="connectedDeviceInfo" class="device-info" aria-live="polite"></div>
+                </div>
+
 
                 <div class="toolbar">
 
@@ -876,13 +1019,13 @@
                         </button>
 
                         <div class="search-wrapper">
-                                <input id="searchInput" class="search-box" placeholder="Search..." autocomplete="off" disabled
-                                        role="combobox" aria-autocomplete="list" aria-expanded="false"
-                                        aria-controls="searchSuggestions"
-                                        oninput="handleSearchInput()" onkeydown="handleSearchKeydown(event)">
+                                <input id="searchInput" class="search-box" placeholder="Search..." autocomplete="off"
+                                        disabled role="combobox" aria-autocomplete="list" aria-expanded="false"
+                                        aria-controls="searchSuggestions" oninput="handleSearchInput()"
+                                        onkeydown="handleSearchKeydown(event)">
                                 <button type="button" id="searchClearButton" class="search-clear-button"
-                                        aria-label="Clear search" title="Clear search"
-                                        onclick="clearSearch()" disabled>&times;</button>
+                                        aria-label="Clear search" title="Clear search" onclick="clearSearch()"
+                                        disabled>&times;</button>
                                 <div id="searchSuggestions" class="search-suggestions" role="listbox"></div>
                         </div>
                 </div>
@@ -897,6 +1040,106 @@
                 let activeResultFilter = "all";
                 let activeFlowFilter = "all";
                 let activeTransactionFilter = "all";
+
+                const pasteSection = document.getElementById("pasteSection");
+                const deviceSection = document.getElementById("deviceSection");
+                const modeToggle = document.getElementById("modeToggle");
+                const deviceStatus = document.getElementById("deviceStatus");
+                const connectedDeviceInfo = document.getElementById("connectedDeviceInfo");
+                const readLogcatButton = document.getElementById("readLogcatButton");
+                const logInput = document.getElementById("logInput");
+                let liveReadSource = null;
+                let liveParseTimer = null;
+                let isLiveReading = false;
+
+                modeToggle.addEventListener("change", () => {
+                        const deviceMode = modeToggle.checked;
+                        pasteSection.style.display = deviceMode ? "none" : "block";
+                        deviceSection.style.display = deviceMode ? "block" : "none";
+                        if (!deviceMode && isLiveReading)
+                                stopLiveReading("Live reading stopped.");
+                });
+
+                function toggleLiveReading() {
+                        if (isLiveReading) {
+                                stopLiveReading("Live reading stopped.");
+                                return;
+                        }
+
+                        isLiveReading = true;
+                        logInput.value = "";
+                        clearParsedResults();
+                        readLogcatButton.textContent = "Stop Live Reading";
+                        deviceStatus.classList.remove("error");
+                        connectedDeviceInfo.classList.remove("error");
+                        deviceStatus.textContent = "Connecting to the ADB helper...";
+                        connectedDeviceInfo.textContent = "";
+                        liveReadSource = new EventSource("http://localhost:9876/stream");
+                        liveReadSource.onopen = () => {
+                                deviceStatus.textContent = "Connected. Waiting for matching Logcat lines...";
+                        };
+                        liveReadSource.onmessage = event => {
+                                if (!isLiveReading)
+                                        return;
+
+                                try {
+                                        logInput.value += `${JSON.parse(event.data)}\n`;
+                                } catch (error) {
+                                        console.error("Could not read streamed Logcat line:", error);
+                                        stopLiveReading("Received an invalid line from the ADB helper.");
+                                        return;
+                                }
+
+                                clearTimeout(liveParseTimer);
+                                liveParseTimer = setTimeout(() => {
+                                        parseLogs();
+                                        const payloadCount = lastParseResult?.summary.totalPayloads ?? 0;
+                                        deviceStatus.textContent = payloadCount
+                                                ? `Live: ${payloadCount} payload${payloadCount === 1 ? "" : "s"} received.`
+                                                : "Connected. Waiting for matching Logcat lines...";
+                                }, 300);
+                        };
+                        liveReadSource.addEventListener("device", event => {
+                                try {
+                                        const device = JSON.parse(event.data);
+                                        connectedDeviceInfo.textContent =
+                                                `Connected device: ${device.model} · Serial: ${device.serial}`;
+                                        connectedDeviceInfo.classList.remove("error");
+                                } catch (error) {
+                                        console.error("Could not read connected device information:", error);
+                                        stopLiveReading("Received invalid device information from the ADB helper.");
+                                }
+                        });
+                        liveReadSource.addEventListener("helper-error", event => {
+                                let message = "ADB helper stream failed.";
+                                try {
+                                        message = JSON.parse(event.data);
+                                } catch {
+                                        // Keep the default error message if the helper sent invalid data.
+                                }
+                                stopLiveReading(message, true);
+                        });
+                        liveReadSource.onerror = () => {
+                                if (isLiveReading)
+                                        deviceStatus.textContent = "Logcat stream disconnected; reconnecting...";
+                        };
+                }
+
+                function stopLiveReading(status, failed = false) {
+                        isLiveReading = false;
+                        clearTimeout(liveParseTimer);
+                        liveParseTimer = null;
+                        liveReadSource?.close();
+                        liveReadSource = null;
+                        if (logInput.value)
+                                parseLogs();
+                        deviceStatus.classList.toggle("error", failed);
+                        connectedDeviceInfo.classList.toggle("error", failed);
+                        if (failed)
+                                connectedDeviceInfo.textContent = "ADB device disconnected or Logcat failed.";
+                        readLogcatButton.textContent = "Start Live Reading";
+                        deviceStatus.textContent = status;
+                }
 
                 function setResultControlsEnabled(enabled) {
                         document.getElementById("expandAllButton").disabled = !enabled;
@@ -1595,13 +1838,14 @@
                 function setFlowFilter(flowId) {
                         activeFlowFilter = activeFlowFilter === flowId ? "all" : flowId;
                         document.querySelectorAll(".flow-id-filters").forEach(group => {
-                                if (group.dataset.transactionGroup !== activeTransactionFilter)
+                                if (activeTransactionFilter !== "all" &&
+                                        group.dataset.transactionGroup !== activeTransactionFilter)
                                         return;
                                 group.querySelectorAll(".flow-id-filter").forEach(button => {
-                                button.setAttribute(
-                                        "aria-pressed",
-                                        String(button.dataset.flowFilter === activeFlowFilter)
-                                );
+                                        button.setAttribute(
+                                                "aria-pressed",
+                                                String(button.dataset.flowFilter === activeFlowFilter)
+                                        );
                                 });
                         });
                         filterResults();
@@ -1617,7 +1861,8 @@
                                 );
                         });
                         document.querySelectorAll(".flow-id-filters").forEach(group => {
-                                group.hidden = group.dataset.transactionGroup !== activeTransactionFilter;
+                                group.hidden = activeTransactionFilter !== "all" &&
+                                        group.dataset.transactionGroup !== activeTransactionFilter;
                         });
                         document.querySelectorAll(".flow-id-filters:not([hidden]) .flow-id-filter").forEach(button => {
                                 button.setAttribute(
@@ -1857,7 +2102,7 @@
                 */
 
                 function parseLogs() {
-                        const text = document.getElementById("input").value;
+                        const text = document.getElementById("logInput").value;
                         const jsonBlocks = extractJsonObjects(text);
                         const container = document.getElementById("results");
 
@@ -2063,7 +2308,9 @@
                         );
 
                         activeTransactionFilter = transactionGroups.length
-                                ? transactionGroups[0].id
+                                ? transactionGroups.length > 1
+                                        ? "all"
+                                        : transactionGroups[0].id
                                 : "all";
 
                         lastParseResult = {
@@ -2097,18 +2344,48 @@
                         activeFlowFilter = "all";
 
                         const transactionTypeFilters = transactionGroups.length > 1
-                                ? `
+                                ? (() => {
+                                        const transactionBundles = [];
+                                        let currentTransaction = null;
+
+                                        transactionGroups.forEach(group => {
+                                                if (/print/i.test(group.transactionType) && currentTransaction) {
+                                                        currentTransaction.push(group);
+                                                        return;
+                                                }
+
+                                                currentTransaction = [group];
+                                                transactionBundles.push(currentTransaction);
+                                        });
+                                        const columnBreak = Math.ceil(transactionBundles.length / 2);
+                                        const transactionColumns = [
+                                                transactionBundles.slice(0, columnBreak),
+                                                transactionBundles.slice(columnBreak)
+                                        ];
+
+                                        const renderGroupButton = group => `
+        <button type="button" class="transaction-type-filter" data-transaction-filter="${group.id}"
+                aria-pressed="${group.id === activeTransactionFilter}"
+                onclick="setTransactionFilter(this.dataset.transactionFilter)">${escapeHtml(group.label)}</button>`;
+                                        const renderColumn = groups => groups.map(group => `
+        <div class="transaction-request-group">${group.map(renderGroupButton).join("")}</div>`).join("");
+                                        return `
 <div class="transaction-type-filters" role="group" aria-label="Filter results by transaction type">
-    ${transactionGroups.map(group => `
-    <button type="button" class="transaction-type-filter" data-transaction-filter="${group.id}"
-            aria-pressed="${group.id === activeTransactionFilter}"
-            onclick="setTransactionFilter(this.dataset.transactionFilter)">${escapeHtml(group.label)}</button>`).join("")}
-</div>`
+    <button type="button" class="transaction-type-filter" data-transaction-filter="all"
+            aria-pressed="${activeTransactionFilter === "all"}"
+            onclick="setTransactionFilter(this.dataset.transactionFilter)">All</button>
+    <div class="transaction-type-columns">
+        <div class="transaction-type-column">${renderColumn(transactionColumns[0])}</div>
+        <div class="transaction-type-column">${renderColumn(transactionColumns[1])}</div>
+    </div>
+</div>`;
+                                })()
                                 : "";
                         const flowIdFilters = flowGroups.map(group => group.flowIds.size > 1
                                 ? `
 <div class="flow-id-filters" data-transaction-group="${group.id}" role="group"
-        aria-label="Filter results by Flow ID"${group.id === activeTransactionFilter ? "" : " hidden"}>
+        aria-label="Filter results by Flow ID"${activeTransactionFilter === "all" ||
+        group.id === activeTransactionFilter ? "" : " hidden"}>
     <span class="flow-id-filter-label">Flow ID</span>
     <button type="button" class="flow-id-filter" data-flow-filter="all"
             aria-pressed="true" onclick="setFlowFilter(this.dataset.flowFilter)">All</button>
@@ -2118,7 +2395,7 @@
 </div>`
                                 : "").join("");
                         const requestGroupsPanel = transactionTypeFilters || flowIdFilters
-? `
+                                ? `
 <section class="request-groups-panel" aria-label="Request Groups">
     <div class="request-groups-header">Request Groups</div>
     <div class="request-groups-content">
@@ -2126,7 +2403,7 @@
         ${flowIdFilters}
     </div>
 </section>`
-: "";
+                                : "";
 
                         const invalidSummary = `
 <button type="button" class="invalid-summary-card" data-filter="invalid" data-count="${invalidTotal}"
@@ -2383,7 +2660,7 @@ ${escapeHtml(JSON.stringify(parsedObj, null, 2))}
                         const reportResults = document.getElementById("results").cloneNode(true);
                         const reportEntries = lastParseResult.entries;
                         const initialTransactionFilter = lastParseResult.transactionGroups.length
-                                ? lastParseResult.transactionGroups[0].id
+                                ? activeTransactionFilter
                                 : "all";
 
                         reportResults.querySelectorAll(".json-block").forEach((block, index) => {
@@ -2418,7 +2695,8 @@ ${escapeHtml(JSON.stringify(parsedObj, null, 2))}
                                 button.setAttribute("aria-pressed", String(button.dataset.flowFilter === "all"));
                         });
                         reportResults.querySelectorAll(".flow-id-filters").forEach(group => {
-                                group.hidden = group.dataset.transactionGroup !== initialTransactionFilter;
+                                group.hidden = initialTransactionFilter !== "all" &&
+                                        group.dataset.transactionGroup !== initialTransactionFilter;
                         });
                         updateWarningVisibility(reportResults, initialTransactionFilter, "all");
                         updateActiveFilterInfo(reportResults, {
@@ -2545,8 +2823,9 @@ function setResultFilter(category) {
 function setFlowFilter(flowId) {
     var buttons = [];
     document.querySelectorAll("#report-results .flow-id-filters").forEach(function (group) {
-        if (group.dataset.transactionGroup === activeReportTransactionFilter)
-            buttons = group.querySelectorAll(".flow-id-filter");
+        if (activeReportTransactionFilter === "all" ||
+                group.dataset.transactionGroup === activeReportTransactionFilter)
+            buttons.push.apply(buttons, group.querySelectorAll(".flow-id-filter"));
     });
     activeReportFlowFilter = activeReportFlowFilter === flowId ? "all" : flowId;
 
@@ -2565,7 +2844,7 @@ function setTransactionFilter(groupId) {
         button.setAttribute("aria-pressed", String(button.dataset.transactionFilter === groupId));
     });
     document.querySelectorAll("#report-results .flow-id-filters").forEach(function (group) {
-        group.hidden = group.dataset.transactionGroup !== groupId;
+        group.hidden = groupId !== "all" && group.dataset.transactionGroup !== groupId;
         if (!group.hidden) {
             group.querySelectorAll(".flow-id-filter").forEach(function (button) {
                 button.setAttribute("aria-pressed", String(button.dataset.flowFilter === "all"));
@@ -2576,7 +2855,7 @@ function setTransactionFilter(groupId) {
 }
 `;
 
-const reportHtml = `
+                        const reportHtml = `
 <html>
 <head>
     <meta charset="UTF-8">
@@ -2635,213 +2914,213 @@ ${reportHtmlEndTag}
                 }
 
 
-                
+
                 function getTitleFromRawJson(text) {
 
-                                // REQUEST
-                                if (text.includes('"request"')) {
+                        // REQUEST
+                        if (text.includes('"request"')) {
 
-                                        const type =
-                                                text.match(/"type"\s*:\s*"([^"]+)"/)?.[1] ||
-                                                text.match(/"txn_type"\s*:\s*"([^"]+)"/)?.[1] ||
-                                                "UNKNOWN";
+                                const type =
+                                        text.match(/"type"\s*:\s*"([^"]+)"/)?.[1] ||
+                                        text.match(/"txn_type"\s*:\s*"([^"]+)"/)?.[1] ||
+                                        "UNKNOWN";
 
-                                        return `REQUEST - ${type}`;
+                                return `REQUEST - ${type}`;
+                        }
+
+                        // RESPONSE
+                        if (text.includes('"response"')) {
+
+                                const type =
+                                        text.match(/"type"\s*:\s*"([^"]+)"/)?.[1] ||
+                                        text.match(/"txn_type"\s*:\s*"([^"]+)"/)?.[1] ||
+                                        "UNKNOWN";
+
+                                return `RESPONSE - ${type}`;
+                        }
+
+                        // EVENT
+                        if (text.includes('"event"')) {
+
+                                const type =
+                                        text.match(/"type"\s*:\s*"([^"]+)"/)?.[1] ||
+                                        text.match(/"txn_type"\s*:\s*"([^"]+)"/)?.[1];
+
+                                const eventType =
+                                        text.match(/"event_type"\s*:\s*"([^"]+)"/)?.[1];
+
+                                const eventText =
+                                        text.match(/"error_info"\s*:\s*\{[^}]*"text"\s*:\s*"([^"]+)"/)?.[1] ||
+                                        text.match(/"text"\s*:\s*"([^"]+)"/)?.[1];
+
+                                const receiptOwner =
+                                        text.match(/"receipt_owner"\s*:\s*"([^"]+)"/)?.[1];
+
+                                if (eventType === "non_fatal_error_info" && eventText) {
+                                        return `EVENT - ${eventType} - [${eventText}]`;
                                 }
 
-                                // RESPONSE
-                                if (text.includes('"response"')) {
+                                const screenName =
+                                        text.match(/"screen_info"\s*:\s*\{[\s\S]*?"name"\s*:\s*"([^"]+)"/)?.[1];
 
-                                        const type =
-                                                text.match(/"type"\s*:\s*"([^"]+)"/)?.[1] ||
-                                                text.match(/"txn_type"\s*:\s*"([^"]+)"/)?.[1] ||
-                                                "UNKNOWN";
+                                const screenTextMatch = text.match(/"screen_info"\s*:\s*\{[\s\S]*?"text"\s*:\s*\[([\s\S]*?)\]/)?.[1];
+                                const screenText = screenTextMatch ? screenTextMatch.match(/"([^"]+)"/g)?.map(value => value.replace(/^"|"$/g, '')).filter(Boolean).join(' ') : '';
 
-                                        return `RESPONSE - ${type}`;
+                                if (eventType === "print_status" && receiptOwner) {
+                                        return `EVENT - ${eventType} - ${receiptOwner}`;
                                 }
 
-                                // EVENT
-                                if (text.includes('"event"')) {
+                                // screen_info special handling
+                                if (eventType === "screen_info") {
+                                        const label = screenName || 'screen_info';
 
-                                        const type =
-                                                text.match(/"type"\s*:\s*"([^"]+)"/)?.[1] ||
-                                                text.match(/"txn_type"\s*:\s*"([^"]+)"/)?.[1];
-
-                                        const eventType =
-                                                text.match(/"event_type"\s*:\s*"([^"]+)"/)?.[1];
-
-                                        const eventText =
-                                                text.match(/"error_info"\s*:\s*\{[^}]*"text"\s*:\s*"([^"]+)"/)?.[1] ||
-                                                text.match(/"text"\s*:\s*"([^"]+)"/)?.[1];
-
-                                        const receiptOwner =
-                                                text.match(/"receipt_owner"\s*:\s*"([^"]+)"/)?.[1];
-
-                                        if (eventType === "non_fatal_error_info" && eventText) {
-                                                return `EVENT - ${eventType} - [${eventText}]`;
-                                        }
-
-                                        const screenName =
-                                                text.match(/"screen_info"\s*:\s*\{[\s\S]*?"name"\s*:\s*"([^"]+)"/)?.[1];
-
-                                        const screenTextMatch = text.match(/"screen_info"\s*:\s*\{[\s\S]*?"text"\s*:\s*\[([\s\S]*?)\]/)?.[1];
-                                        const screenText = screenTextMatch ? screenTextMatch.match(/"([^"]+)"/g)?.map(value => value.replace(/^"|"$/g, '')).filter(Boolean).join(' ') : '';
-
-                                        if (eventType === "print_status" && receiptOwner) {
-                                                return `EVENT - ${eventType} - ${receiptOwner}`;
-                                        }
-
-                                        // screen_info special handling
-                                        if (eventType === "screen_info") {
-                                                const label = screenName || 'screen_info';
-
-                                                if (screenText) {
-                                                        return `EVENT - ${eventType} - ${label} - [${screenText}]`;
-                                                }
-
-                                                if (type) {
-                                                        return `EVENT - ${type} - ${eventType} - ${label}`;
-                                                }
-
-                                                return `EVENT - ${eventType} - ${label}`;
-                                        }
-
-                                        if (type && eventType) {
-                                                return `EVENT - ${type} - ${eventType}`;
+                                        if (screenText) {
+                                                return `EVENT - ${eventType} - ${label} - [${screenText}]`;
                                         }
 
                                         if (type) {
-                                                return `EVENT - ${type}`;
+                                                return `EVENT - ${type} - ${eventType} - ${label}`;
                                         }
 
-                                        if (eventType) {
-                                                return `EVENT - ${eventType}`;
-                                        }
-
-                                        return "EVENT - UNKNOWN";
+                                        return `EVENT - ${eventType} - ${label}`;
                                 }
 
-                                return "INVALID JSON";
+                                if (type && eventType) {
+                                        return `EVENT - ${type} - ${eventType}`;
+                                }
+
+                                if (type) {
+                                        return `EVENT - ${type}`;
+                                }
+
+                                if (eventType) {
+                                        return `EVENT - ${eventType}`;
+                                }
+
+                                return "EVENT - UNKNOWN";
                         }
 
-                        /*                 function extractMetadata(raw) {
-                        
-                                                const type =
-                                                        raw.includes('"request"') ? 'REQUEST' :
-                                                                raw.includes('"response"') ? 'RESPONSE' :
-                                                                        raw.includes('"event"') ? 'EVENT' :
-                                                                                'UNKNOWN';
-                        
-                                                const flowId =
-                                                        raw.match(/"flow_id":"([^"]+)"/)?.[1] || '-';
-                        
-                                                const endpoint =
-                                                        raw.match(/"endpoint":"([^"]+)"/)?.[1] || '-';
-                        
-                                                const eventType =
-                                                        raw.match(/"event_type":"([^"]+)"/)?.[1] || '-';
-                        
-                                                const txnType =
-                                                        raw.match(/"txn_type":"([^"]+)"/)?.[1] || '-';
-                        
-                                                return {
-                                                        type,
-                                                        flowId,
-                                                        endpoint,
-                                                        eventType,
-                                                        txnType
-                                                };
-                                        } */
+                        return "INVALID JSON";
+                }
 
-                        function copyJson(index, button) {
+                /*                 function extractMetadata(raw) {
+                
+                                        const type =
+                                                raw.includes('"request"') ? 'REQUEST' :
+                                                        raw.includes('"response"') ? 'RESPONSE' :
+                                                                raw.includes('"event"') ? 'EVENT' :
+                                                                        'UNKNOWN';
+                
+                                        const flowId =
+                                                raw.match(/"flow_id":"([^"]+)"/)?.[1] || '-';
+                
+                                        const endpoint =
+                                                raw.match(/"endpoint":"([^"]+)"/)?.[1] || '-';
+                
+                                        const eventType =
+                                                raw.match(/"event_type":"([^"]+)"/)?.[1] || '-';
+                
+                                        const txnType =
+                                                raw.match(/"txn_type":"([^"]+)"/)?.[1] || '-';
+                
+                                        return {
+                                                type,
+                                                flowId,
+                                                endpoint,
+                                                eventType,
+                                                txnType
+                                        };
+                                } */
 
-                                const text =
-                                        document.getElementById(
-                                                "json-" + index
-                                        ).innerText;
+                function copyJson(index, button) {
 
-                                navigator.clipboard.writeText(text)
-                                        .then(() => {
+                        const text =
+                                document.getElementById(
+                                        "json-" + index
+                                ).innerText;
 
-                                                const originalText = button.innerText;
+                        navigator.clipboard.writeText(text)
+                                .then(() => {
 
-                                                button.innerText = "✓ Copied!";
-                                                button.style.background = "#16a34a";
+                                        const originalText = button.innerText;
 
-                                                showToast("JSON copied to clipboard");
+                                        button.innerText = "✓ Copied!";
+                                        button.style.background = "#16a34a";
 
-                                                setTimeout(() => {
-                                                        button.innerText = originalText;
-                                                        button.style.background = "#334155";
-                                                }, 1500);
+                                        showToast("JSON copied to clipboard");
 
-                                        })
-                                        .catch(() => {
-
-                                                button.innerText = "Failed";
-                                                button.style.background = "#dc2626";
-
-                                                setTimeout(() => {
-                                                        button.innerText = "Copy";
-                                                        button.style.background = "#334155";
-                                                }, 1500);
-
-                                        });
-                        }
-
-                        function showToast(message) {
-
-                                const toast =
-                                        document.getElementById("toast");
-
-                                toast.innerText = message;
-                                toast.classList.add("show");
-
-                                setTimeout(() => {
-                                        toast.classList.remove("show");
-                                }, 2000);
-                        }
-
-                        function copyLogcatFilter(button) {
-                                const filter = document.getElementById("logcatFilterText").textContent;
-                                const copyWithFallback = () => {
-                                        const temporaryInput = document.createElement("textarea");
-                                        temporaryInput.value = filter;
-                                        temporaryInput.setAttribute("readonly", "");
-                                        temporaryInput.style.position = "fixed";
-                                        temporaryInput.style.opacity = "0";
-                                        document.body.appendChild(temporaryInput);
-                                        temporaryInput.select();
-                                        const copied = document.execCommand("copy");
-                                        temporaryInput.remove();
-                                        return copied;
-                                };
-
-                                const confirmCopied = () => {
-                                        showToast("Logcat filter copied to clipboard");
-                                        button.title = "Copied";
                                         setTimeout(() => {
-                                                button.title = "Copy filter";
+                                                button.innerText = originalText;
+                                                button.style.background = "#334155";
                                         }, 1500);
-                                };
 
-                                if (!navigator.clipboard?.writeText) {
+                                })
+                                .catch(() => {
+
+                                        button.innerText = "Failed";
+                                        button.style.background = "#dc2626";
+
+                                        setTimeout(() => {
+                                                button.innerText = "Copy";
+                                                button.style.background = "#334155";
+                                        }, 1500);
+
+                                });
+                }
+
+                function showToast(message) {
+
+                        const toast =
+                                document.getElementById("toast");
+
+                        toast.innerText = message;
+                        toast.classList.add("show");
+
+                        setTimeout(() => {
+                                toast.classList.remove("show");
+                        }, 2000);
+                }
+
+                function copyLogcatFilter(button) {
+                        const filter = document.getElementById("logcatFilterText").textContent;
+                        const copyWithFallback = () => {
+                                const temporaryInput = document.createElement("textarea");
+                                temporaryInput.value = filter;
+                                temporaryInput.setAttribute("readonly", "");
+                                temporaryInput.style.position = "fixed";
+                                temporaryInput.style.opacity = "0";
+                                document.body.appendChild(temporaryInput);
+                                temporaryInput.select();
+                                const copied = document.execCommand("copy");
+                                temporaryInput.remove();
+                                return copied;
+                        };
+
+                        const confirmCopied = () => {
+                                showToast("Logcat filter copied to clipboard");
+                                button.title = "Copied";
+                                setTimeout(() => {
+                                        button.title = "Copy filter";
+                                }, 1500);
+                        };
+
+                        if (!navigator.clipboard?.writeText) {
+                                if (copyWithFallback())
+                                        confirmCopied();
+                                else
+                                        showToast("Could not copy the Logcat filter");
+                                return;
+                        }
+
+                        navigator.clipboard.writeText(filter)
+                                .then(confirmCopied)
+                                .catch(() => {
                                         if (copyWithFallback())
                                                 confirmCopied();
                                         else
                                                 showToast("Could not copy the Logcat filter");
-                                        return;
-                                }
-
-                                navigator.clipboard.writeText(filter)
-                                        .then(confirmCopied)
-                                        .catch(() => {
-                                                if (copyWithFallback())
-                                                        confirmCopied();
-                                                else
-                                                        showToast("Could not copy the Logcat filter");
-                                        });
-                        }
+                                });
+                }
 
 
         </script>
