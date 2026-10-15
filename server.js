@@ -51,8 +51,16 @@ async function getConnectedDevice() {
 
 function setCorsHeaders(req, res) {
   const origin = req.headers.origin;
-  if (!origin || origin === "null" || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin))
-    res.setHeader("Access-Control-Allow-Origin", origin || "*");
+
+  const allowedOrigins = [
+    "https://haerul12345.github.io",
+    "http://localhost",
+    "http://127.0.0.1"
+  ];
+
+  if (origin && allowedOrigins.some(o => origin.startsWith(o))) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
 
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
