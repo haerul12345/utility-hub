@@ -241,6 +241,60 @@
                         font-size: 13px;
                 }
 
+                .memory-panel {
+                        display: grid;
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        gap: 8px;
+                        max-width: 700px;
+                        margin: 0 auto 18px;
+                }
+
+                .memory-card {
+                        min-width: 0;
+                        border: 1px solid var(--border);
+                        background: rgba(7, 11, 20, .9);
+                        padding: 9px 12px;
+                }
+
+                .memory-card h2 {
+                        color: var(--accent);
+                        font-size: 11px;
+                        font-weight: 500;
+                        margin-bottom: 5px;
+                }
+
+                .memory-card-heading {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 8px;
+                }
+
+                .memory-refresh {
+                        flex: 0 0 auto;
+                        font-size: 10px;
+                        padding: 3px 7px;
+                }
+
+                .memory-value {
+                        color: var(--text);
+                        font-size: 11px;
+                        line-height: 1.5;
+                        overflow-wrap: anywhere;
+                }
+
+                .memory-note {
+                        color: var(--muted);
+                        font-size: 10px;
+                        line-height: 1.5;
+                }
+
+                @media (max-width: 600px) {
+                        .memory-panel {
+                                grid-template-columns: minmax(0, 1fr);
+                        }
+                }
+
                 .mode-switch {
                         position: relative;
                         display: inline-flex;
@@ -981,6 +1035,22 @@
                         <span id="deviceModeLabel">Read from ADB helper</span>
                 </div>
 
+                <section class="memory-panel" aria-label="Memory usage">
+                        <div class="memory-card">
+                                <h2>Parser page · JavaScript heap</h2>
+                                <div id="pageMemoryValue" class="memory-value" aria-live="polite">Checking browser support...</div>
+                                <div class="memory-note">Browser heap estimate; not total tab or GPU memory.</div>
+                        </div>
+                        <div class="memory-card">
+                                <div class="memory-card-heading">
+                                        <h2>ADB helper · Node.js process</h2>
+                                        <button class="memory-refresh" type="button" onclick="updateHelperMemory()">Refresh</button>
+                                </div>
+                                <div id="helperMemoryValue" class="memory-value" aria-live="polite">Switch to ADB mode to check the helper.</div>
+                                <div class="memory-note">Shows process RSS and JavaScript heap while the helper is running.</div>
+                        </div>
+                </section>
+
                 <div id="pasteSection">
                         <textarea id="logInput" placeholder="Paste logcat here..." oninput="clearParsedResults()"></textarea>
                 </div>
@@ -1048,16 +1118,79 @@
                 const connectedDeviceInfo = document.getElementById("connectedDeviceInfo");
                 const readLogcatButton = document.getElementById("readLogcatButton");
                 const logInput = document.getElementById("logInput");
+                const pageMemoryValue = document.getElementById("pageMemoryValue");
+                const helperMemoryValue = document.getElementById("helperMemoryValue");
                 let liveReadSource = null;
                 let liveParseTimer = null;
+                let helperMemoryTimer = null;
                 let isLiveReading = false;
+
+                function formatMemory(bytes) {
+                        return `${(bytes / (1024 * 1024)).toFixed(1)} MiB`;
+                }
+
+                function updatePageMemory() {
+                        const memory = performance.memory;
+                        if (!memory) {
+                                pageMemoryValue.textContent = "Not available in this browser.";
+                                return;
+                        }
+
+                        pageMemoryValue.textContent =
+                                `${formatMemory(memory.usedJSHeapSize)} used / ` +
+                                `${formatMemory(memory.totalJSHeapSize)} allocated · ` +
+                                `${formatMemory(memory.jsHeapSizeLimit)} limit`;
+                }
+
+                async function updateHelperMemory() {
+                        if (!modeToggle.checked)
+                                return;
+
+                        try {
+                                const response = await fetch("http://localhost:9876/memory", {
+                                        cache: "no-store"
+                                });
+                                if (!response.ok)
+                                        throw new Error(`HTTP ${response.status}`);
+
+                                const memory = await response.json();
+                                if (!modeToggle.checked)
+                                        return;
+
+                                helperMemoryValue.textContent =
+                                        `${formatMemory(memory.rss)} RSS · ` +
+                                        `${formatMemory(memory.heapUsed)} used / ` +
+                                        `${formatMemory(memory.heapTotal)} heap`;
+                                if (!helperMemoryTimer)
+                                        helperMemoryTimer = setInterval(updateHelperMemory, 2000);
+                        } catch (error) {
+                                if (!modeToggle.checked)
+                                        return;
+
+                                clearInterval(helperMemoryTimer);
+                                helperMemoryTimer = null;
+                                helperMemoryValue.textContent =
+                                        `Unavailable — restart server.js to enable memory reporting (${error.message}).`;
+                        }
+                }
+
+                updatePageMemory();
+                setInterval(updatePageMemory, 1000);
 
                 modeToggle.addEventListener("change", () => {
                         const deviceMode = modeToggle.checked;
                         pasteSection.style.display = deviceMode ? "none" : "block";
                         deviceSection.style.display = deviceMode ? "block" : "none";
-                        if (!deviceMode && isLiveReading)
-                                stopLiveReading("Live reading stopped.");
+                        if (deviceMode) {
+                                updateHelperMemory();
+                                helperMemoryTimer = setInterval(updateHelperMemory, 2000);
+                        } else {
+                                clearInterval(helperMemoryTimer);
+                                helperMemoryTimer = null;
+                                helperMemoryValue.textContent = "Switch to ADB mode to check the helper.";
+                                if (isLiveReading)
+                                        stopLiveReading("Live reading stopped.");
+                        }
                 });
 
                 function toggleLiveReading() {
@@ -1240,8 +1373,8 @@
                                 const axlMatch = line.match(
                                         /IngenicoAxL:(request|response|event):\s*(\{.*)?$/
                                 );
-                                const sentMatch = line.match(/\bSent:\s*(\{.*)$/);
-                                const receivedMatch = line.match(/\bReceived:\s*(.*)$/);
+                                const sentMatch = line.match(/\bSent:\s*(\{.*)$/i);
+                                const receivedMatch = line.match(/\b(?:client\s+)?received:\s*(.*)$/i);
 
                                 if (axlMatch || sentMatch || receivedMatch) {
                                         if (active)

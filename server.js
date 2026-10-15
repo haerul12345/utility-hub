@@ -9,7 +9,7 @@ const FILTERED_MESSAGE_MARKERS = [
   "IngenicoAxL:response:"
 ];
 const NUA_CLIENT_TAG = "NUAClient";
-const NUA_CLIENT_MESSAGE_MARKERS = ["Sent:", "Received:"];
+const NUA_CLIENT_MESSAGE_MARKERS = ["Sent:", "Received:", "client received:"];
 const execFileAsync = promisify(execFile);
 
 async function getConnectedDevice() {
@@ -67,6 +67,34 @@ function parseLogcatEntry(line) {
     : null;
 }
 
+function countJsonBraces(text) {
+  let count = 0;
+  let inString = false;
+  let escape = false;
+
+  for (const character of text) {
+    if (escape) {
+      escape = false;
+      continue;
+    }
+    if (character === "\\") {
+      escape = true;
+      continue;
+    }
+    if (character === '"') {
+      inString = !inString;
+      continue;
+    }
+    if (!inString) {
+      if (character === "{")
+        count++;
+      else if (character === "}")
+        count--;
+    }
+  }
+  return count;
+}
+
 function matchesLogcatFilter(line, entry) {
   if (FILTERED_MESSAGE_MARKERS.some(marker => line.includes(marker)))
     return true;
@@ -74,7 +102,9 @@ function matchesLogcatFilter(line, entry) {
   return Boolean(
     entry &&
     entry.tag === NUA_CLIENT_TAG &&
-    NUA_CLIENT_MESSAGE_MARKERS.some(marker => entry.message.includes(marker))
+    NUA_CLIENT_MESSAGE_MARKERS.some(marker =>
+      entry.message.toLowerCase().includes(marker.toLowerCase())
+    )
   );
 }
 
@@ -98,6 +128,18 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  if (req.method === "GET" && req.url === "/memory") {
+    res.writeHead(200, {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store"
+    });
+    res.end(JSON.stringify({
+      ...process.memoryUsage(),
+      uptimeSeconds: process.uptime()
+    }));
+    return;
+  }
+
   if (req.method !== "GET" || req.url !== "/stream") {
     res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
     res.end("Not found");
@@ -117,7 +159,7 @@ const server = http.createServer((req, res) => {
   let clientClosed = false;
   let currentEntryLines = [];
   let currentEntryMatches = false;
-  let previousEntryWasEmptyReceived = false;
+  let receivedPayload = null;
   let flushTimer = null;
 
   const flushCurrentEntry = () => {
@@ -126,6 +168,19 @@ const server = http.createServer((req, res) => {
 
     currentEntryLines = [];
     currentEntryMatches = false;
+  };
+
+  const finishReceivedPayload = () => {
+    if (receivedPayload && !clientClosed)
+      sendSse(res, "message", receivedPayload.lines.join("\n"));
+    receivedPayload = null;
+  };
+
+  const appendReceivedPayload = text => {
+    receivedPayload.lines.push(text);
+    receivedPayload.braceCount += countJsonBraces(text);
+    if (receivedPayload.braceCount <= 0)
+      finishReceivedPayload();
   };
 
   const heartbeat = setInterval(() => {
@@ -183,16 +238,69 @@ const server = http.createServer((req, res) => {
 
       for (const line of lines) {
         const entry = parseLogcatEntry(line);
+
+        if (receivedPayload) {
+          if (!entry) {
+            if (!receivedPayload.waitingForMessage && line.trim())
+              appendReceivedPayload(line);
+            continue;
+          }
+
+          if (entry.tag === NUA_CLIENT_TAG) {
+            const isReceivedHeader = /^(?:client\s+)?received:\s*$/i.test(entry.message);
+            if (isReceivedHeader || /^(?:Sent|Received):/i.test(entry.message)) {
+              finishReceivedPayload();
+            } else if (receivedPayload.waitingForMessage) {
+              const messageMatch = entry.message.match(
+                /^\s*(?:size:\s*\d+\s+)?msg:\s*(.*)$/i
+              );
+              if (messageMatch) {
+                receivedPayload.waitingForMessage = false;
+                const prefix = entry.message.match(/^\s*(?:size:\s*\d+\s+)?msg:/i)?.[0] || "msg:";
+                receivedPayload.lines.push(`${prefix}${messageMatch[1]}`);
+                receivedPayload.braceCount += countJsonBraces(messageMatch[1]);
+                if (receivedPayload.braceCount <= 0)
+                  finishReceivedPayload();
+              } else {
+                receivedPayload = null;
+              }
+            } else {
+              appendReceivedPayload(entry.message);
+            }
+            if (receivedPayload)
+              continue;
+          } else {
+            continue;
+          }
+        }
+
         if (entry) {
           flushCurrentEntry();
 
-          const isReceivedPayloadLine = previousEntryWasEmptyReceived &&
-            entry.tag === NUA_CLIENT_TAG &&
-            /^\s*(?:(?:size:\s*\d+)\s+)?msg:\s*\{/.test(entry.message);
-          currentEntryMatches = matchesLogcatFilter(line, entry) || isReceivedPayloadLine;
+          const receivedHeader = entry.tag === NUA_CLIENT_TAG &&
+            /^(?:client\s+)?received:\s*(.*)$/i.exec(entry.message);
+          if (receivedHeader) {
+            receivedPayload = {
+              lines: [line],
+              braceCount: 0,
+              waitingForMessage: true
+            };
+            const inlineMessage = receivedHeader[1].match(
+              /^\s*(?:size:\s*\d+\s+)?msg:\s*(.*)$/i
+            );
+            if (inlineMessage) {
+              const prefix = receivedHeader[1].match(/^\s*(?:size:\s*\d+\s+)?msg:/i)?.[0] || "msg:";
+              receivedPayload.lines.push(`${prefix}${inlineMessage[1]}`);
+              receivedPayload.waitingForMessage = false;
+              receivedPayload.braceCount = countJsonBraces(inlineMessage[1]);
+              if (receivedPayload.braceCount <= 0)
+                finishReceivedPayload();
+            }
+            continue;
+          }
+
+          currentEntryMatches = matchesLogcatFilter(line, entry);
           currentEntryLines = currentEntryMatches ? [line] : [];
-          previousEntryWasEmptyReceived = entry.tag === NUA_CLIENT_TAG &&
-            /^Received:\s*$/.test(entry.message);
         } else if (currentEntryMatches && line.trim()) {
           currentEntryLines.push(line);
         }
