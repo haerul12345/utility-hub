@@ -425,6 +425,45 @@
                         min-width: 250px;
                 }
 
+                .search-wrapper-home {
+                        display: none;
+                }
+
+                .parsed-payloads-header-tools {
+                        display: grid;
+                        flex: 0 1 560px;
+                        grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+                        align-items: center;
+                        gap: 12px;
+                        min-width: 0;
+                }
+
+                .parsed-payload-search-host {
+                        min-width: 0;
+                }
+
+                .parsed-payloads-header-tools .search-wrapper {
+                        width: 100%;
+                        min-width: 0;
+                }
+
+                .parsed-payloads-header-tools .search-box {
+                        min-width: 0;
+                }
+
+                .parsed-payloads-header-tools .active-filter-info {
+                        display: grid;
+                        flex: 0 1 auto;
+                        min-width: 0;
+                        gap: 2px;
+                }
+
+                .active-filter-line {
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                }
+
                 .search-wrapper .search-box {
                         width: 100%;
                         padding-right: 40px;
@@ -506,6 +545,17 @@
                 .search-suggestion.active {
                         background: rgba(0, 212, 255, .1);
                         box-shadow: none;
+                }
+
+                @media (max-width: 600px) {
+                        .parsed-payloads-header-tools {
+                                flex-basis: 100%;
+                                grid-template-columns: minmax(0, 1fr);
+                        }
+
+                        .parsed-payloads-header-tools .search-wrapper {
+                                min-width: 0;
+                        }
                 }
 
                 .stats {
@@ -1088,15 +1138,17 @@
                                 Export JSON
                         </button>
 
-                        <div class="search-wrapper">
-                                <input id="searchInput" class="search-box" placeholder="Search..." autocomplete="off"
-                                        disabled role="combobox" aria-autocomplete="list" aria-expanded="false"
-                                        aria-controls="searchSuggestions" oninput="handleSearchInput()"
-                                        onkeydown="handleSearchKeydown(event)">
-                                <button type="button" id="searchClearButton" class="search-clear-button"
-                                        aria-label="Clear search" title="Clear search" onclick="clearSearch()"
-                                        disabled>&times;</button>
-                                <div id="searchSuggestions" class="search-suggestions" role="listbox"></div>
+                        <div id="searchWrapperHome" class="search-wrapper-home">
+                                <div id="searchWrapper" class="search-wrapper">
+                                        <input id="searchInput" class="search-box" placeholder="Search payloads..."
+                                                autocomplete="off" disabled role="combobox" aria-autocomplete="list"
+                                                aria-expanded="false" aria-controls="searchSuggestions"
+                                                oninput="handleSearchInput()" onkeydown="handleSearchKeydown(event)">
+                                        <button type="button" id="searchClearButton" class="search-clear-button"
+                                                aria-label="Clear search" title="Clear search" onclick="clearSearch()"
+                                                disabled>&times;</button>
+                                        <div id="searchSuggestions" class="search-suggestions" role="listbox"></div>
+                                </div>
                         </div>
                 </div>
 
@@ -1118,6 +1170,8 @@
                 const connectedDeviceInfo = document.getElementById("connectedDeviceInfo");
                 const readLogcatButton = document.getElementById("readLogcatButton");
                 const logInput = document.getElementById("logInput");
+                const searchWrapper = document.getElementById("searchWrapper");
+                const searchWrapperHome = document.getElementById("searchWrapperHome");
                 const pageMemoryValue = document.getElementById("pageMemoryValue");
                 const helperMemoryValue = document.getElementById("helperMemoryValue");
                 let liveReadSource = null;
@@ -1291,6 +1345,7 @@
                         activeResultFilter = "all";
                         activeFlowFilter = "all";
                         activeTransactionFilter = "all";
+                        searchWrapperHome.appendChild(searchWrapper);
                         document.getElementById("results").replaceChildren();
                         setResultControlsEnabled(false);
 
@@ -1920,13 +1975,22 @@
                         if (categoryLabels[filters.categoryFilter])
                                 activeFilters.push(`Type: ${categoryLabels[filters.categoryFilter]}`);
 
-                        if (filters.searchTerm)
-                                activeFilters.push(`Search: ${filters.searchTerm}`);
+                        info.replaceChildren();
+                        if (activeFilters.length) {
+                                const filterLine = document.createElement("span");
+                                filterLine.className = "active-filter-line";
+                                filterLine.textContent = `Active filters: ${activeFilters.join(" · ")}`;
+                                info.appendChild(filterLine);
+                        }
 
-                        info.textContent = activeFilters.length
-                                ? `Active filters: ${activeFilters.join(" · ")}`
-                                : "";
-                        info.hidden = activeFilters.length === 0;
+                        if (filters.searchTerm) {
+                                const searchLine = document.createElement("span");
+                                searchLine.className = "active-filter-line";
+                                searchLine.textContent = `Search: ${filters.searchTerm}`;
+                                info.appendChild(searchLine);
+                        }
+
+                        info.hidden = activeFilters.length === 0 && !filters.searchTerm;
                 }
 
                 function updateWarningVisibility(root, transactionFilter, flowFilter) {
@@ -2623,7 +2687,10 @@ ${paymentIdleWarningSummary}
 <section class="request-groups-panel parsed-payloads-panel" aria-label="Parsed Payloads">
     <div class="request-groups-header">
         <span>Parsed Payloads</span>
-        <span class="active-filter-info" aria-live="polite" hidden></span>
+        <div class="parsed-payloads-header-tools">
+            <span class="active-filter-info" aria-live="polite" hidden></span>
+            <div id="parsedPayloadSearchHost" class="parsed-payload-search-host"></div>
+        </div>
     </div>
     <div class="parsed-payloads-content">`;
                         }
@@ -2749,7 +2816,11 @@ ${escapeHtml(JSON.stringify(parsedObj, null, 2))}
                         }
 
                         // ONE DOM UPDATE
+                        searchWrapperHome.appendChild(searchWrapper);
                         container.innerHTML = html;
+                        const searchHost = container.querySelector("#parsedPayloadSearchHost");
+                        if (searchHost)
+                                searchHost.appendChild(searchWrapper);
                         setResultControlsEnabled(entries.length > 0);
                         handleSearchInput();
                 }
@@ -2791,6 +2862,7 @@ ${escapeHtml(JSON.stringify(parsedObj, null, 2))}
 
                         const generatedAt = lastParseResult.generatedAt;
                         const reportResults = document.getElementById("results").cloneNode(true);
+                        reportResults.querySelector("#searchWrapper")?.remove();
                         const reportEntries = lastParseResult.entries;
                         const initialTransactionFilter = lastParseResult.transactionGroups.length
                                 ? activeTransactionFilter
