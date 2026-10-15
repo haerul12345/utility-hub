@@ -431,7 +431,7 @@
 
                 .parsed-payloads-header-tools {
                         display: grid;
-                        flex: 0 1 560px;
+                        flex: 1 1 560px;
                         grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
                         align-items: center;
                         gap: 12px;
@@ -439,11 +439,14 @@
                 }
 
                 .parsed-payload-search-host {
+                        display: flex;
+                        justify-content: flex-end;
                         min-width: 0;
                 }
 
                 .parsed-payloads-header-tools .search-wrapper {
                         width: 100%;
+                        max-width: 320px;
                         min-width: 0;
                 }
 
@@ -453,9 +456,11 @@
 
                 .parsed-payloads-header-tools .active-filter-info {
                         display: grid;
-                        flex: 0 1 auto;
+                        width: 100%;
                         min-width: 0;
                         gap: 2px;
+                        overflow: hidden;
+                        text-align: right;
                 }
 
                 .active-filter-line {
