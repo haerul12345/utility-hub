@@ -1251,9 +1251,26 @@
                         setTimeout(parseLogs, 0);
                 });
 
+                function prepareManualPasteFallback() {
+                        const hasExistingLogs = Boolean(logInput.value.trim());
+                        if (hasExistingLogs)
+                                parseLogs();
+
+                        logInput.focus();
+                        logInput.select();
+
+                        const secureContextHint = window.isSecureContext
+                                ? "Allow clipboard access for this site."
+                                : "Open this page over HTTPS or localhost.";
+                        const fallbackMessage = hasExistingLogs
+                                ? "Existing logs parsed. Press Ctrl+V to replace them."
+                                : "Press Ctrl+V in the log box to paste.";
+                        //showToast(`Clipboard blocked. ${fallbackMessage} ${secureContextHint}`);
+                }
+
                 async function pasteLogsFromClipboard() {
                         if (!navigator.clipboard?.readText) {
-                                showToast("Clipboard access is unavailable. Paste logs into the textbox.");
+                                prepareManualPasteFallback();
                                 return;
                         }
 
@@ -1270,7 +1287,7 @@
                                 logInput.focus();
                         } catch (error) {
                                 console.error("Could not read logs from the clipboard:", error);
-                                showToast("Could not read clipboard. Allow access or paste logs into the textbox.");
+                                prepareManualPasteFallback();
                         }
                 }
 
@@ -3066,6 +3083,20 @@ body {
 .container {
     width: 100%;
 }
+
+.header {
+    grid-template-columns: 1fr;
+}
+
+.header .brand {
+    grid-column: 1;
+    justify-self: center;
+}
+
+#report-results .parsed-payloads-header-tools {
+    display: flex;
+    justify-content: flex-end;
+}
 `;
 
                         const reportBodyEndTag = "<" + "/body>";
@@ -3075,6 +3106,25 @@ body {
 var activeReportCategoryFilter = "all";
 var activeReportFlowFilter = "all";
 var activeReportTransactionFilter = "${initialTransactionFilter}";
+
+function toggleParsedPayloads(button) {
+    var content = document.getElementById(button.getAttribute("aria-controls"));
+    var expanded = button.getAttribute("aria-expanded") === "true";
+    button.setAttribute("aria-expanded", String(!expanded));
+    content.hidden = expanded;
+}
+
+function expandAll() {
+    document.querySelectorAll("#report-results .json-block details").forEach(function (details) {
+        details.open = true;
+    });
+}
+
+function collapseAll() {
+    document.querySelectorAll("#report-results .json-block details").forEach(function (details) {
+        details.open = false;
+    });
+}
 
 function updateReportActiveFilterInfo() {
     var info = document.querySelector("#report-results .active-filter-info");
@@ -3227,10 +3277,6 @@ ${css}
     </div>
 
     <div class="container">
-        <div class="toolbar">
-            <button class="secondary" onclick="document.querySelectorAll('#report-results details').forEach(details => details.open = true)">Expand All</button>
-            <button class="secondary" onclick="document.querySelectorAll('#report-results details').forEach(details => details.open = false)">Collapse All</button>
-        </div>
         <div id="report-results">
 ${reportResults.innerHTML}
         </div>
