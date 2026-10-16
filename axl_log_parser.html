@@ -1468,13 +1468,19 @@
                         connectedDeviceInfo.classList.toggle("error", failed);
                         if (failed)
                                 connectedDeviceInfo.textContent = "ADB device disconnected or Logcat failed.";
+                        else
+                                connectedDeviceInfo.textContent = "";
                         readLogcatButton.textContent = "Start Live Reading";
                         deviceStatus.textContent = status;
                 }
 
                 function setResultControlsEnabled(enabled) {
-                        document.getElementById("expandAllButton").disabled = !enabled;
-                        document.getElementById("collapseAllButton").disabled = !enabled;
+                        const expandAllButton = document.getElementById("expandAllButton");
+                        const collapseAllButton = document.getElementById("collapseAllButton");
+                        if (expandAllButton)
+                                expandAllButton.disabled = !enabled;
+                        if (collapseAllButton)
+                                collapseAllButton.disabled = !enabled;
                         document.getElementById("exportHtmlButton").disabled = !enabled;
                         document.getElementById("exportJsonButton").disabled = !enabled;
                         document.getElementById("searchInput").disabled = !enabled;
