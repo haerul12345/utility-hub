@@ -373,9 +373,25 @@
 
                 .toolbar {
                         display: flex;
+                        align-items: center;
                         gap: 10px;
                         flex-wrap: wrap;
                         margin: 20px 0;
+                }
+
+                .toolbar-actions,
+                .toolbar-exports {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                }
+
+                .toolbar-exports {
+                        margin-left: auto;
+                }
+
+                #parseLogsButton[hidden] {
+                        display: none;
                 }
 
                 button {
@@ -702,6 +718,54 @@
                         font-size: 15px;
                         font-weight: 600;
                         padding: 12px 16px;
+                }
+
+                .parsed-payloads-toggle {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                        flex: 0 0 auto;
+                        border: 0;
+                        padding: 0;
+                        color: inherit;
+                        font: inherit;
+                        text-align: left;
+                }
+
+                .parsed-payloads-heading-controls {
+                        display: flex;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 8px;
+                }
+
+                .parsed-payloads-heading-controls #expandAllButton {
+                        margin-left: 12px;
+                }
+
+                .parsed-payloads-heading-controls .secondary {
+                        padding: 6px 9px;
+                        font-size: 11px;
+                }
+
+                .parsed-payloads-toggle:hover {
+                        background: transparent;
+                        color: var(--accent);
+                        box-shadow: none;
+                }
+
+                .parsed-payloads-toggle:focus-visible {
+                        outline: 2px solid var(--accent);
+                        outline-offset: 4px;
+                }
+
+                .parsed-payloads-toggle-icon {
+                        display: inline-block;
+                        transition: transform .16s ease;
+                }
+
+                .parsed-payloads-toggle[aria-expanded="false"] .parsed-payloads-toggle-icon {
+                        transform: rotate(-90deg);
                 }
 
                 .active-filter-info {
@@ -1092,9 +1156,9 @@
 
                 <section class="memory-panel" aria-label="Memory usage">
                         <div class="memory-card">
-                                <h2>Parser page · JavaScript heap</h2>
+                                <h2>JavaScript heap · browser estimate</h2>
                                 <div id="pageMemoryValue" class="memory-value" aria-live="polite">Checking browser support...</div>
-                                <div class="memory-note">Browser heap estimate; not total tab or GPU memory.</div>
+                                <div class="memory-note">Heap capacity can grow and stay reserved; this alone does not indicate a leak. Watch “used” memory instead. Not total tab or GPU memory.</div>
                         </div>
                         <div class="memory-card">
                                 <div class="memory-card-heading">
@@ -1122,26 +1186,22 @@
 
 
                 <div class="toolbar">
+                        <div class="toolbar-actions">
+                                <button class="primary" id="parseLogsButton" onclick="pasteLogsFromClipboard()">
+                                        Paste Logs
+                                </button>
 
-                        <button class="primary" onclick="parseLogs()">
-                                Parse Logs
-                        </button>
+                        </div>
 
-                        <button class="secondary" id="expandAllButton" onclick="expandAll()" disabled>
-                                Expand All
-                        </button>
+                        <div class="toolbar-exports">
+                                <button class="secondary" id="exportHtmlButton" onclick="exportHtmlReport()" disabled>
+                                        Export HTML Report
+                                </button>
 
-                        <button class="secondary" id="collapseAllButton" onclick="collapseAll()" disabled>
-                                Collapse All
-                        </button>
-
-                        <button class="secondary" id="exportHtmlButton" onclick="exportHtmlReport()" disabled>
-                                Export HTML Report
-                        </button>
-
-                        <button class="secondary" id="exportJsonButton" onclick="exportJsonReport()" disabled>
-                                Export JSON
-                        </button>
+                                <button class="secondary" id="exportJsonButton" onclick="exportJsonReport()" disabled>
+                                        Export JSON
+                                </button>
+                        </div>
 
                         <div id="searchWrapperHome" class="search-wrapper-home">
                                 <div id="searchWrapper" class="search-wrapper">
@@ -1171,6 +1231,7 @@
                 const pasteSection = document.getElementById("pasteSection");
                 const deviceSection = document.getElementById("deviceSection");
                 const modeToggle = document.getElementById("modeToggle");
+                const parseLogsButton = document.getElementById("parseLogsButton");
                 const deviceStatus = document.getElementById("deviceStatus");
                 const connectedDeviceInfo = document.getElementById("connectedDeviceInfo");
                 const readLogcatButton = document.getElementById("readLogcatButton");
@@ -1181,8 +1242,37 @@
                 const helperMemoryValue = document.getElementById("helperMemoryValue");
                 let liveReadSource = null;
                 let liveParseTimer = null;
+                let pageMemoryTimer = null;
                 let helperMemoryTimer = null;
                 let isLiveReading = false;
+                let isPageActive = true;
+
+                logInput.addEventListener("paste", () => {
+                        setTimeout(parseLogs, 0);
+                });
+
+                async function pasteLogsFromClipboard() {
+                        if (!navigator.clipboard?.readText) {
+                                showToast("Clipboard access is unavailable. Paste logs into the textbox.");
+                                return;
+                        }
+
+                        try {
+                                const text = await navigator.clipboard.readText();
+                                if (!text.trim()) {
+                                        showToast("Clipboard is empty.");
+                                        return;
+                                }
+
+                                logInput.value = text;
+                                clearParsedResults();
+                                parseLogs();
+                                logInput.focus();
+                        } catch (error) {
+                                console.error("Could not read logs from the clipboard:", error);
+                                showToast("Could not read clipboard. Allow access or paste logs into the textbox.");
+                        }
+                }
 
                 function formatMemory(bytes) {
                         return `${(bytes / (1024 * 1024)).toFixed(1)} MiB`;
@@ -1197,12 +1287,12 @@
 
                         pageMemoryValue.textContent =
                                 `${formatMemory(memory.usedJSHeapSize)} used / ` +
-                                `${formatMemory(memory.totalJSHeapSize)} allocated · ` +
+                                `${formatMemory(memory.totalJSHeapSize)} heap capacity · ` +
                                 `${formatMemory(memory.jsHeapSizeLimit)} limit`;
                 }
 
                 async function updateHelperMemory() {
-                        if (!modeToggle.checked)
+                        if (!isPageActive || !modeToggle.checked)
                                 return;
 
                         try {
@@ -1213,17 +1303,15 @@
                                         throw new Error(`HTTP ${response.status}`);
 
                                 const memory = await response.json();
-                                if (!modeToggle.checked)
+                                if (!isPageActive || !modeToggle.checked)
                                         return;
 
                                 helperMemoryValue.textContent =
                                         `${formatMemory(memory.rss)} RSS · ` +
                                         `${formatMemory(memory.heapUsed)} used / ` +
                                         `${formatMemory(memory.heapTotal)} heap`;
-                                if (!helperMemoryTimer)
-                                        helperMemoryTimer = setInterval(updateHelperMemory, 2000);
                         } catch (error) {
-                                if (!modeToggle.checked)
+                                if (!isPageActive || !modeToggle.checked)
                                         return;
 
                                 clearInterval(helperMemoryTimer);
@@ -1233,23 +1321,57 @@
                         }
                 }
 
-                updatePageMemory();
-                setInterval(updatePageMemory, 1000);
+                function startPageMemoryUpdates() {
+                        updatePageMemory();
+                        if (!pageMemoryTimer)
+                                pageMemoryTimer = setInterval(updatePageMemory, 1000);
+                }
+
+                function startHelperMemoryUpdates() {
+                        if (!modeToggle.checked || !isPageActive)
+                                return;
+
+                        updateHelperMemory();
+                        if (!helperMemoryTimer)
+                                helperMemoryTimer = setInterval(updateHelperMemory, 2000);
+                }
+
+                function stopHelperMemoryUpdates() {
+                        clearInterval(helperMemoryTimer);
+                        helperMemoryTimer = null;
+                }
+
+                startPageMemoryUpdates();
 
                 modeToggle.addEventListener("change", () => {
                         const deviceMode = modeToggle.checked;
                         pasteSection.style.display = deviceMode ? "none" : "block";
                         deviceSection.style.display = deviceMode ? "block" : "none";
+                        parseLogsButton.hidden = deviceMode;
                         if (deviceMode) {
-                                updateHelperMemory();
-                                helperMemoryTimer = setInterval(updateHelperMemory, 2000);
+                                startHelperMemoryUpdates();
                         } else {
-                                clearInterval(helperMemoryTimer);
-                                helperMemoryTimer = null;
+                                stopHelperMemoryUpdates();
                                 helperMemoryValue.textContent = "Switch to ADB mode to check the helper.";
                                 if (isLiveReading)
                                         stopLiveReading("Live reading stopped.");
                         }
+                });
+
+                window.addEventListener("pagehide", () => {
+                        isPageActive = false;
+                        clearInterval(pageMemoryTimer);
+                        pageMemoryTimer = null;
+                        stopHelperMemoryUpdates();
+                        if (isLiveReading)
+                                stopLiveReading("Live reading stopped.", false, false);
+                });
+
+                window.addEventListener("pageshow", () => {
+                        isPageActive = true;
+                        startPageMemoryUpdates();
+                        if (modeToggle.checked)
+                                startHelperMemoryUpdates();
                 });
 
                 function toggleLiveReading() {
@@ -1317,13 +1439,13 @@
                         };
                 }
 
-                function stopLiveReading(status, failed = false) {
+                function stopLiveReading(status, failed = false, parseRemainingLog = true) {
                         isLiveReading = false;
                         clearTimeout(liveParseTimer);
                         liveParseTimer = null;
                         liveReadSource?.close();
                         liveReadSource = null;
-                        if (logInput.value)
+                        if (parseRemainingLog && logInput.value)
                                 parseLogs();
                         deviceStatus.classList.toggle("error", failed);
                         connectedDeviceInfo.classList.toggle("error", failed);
@@ -1362,6 +1484,13 @@
                         document.getElementById("searchSuggestions").replaceChildren();
                         document.getElementById("searchSuggestions").classList.remove("open");
                         activeSuggestionIndex = -1;
+                }
+
+                function toggleParsedPayloads(button) {
+                        const content = document.getElementById(button.getAttribute("aria-controls"));
+                        const expanded = button.getAttribute("aria-expanded") === "true";
+                        button.setAttribute("aria-expanded", String(!expanded));
+                        content.hidden = expanded;
                 }
 
                 function countBraces(text) {
@@ -2691,13 +2820,21 @@ ${paymentIdleWarningSummary}
                                 html += `
 <section class="request-groups-panel parsed-payloads-panel" aria-label="Parsed Payloads">
     <div class="request-groups-header">
-        <span>Parsed Payloads</span>
+        <div class="parsed-payloads-heading-controls">
+            <button type="button" class="parsed-payloads-toggle" aria-expanded="true"
+                    aria-controls="parsedPayloadsContent" onclick="toggleParsedPayloads(this)">
+                <span>Parsed Payloads</span>
+                <span class="parsed-payloads-toggle-icon" aria-hidden="true">▾</span>
+            </button>
+            <button class="secondary" id="expandAllButton" onclick="expandAll()" disabled>Expand All</button>
+            <button class="secondary" id="collapseAllButton" onclick="collapseAll()" disabled>Collapse All</button>
+        </div>
         <div class="parsed-payloads-header-tools">
             <span class="active-filter-info" aria-live="polite" hidden></span>
             <div id="parsedPayloadSearchHost" class="parsed-payload-search-host"></div>
         </div>
     </div>
-    <div class="parsed-payloads-content">`;
+    <div id="parsedPayloadsContent" class="parsed-payloads-content">`;
                         }
 
                         // RENDER USING ALREADY PARSED DATA
