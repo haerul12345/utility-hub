@@ -1131,7 +1131,6 @@
                 <section class="logcat-filter" aria-label="Android Studio Logcat filter">
                         <p>Use this filter in Android Studio Logcat to capture AXL requests and responses.</p>
                         <div class="logcat-filter-row">
-                                <!-- <code id="logcatFilterText" class="logcat-filter-code">"IngenicoAxL:request:" | "IngenicoAxL:response:" | "Sent:" | "Received:"</code> -->
                                 <code id="logcatFilterText"
                                         class="logcat-filter-code">"IngenicoAxL:request:" | "IngenicoAxL:response:" | tag:NUAClient  & ( "Sent:" | "Received:")</code>
                                 <button class="logcat-copy-button" type="button" onclick="copyLogcatFilter(this)"
@@ -1260,13 +1259,6 @@
                         logInput.focus();
                         logInput.select();
 
-                        const secureContextHint = window.isSecureContext
-                                ? "Allow clipboard access for this site."
-                                : "Open this page over HTTPS or localhost.";
-                        const fallbackMessage = hasExistingLogs
-                                ? "Existing logs parsed. Press Ctrl+V to replace them."
-                                : "Press Ctrl+V in the log box to paste.";
-                        //showToast(`Clipboard blocked. ${fallbackMessage} ${secureContextHint}`);
                 }
 
                 async function pasteLogsFromClipboard() {
@@ -1837,28 +1829,6 @@
                         return "UNKNOWN";
                 }
 
-                /*                 function copyJson(index) {
-                
-                                        const text =
-                                                document.getElementById(
-                                                        "json-" + index
-                                                ).innerText;
-                
-                                        navigator.clipboard.writeText(text)
-                                                .then(() => {
-                
-                                                        button.innerText = "✓ Copied!";
-                                                        button.style.background = "#16a34a";
-                
-                                                        showToast("JSON copied to clipboard");
-                
-                                                        setTimeout(() => {
-                                                                button.innerText = "Copy";
-                                                                button.style.background = "#334155";
-                                                        }, 1500);
-                                                });
-                                }
-                 */
                 function expandAll() {
 
                         document
@@ -2039,6 +2009,17 @@
                                 .getElementById("searchInput")
                                 .value
                                 .trim();
+
+                        if (term) {
+                                const parsedPayloads = document.getElementById("parsedPayloadsContent");
+                                const parsedPayloadsToggle = document.querySelector(
+                                        '[aria-controls="parsedPayloadsContent"]'
+                                );
+                                if (parsedPayloads?.hidden && parsedPayloadsToggle) {
+                                        parsedPayloads.hidden = false;
+                                        parsedPayloadsToggle.setAttribute("aria-expanded", "true");
+                                }
+                        }
 
                         document
                                 .querySelectorAll(".json-block")
@@ -2227,235 +2208,6 @@
                         });
                         filterResults();
                 }
-                /*
-                                function parseLogs() {
-                
-                                        const text =
-                                                document.getElementById("input").value;
-                
-                                        const jsonBlocks =
-                                                extractJsonObjects(text);
-                
-                                        const container =
-                                                document.getElementById("results");
-                
-                                        let requestCount = 0;
-                                        let responseCount = 0;
-                                        let eventCount = 0;
-                
-                                        let invalidTotal = 0;
-                                        let invalidRequest = 0;
-                                        let invalidResponse = 0;
-                                        let invalidEvent = 0;
-                
-                
-                                        jsonBlocks.forEach(raw => {
-                
-                                                try {
-                                                        JSON.parse(raw);
-                                                } catch {
-                
-                                                        invalidTotal++;
-                
-                                                        if (raw.includes('"request"'))
-                                                                invalidRequest++;
-                
-                                                        else if (raw.includes('"response"'))
-                                                                invalidResponse++;
-                
-                                                        else if (raw.includes('"event"'))
-                                                                invalidEvent++;
-                                                }
-                
-                                                if (raw.includes('"request"'))
-                                                        requestCount++;
-                
-                                                else if (raw.includes('"response"'))
-                                                        responseCount++;
-                
-                                                else if (raw.includes('"event"'))
-                                                        eventCount++;
-                                        });
-                
-                                        const invalidSummary = `
-                <div class="invalid-summary-card">
-                
-                  <div class="invalid-summary-header">
-                
-                    <div class="invalid-summary-left">
-                
-                        <div class="invalid-summary-total">
-                            ${invalidTotal}
-                        </div>
-                
-                        <div class="invalid-summary-title">
-                            Invalid JSON
-                        </div>
-                
-                    </div>
-                
-                    <div class="invalid-summary-detail">
-                
-                        <span class="invalid-req">
-                            Requests: ${invalidRequest}
-                        </span>
-                
-                        <span class="invalid-res">
-                            Responses: ${invalidResponse}
-                        </span>
-                
-                        <span class="invalid-event">
-                            Events: ${invalidEvent}
-                        </span>
-                
-                    </div>
-                
-                </div>
-                
-                </div>
-                `;
-                
-                                        container.innerHTML = `
-                    <div class="stats">
-                
-                        <div class="stat-card">
-                            <div class="stat-number">${jsonBlocks.length}</div>
-                            <div class="stat-label">Total Payloads</div>
-                        </div>
-                
-                        <div class="stat-card">
-                            <div class="stat-number">${requestCount}</div>
-                            <div class="stat-label">Requests</div>
-                        </div>
-                
-                        <div class="stat-card">
-                            <div class="stat-number">${responseCount}</div>
-                            <div class="stat-label">Responses</div>
-                        </div>
-                
-                        <div class="stat-card">
-                            <div class="stat-number">${eventCount}</div>
-                            <div class="stat-label">Events</div>
-                        </div>
-                
-                ${invalidTotal > 0 ? invalidSummary : ""}
-                
-                    </div>
-                `;
-                
-                
-                
-                                        jsonBlocks.forEach((block, index) => {
-                                                const { jsonText, timestamp } = block;
-                
-                                                const div =
-                                                        document.createElement("div");
-                
-                                                div.className = "json-block";
-                
-                                                try {
-                
-                                                        const obj =
-                                                                JSON.parse(jsonText);
-                
-                                                        const title =
-                                                                getTitle(obj);
-                
-                                                        div.classList.add("valid");
-                
-                                                        let badgeClass =
-                                                                "event-badge";
-                
-                                                        let badgeText =
-                                                                "EVENT";
-                
-                                                        if (title.startsWith("REQUEST")) {
-                                                                badgeClass = "request-badge";
-                                                                badgeText = "REQUEST";
-                                                        }
-                
-                                                        if (title.startsWith("RESPONSE")) {
-                                                                badgeClass = "response-badge";
-                                                                badgeText = "RESPONSE";
-                                                        }
-                
-                                                        const displayTitle = stripTypePrefix(title);
-                
-                                                        div.innerHTML = `
-                <details class="json-details">
-                
-                    <summary>
-                        <div class="summary-left">
-                            <span class="badge ${badgeClass}">
-                                ${badgeText}
-                            </span>
-                
-                            <span>${escapeHtml(displayTitle)}</span>
-                        </div>
-                    </summary>
-                
-                <button
-                    class="copy-btn floating-copy"
-                    onclick="copyJson(${index}, this)">
-                    Copy
-                </button>
-                
-                    <pre id="json-${index}">
-                ${escapeHtml(JSON.stringify(obj, null, 2))}
-                    </pre>
-                
-                </details>
-                            `;
-                
-                                                } catch (err) {
-                
-                                                        div.classList.add("invalid");
-                
-                                                        const title = getTitleFromRawJson(jsonText);
-                
-                                                        let badgeClass = "event-badge";
-                                                        let badgeText = "EVENT";
-                
-                                                        if (title.startsWith("REQUEST")) {
-                                                                badgeClass = "request-badge";
-                                                                badgeText = "REQUEST";
-                                                        }
-                
-                                                        if (title.startsWith("RESPONSE")) {
-                                                                badgeClass = "response-badge";
-                                                                badgeText = "RESPONSE";
-                                                        }
-                
-                                                        const displayTitle = stripTypePrefix(title);
-                
-                                                        div.innerHTML = `
-                <details>
-                
-                    <summary>
-                
-                        <div class="summary-left">
-                
-                            <span class="badge ${badgeClass}">
-                                ${badgeText}
-                            </span>
-                
-                            <span>${escapeHtml(displayTitle)}</span>
-                
-                        </div>
-                
-                    </summary>
-                
-                    <pre>${escapeHtml(jsonText.substring(0, 5000))}</pre>
-                
-                </details>
-                `;
-                                                }
-                
-                                                container.appendChild(div);
-                                        });
-                                }
-                */
-
                 function parseLogs() {
                         const text = document.getElementById("logInput").value;
                         const jsonBlocks = extractJsonObjects(text);
@@ -3313,8 +3065,6 @@ ${reportHtmlEndTag}
                         setTimeout(() => URL.revokeObjectURL(url), 1000);
                 }
 
-
-
                 function getTitleFromRawJson(text) {
 
                         // REQUEST
@@ -3402,35 +3152,6 @@ ${reportHtmlEndTag}
 
                         return "INVALID JSON";
                 }
-
-                /*                 function extractMetadata(raw) {
-                
-                                        const type =
-                                                raw.includes('"request"') ? 'REQUEST' :
-                                                        raw.includes('"response"') ? 'RESPONSE' :
-                                                                raw.includes('"event"') ? 'EVENT' :
-                                                                        'UNKNOWN';
-                
-                                        const flowId =
-                                                raw.match(/"flow_id":"([^"]+)"/)?.[1] || '-';
-                
-                                        const endpoint =
-                                                raw.match(/"endpoint":"([^"]+)"/)?.[1] || '-';
-                
-                                        const eventType =
-                                                raw.match(/"event_type":"([^"]+)"/)?.[1] || '-';
-                
-                                        const txnType =
-                                                raw.match(/"txn_type":"([^"]+)"/)?.[1] || '-';
-                
-                                        return {
-                                                type,
-                                                flowId,
-                                                endpoint,
-                                                eventType,
-                                                txnType
-                                        };
-                                } */
 
                 function copyJson(index, button) {
 

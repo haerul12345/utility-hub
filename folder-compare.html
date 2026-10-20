@@ -312,6 +312,30 @@
                         min-width: 180px;
                 }
 
+                .badge-button {
+                        width: 100%;
+                        color: inherit;
+                        font: inherit;
+                        text-align: left;
+                        cursor: pointer;
+                        transition: background .2s, box-shadow .2s, transform .2s;
+                }
+
+                .badge-button:hover {
+                        background: var(--panel2);
+                }
+
+                .badge-button:focus-visible {
+                        outline: 2px solid var(--accent);
+                        outline-offset: 2px;
+                }
+
+                .badge-button[aria-pressed="true"] {
+                        background: #05070d;
+                        box-shadow: inset 0 2px 5px rgba(0, 0, 0, .45);
+                        transform: translateY(1px);
+                }
+
                 .badge::before {
                         content: '';
                         position: absolute;
@@ -324,6 +348,10 @@
 
                 .badge.ok {
                         color: var(--success);
+                }
+
+                .badge.all {
+                        color: var(--accent);
                 }
 
                 .badge.chg {
@@ -547,6 +575,7 @@
                         // State
                         let dirA = null, dirB = null;
                         let reportCache = null;
+                        let selectedFilter = 'all';
 
                         // Helpers
                         const esc = s => (s ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
@@ -797,47 +826,50 @@
 
                         function renderSummary(report) {
                                 const c = report.counts;
-                                /*     summaryEl.innerHTML =
-                                      '<span class="badge ok">Identical: ' + c.identical + '</span>' +
-                                      '<span class="badge chg">Changed: ' + c.changed + '</span>' +
-                                      '<span class="badge version">Different version: ' + c.version + '</span>' +
-                                      '<span class="badge build">Different build: ' + c.build + '</span>' +
-                                      '<span class="badge onlyA">Only in A: ' + c.onlyA + '</span>' +
-                                      '<span class="badge onlyB">Only in B: ' + c.onlyB + '</span>'; */
-
+                                const total = Object.values(c).reduce((sum, count) => sum + count, 0);
                                 summaryEl.innerHTML =
                                         `
-<div class="badge ok">
+<button type="button" class="badge badge-button all" data-filter="all" aria-pressed="false">
+  ALL<br><strong>${total}</strong>
+</button>
+
+<button type="button" class="badge badge-button ok" data-filter="identical" aria-pressed="false">
   IDENTICAL<br><strong>${c.identical}</strong>
-</div>
+</button>
 
-<div class="badge chg">
+<button type="button" class="badge badge-button chg" data-filter="changed" aria-pressed="false">
   CHANGED<br><strong>${c.changed}</strong>
-</div>
+</button>
 
-<div class="badge version">
+<button type="button" class="badge badge-button version" data-filter="version" aria-pressed="false">
   VERSION DIFF<br><strong>${c.version}</strong>
-</div>
+</button>
 
-<div class="badge build">
+<button type="button" class="badge badge-button build" data-filter="build" aria-pressed="false">
   BUILD DIFF<br><strong>${c.build}</strong>
-</div>
+</button>
 
-<div class="badge onlyA">
+<button type="button" class="badge badge-button onlyA" data-filter="onlyA" aria-pressed="false">
   ONLY IN A<br><strong>${c.onlyA}</strong>
-</div>
+</button>
 
-<div class="badge onlyB">
+<button type="button" class="badge badge-button onlyB" data-filter="onlyB" aria-pressed="false">
   ONLY IN B<br><strong>${c.onlyB}</strong>
-</div>
+ </button>
 `;
+                                for (const card of summaryEl.querySelectorAll('[data-filter]')) {
+                                        const active = selectedFilter === 'differences'
+                                                ? ['changed', 'version'].includes(card.dataset.filter)
+                                                : selectedFilter === card.dataset.filter;
+                                        card.setAttribute('aria-pressed', String(active));
+                                }
                         }
 
-                        function renderSideBySide(report, onlyChanged = false) {
+                        function renderSideBySide(report) {
                                 resultsBody.innerHTML = '';
                                 for (const row of report.rows) {
-                                        // if (onlyChanged && !['changed', 'version', 'build'].includes(row.status)) continue;
-                                        if (onlyChanged && row.status === 'identical') continue;
+                                        if (selectedFilter === 'differences' && !['changed', 'version'].includes(row.status)) continue;
+                                        if (selectedFilter !== 'all' && selectedFilter !== 'differences' && row.status !== selectedFilter) continue;
 
                                         const tr = document.createElement('tr');
 
@@ -923,9 +955,24 @@
                                 URL.revokeObjectURL(url);
                         });
 
-                        // React to filter toggle
+                        // Keep summary card and checkbox filters in sync.
+                        summaryEl.addEventListener('click', event => {
+                                const card = event.target.closest('[data-filter]');
+                                if (!card) return;
+                                selectedFilter = card.dataset.filter;
+                                onlyChangedEl.checked = false;
+                                if (reportCache) {
+                                        renderSummary(reportCache);
+                                        renderSideBySide(reportCache);
+                                }
+                        });
+
                         onlyChangedEl.addEventListener('change', () => {
-                                if (reportCache) renderSideBySide(reportCache, onlyChangedEl.checked);
+                                selectedFilter = onlyChangedEl.checked ? 'differences' : 'all';
+                                if (reportCache) {
+                                        renderSummary(reportCache);
+                                        renderSideBySide(reportCache);
+                                }
                         });
 
                 })();
