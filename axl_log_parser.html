@@ -982,14 +982,6 @@
                         color: var(--danger);
                 }
 
-                .group-comparison-metric.total-delta.negative strong {
-                        color: var(--danger);
-                }
-
-                .group-comparison-metric.total-delta.positive strong {
-                        color: var(--success);
-                }
-
                 .group-comparison-metric.total-delta small {
                         color: var(--muted);
                         font-size: 9px;
@@ -1895,6 +1887,8 @@
                         pasteSection.style.display = deviceMode ? "none" : "block";
                         deviceSection.style.display = deviceMode ? "block" : "none";
                         parseLogsButton.hidden = deviceMode;
+                        appendLogsButton.hidden = deviceMode;
+                        clearLogsButton.hidden = deviceMode;
                         if (deviceMode) {
                                 startHelperMemoryUpdates();
                         } else {
@@ -2967,8 +2961,7 @@
                 }
 
                 function formatExecutionDifference(milliseconds) {
-                        const sign = milliseconds > 0 ? "+" : milliseconds < 0 ? "-" : "";
-                        return `${sign}${formatExecutionDuration(Math.abs(milliseconds))}`;
+                        return formatExecutionDuration(Math.abs(milliseconds));
                 }
 
                 function setComparisonFilter(filter, button) {
@@ -3168,7 +3161,7 @@
                                 includeExecutionTime
                                         ? `<div class="group-comparison-metric ${changedExecutionIntervalCount ? "warning" : ""}"><span>Intervals differ</span><strong>${changedExecutionIntervalCount}/${comparedExecutionIntervalCount}</strong></div>`
                                         : `<div class="group-comparison-metric"><span>Intervals differ</span><strong>Off</strong></div>`,
-                                `<div class="group-comparison-metric total-delta ${totalTimeDifference == null ? "" : totalTimeDifference < 0 ? "negative" : totalTimeDifference > 0 ? "positive" : ""}"><span>Total delta · B − A</span><strong>${escapeHtml(totalTimeDifference == null ? "Unavailable" : formatExecutionDifference(totalTimeDifference))}</strong><small>${escapeHtml(groupA.label)}: ${escapeHtml(formatExecutionDuration(totalTimeA))} &nbsp;→&nbsp; ${escapeHtml(groupB.label)}: ${escapeHtml(formatExecutionDuration(totalTimeB))}</small></div>`
+                                `<div class="group-comparison-metric total-delta"><span>Total time difference</span><strong>${escapeHtml(totalTimeDifference == null ? "Unavailable" : formatExecutionDifference(totalTimeDifference))}</strong><small>${escapeHtml(groupA.label)}: ${escapeHtml(formatExecutionDuration(totalTimeA))} &nbsp;→&nbsp; ${escapeHtml(groupB.label)}: ${escapeHtml(formatExecutionDuration(totalTimeB))}</small></div>`
                         ].join("");
                         const breakdownTypes = ["request", "response", "event"];
                         Object.keys(differenceCounts).forEach(type => {
