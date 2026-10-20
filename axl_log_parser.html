@@ -902,60 +902,207 @@
                 }
 
                 .group-comparison-summary {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: 8px;
-                        color: var(--muted);
-                        font-size: 12px;
-                        line-height: 1.6;
+                        display: grid;
+                        gap: 16px;
                         padding: 16px;
                         background: rgba(18, 26, 44, .42);
                         border-bottom: 1px solid var(--border);
                 }
 
-                .group-comparison-total-time {
-                        display: grid;
-                        grid-template-columns: repeat(3, minmax(0, 1fr));
-                        gap: 10px;
-                        margin: 16px;
-                }
-
-                .group-comparison-time-card {
-                        min-width: 0;
-                        border: 1px solid var(--border);
-                        background: linear-gradient(145deg, rgba(18, 26, 44, .9), rgba(7, 11, 20, .85));
-                        padding: 14px 16px;
-                }
-
-                .group-comparison-time-card.different {
-                        border-color: rgba(255, 176, 32, .55);
-                        background: linear-gradient(145deg, rgba(255, 176, 32, .1), rgba(7, 11, 20, .85));
-                }
-
-                .group-comparison-time-label {
-                        color: var(--muted);
-                        font-size: 10px;
-                        letter-spacing: .7px;
-                        margin-bottom: 8px;
-                        text-transform: uppercase;
-                }
-
-                .group-comparison-time-value {
-                        color: var(--accent);
-                        font-size: 16px;
+                .group-comparison-summary-heading {
+                        color: var(--text);
+                        font-size: 13px;
                         font-weight: 700;
+                        line-height: 1.5;
                         overflow-wrap: anywhere;
                 }
 
-                .group-comparison-time-card.different .group-comparison-time-value {
+                .group-comparison-summary-caption {
+                        display: block;
+                        margin-top: 3px;
+                        color: var(--muted);
+                        font-size: 11px;
+                        font-weight: 400;
+                        line-height: 1.5;
+                }
+
+                .group-comparison-metrics {
+                        display: grid;
+                        grid-template-columns: repeat(4, minmax(0, 1fr));
+                        gap: 10px;
+                }
+
+                .group-comparison-metric {
+                        display: flex;
+                        min-width: 0;
+                        flex-direction: column;
+                        justify-content: space-between;
+                        gap: 6px;
+                        border: 1px solid var(--border);
+                        background: rgba(7, 11, 20, .55);
+                        padding: 11px 12px;
+                        color: var(--muted);
+                        font-size: 9px;
+                        letter-spacing: .45px;
+                        text-transform: uppercase;
+                }
+
+                .group-comparison-summary-heading-wrap {
+                        display: flex;
+                        align-items: flex-start;
+                        gap: 10px;
+                }
+
+                .group-comparison-summary-icon {
+                        display: inline-flex;
+                        width: 30px;
+                        height: 30px;
+                        flex: 0 0 auto;
+                        align-items: center;
+                        justify-content: center;
+                        border: 1px solid var(--border);
+                        color: var(--accent);
+                        font-size: 16px;
+                }
+
+                .group-comparison-metric strong {
+                        color: var(--text);
+                        font-size: 18px;
+                        letter-spacing: 0;
+                        line-height: 1.2;
+                        overflow-wrap: anywhere;
+                        text-transform: none;
+                }
+
+                .group-comparison-metric.warning strong {
                         color: var(--warning);
                 }
 
-                @media (max-width: 650px) {
-                        .group-comparison-total-time {
-                                grid-template-columns: minmax(0, 1fr);
-                                margin: 12px 8px;
-                        }
+                .group-comparison-metric.danger strong {
+                        color: var(--danger);
+                }
+
+                .group-comparison-metric.total-delta.negative strong {
+                        color: var(--danger);
+                }
+
+                .group-comparison-metric.total-delta.positive strong {
+                        color: var(--success);
+                }
+
+                .group-comparison-metric.total-delta small {
+                        color: var(--muted);
+                        font-size: 9px;
+                        letter-spacing: 0;
+                        line-height: 1.5;
+                        text-transform: none;
+                }
+
+                .group-comparison-breakdown {
+                        margin: 14px 16px 0;
+                        padding: 14px;
+                        border: 1px solid var(--border);
+                        background: rgba(18, 26, 44, .42);
+                }
+
+                .group-comparison-breakdown h3 {
+                        margin-bottom: 12px;
+                        color: var(--text);
+                        font-size: 12px;
+                        font-weight: 700;
+                }
+
+                .group-comparison-breakdown-list {
+                        display: grid;
+                        gap: 10px;
+                }
+
+                .group-comparison-breakdown-row {
+                        display: grid;
+                        gap: 5px;
+                }
+
+                .group-comparison-breakdown-label {
+                        display: flex;
+                        justify-content: space-between;
+                        gap: 8px;
+                        color: var(--muted);
+                        font-size: 10px;
+                        text-transform: uppercase;
+                }
+
+                .group-comparison-breakdown-track {
+                        height: 9px;
+                        overflow: hidden;
+                        background: rgba(7, 11, 20, .65);
+                }
+
+                .group-comparison-breakdown-fill {
+                        height: 100%;
+                        background: var(--warning);
+                        transition: width .2s ease;
+                }
+
+                .group-comparison-breakdown-fill.request {
+                        background: var(--request);
+                }
+
+                .group-comparison-breakdown-fill.response {
+                        background: var(--response);
+                }
+
+                .group-comparison-breakdown-fill.event {
+                        background: var(--event);
+                }
+
+                .group-comparison-filters {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 8px;
+                        margin: 14px 16px 0;
+                }
+
+                .group-comparison-filter {
+                        border: 1px solid var(--border);
+                        background: var(--panel);
+                        color: var(--text);
+                        cursor: pointer;
+                        font: inherit;
+                        font-size: 11px;
+                        padding: 7px 11px;
+                }
+
+                .group-comparison-filter:hover:not(:disabled) {
+                        background: var(--panel2);
+                }
+
+                .group-comparison-filter[aria-pressed="true"] {
+                        background: var(--panel2);
+                        color: var(--accent);
+                        box-shadow: inset 0 -2px 0 var(--accent);
+                }
+
+                .group-comparison-filter:focus-visible {
+                        outline: 2px solid var(--accent);
+                        outline-offset: 2px;
+                }
+
+                .group-comparison-filter:disabled {
+                        color: var(--muted);
+                        cursor: not-allowed;
+                        opacity: .65;
+                }
+
+                .group-comparison-empty-filter {
+                        margin: 14px 16px;
+                        padding: 12px;
+                        border: 1px solid var(--border);
+                        color: var(--muted);
+                        font-size: 11px;
+                }
+
+                .group-comparison-empty-filter[hidden] {
+                        display: none;
                 }
 
                 .group-comparison-item {
@@ -966,11 +1113,30 @@
                 }
 
                 .group-comparison-item-title {
+                        display: flex;
+                        align-items: flex-start;
+                        justify-content: space-between;
+                        gap: 12px;
                         padding: 10px 12px;
                         background: var(--panel2);
                         border-bottom: 1px solid var(--border);
                         font-size: 12px;
                         font-weight: 700;
+                }
+
+                .group-comparison-item-title-text {
+                        min-width: 0;
+                        overflow-wrap: anywhere;
+                }
+
+                .group-comparison-status {
+                        flex: 0 0 auto;
+                        border: 1px solid currentColor;
+                        padding: 3px 7px;
+                        font-size: 9px;
+                        font-weight: 500;
+                        line-height: 1.35;
+                        text-transform: uppercase;
                 }
 
                 .group-comparison-item-title.different {
@@ -979,6 +1145,30 @@
 
                 .group-comparison-item-title.missing {
                         color: var(--danger);
+                }
+
+                .group-comparison-timing-alert {
+                        padding: 8px 10px;
+                        border-left: 2px solid var(--warning);
+                        background: rgba(255, 176, 32, .1);
+                        color: var(--warning);
+                        font-size: 11px;
+                        font-weight: 700;
+                }
+
+                .group-comparison-timing-alert.unavailable {
+                        border-left-color: var(--muted);
+                        background: rgba(125, 140, 165, .08);
+                        color: var(--muted);
+                        font-weight: 500;
+                }
+
+                .group-comparison-status.match {
+                        color: var(--success);
+                }
+
+                .group-comparison-status.timing-unavailable {
+                        color: var(--muted);
                 }
 
                 .group-comparison-table {
@@ -990,12 +1180,21 @@
 
                 .group-comparison-table th,
                 .group-comparison-table td {
-                        width: 33.333%;
                         border-bottom: 1px solid var(--border);
                         padding: 9px 12px;
                         text-align: left;
                         vertical-align: top;
                         overflow-wrap: anywhere;
+                }
+
+                .group-comparison-table th:first-child,
+                .group-comparison-table td:first-child {
+                        width: 28%;
+                }
+
+                .group-comparison-table th:not(:first-child),
+                .group-comparison-table td:not(:first-child) {
+                        width: 36%;
                 }
 
                 .group-comparison-table th {
@@ -1028,6 +1227,11 @@
                         color: var(--warning);
                 }
 
+                .group-comparison-table .timing-unavailable {
+                        color: var(--muted);
+                        font-style: italic;
+                }
+
                 .group-comparison-table pre {
                         margin: 0;
                         color: inherit;
@@ -1046,6 +1250,16 @@
                 }
 
                 @media (max-width: 650px) {
+                        .group-comparison-metrics {
+                                grid-template-columns: repeat(2, minmax(0, 1fr));
+                        }
+
+                        .group-comparison-breakdown,
+                        .group-comparison-filters {
+                                margin-right: 8px;
+                                margin-left: 8px;
+                        }
+
                         .group-comparison-item {
                                 margin: 12px 8px;
                                 overflow-x: auto;
@@ -2737,15 +2951,58 @@
 
                 function formatExecutionDuration(milliseconds) {
                         if (milliseconds == null)
-                                return "Unavailable (no previous payload timestamp)";
+                                return "Unavailable";
                         if (milliseconds < 1000)
                                 return `${milliseconds} ms`;
                         return `${(milliseconds / 1000).toFixed(3)} s`;
                 }
 
+                function getExecutionIntervalDisplay(group, entry, intervals) {
+                        const duration = intervals.get(entry);
+                        if (duration != null)
+                                return { value: formatExecutionDuration(duration), available: true };
+                        if (group.entries[0] === entry)
+                                return { value: "Transaction start", available: false };
+                        return { value: "Timestamp unavailable", available: false };
+                }
+
                 function formatExecutionDifference(milliseconds) {
                         const sign = milliseconds > 0 ? "+" : milliseconds < 0 ? "-" : "";
                         return `${sign}${formatExecutionDuration(Math.abs(milliseconds))}`;
+                }
+
+                function setComparisonFilter(filter, button) {
+                        const content = document.getElementById("groupComparisonContent");
+                        if (!content)
+                                return;
+
+                        content.querySelectorAll(".group-comparison-filter").forEach(filterButton => {
+                                filterButton.setAttribute("aria-pressed", String(filterButton === button));
+                        });
+
+                        let visibleCount = 0;
+                        content.querySelectorAll("[data-comparison-item]").forEach(item => {
+                                const matches = filter === "all" ||
+                                        filter === "differences" && item.dataset.different === "true" ||
+                                        filter === "timing" && item.dataset.timing === "true" ||
+                                        item.dataset.kind === filter;
+                                item.hidden = !matches;
+                                if (matches)
+                                        visibleCount++;
+                        });
+
+                        const emptyMessage = content.querySelector(".group-comparison-empty-filter");
+                        if (emptyMessage) {
+                                const messages = {
+                                        differences: "No payload or field differences to show.",
+                                        timing: "No execution-time details to show.",
+                                        request: "No request payloads in this comparison.",
+                                        response: "No response payloads in this comparison.",
+                                        event: "No event payloads in this comparison."
+                                };
+                                emptyMessage.textContent = messages[filter] || "No comparison results to show.";
+                                emptyMessage.hidden = visibleCount > 0;
+                        }
                 }
 
                 function compareRequestGroups() {
@@ -2761,7 +3018,6 @@
                         const totalTimeA = getTransactionDuration(groupA);
                         const totalTimeB = getTransactionDuration(groupB);
                         const hasComparableTotalTime = totalTimeA != null && totalTimeB != null;
-                        const totalTimeDiffers = hasComparableTotalTime && totalTimeA !== totalTimeB;
                         const includeExecutionTime = document.getElementById("includeExecutionTime")?.checked || false;
                         const executionIntervalsA = includeExecutionTime ? getExecutionIntervals(groupA) : new Map();
                         const executionIntervalsB = includeExecutionTime ? getExecutionIntervals(groupB) : new Map();
@@ -2784,6 +3040,7 @@
                         let changedFieldCount = 0;
                         let comparedExecutionIntervalCount = 0;
                         let changedExecutionIntervalCount = 0;
+                        const differenceCounts = { request: 0, response: 0, event: 0 };
 
                         keys.forEach(key => {
                                 const leftEntries = entriesA.get(key) || [];
@@ -2802,8 +3059,10 @@
                                         missingPayloadCount++;
                                         const entry = left || right;
                                         const missingGroup = left ? groupB : groupA;
+                                        const category = String(entry.type || "other").toLowerCase();
+                                        differenceCounts[category] = (differenceCounts[category] || 0) + 1;
                                         return `
-<div class="group-comparison-item">
+<div class="group-comparison-item" data-comparison-item data-kind="${escapeHtmlAttribute(category)}" data-different="true" data-timing="false">
     <div class="group-comparison-item-title missing">Missing ${escapeHtml(entry.type.toUpperCase())} in ${escapeHtml(missingGroup.label)} · ${escapeHtml(getComparisonEntryLabel(entry))}</div>
     <table class="group-comparison-table">
         <thead><tr><th>Payload</th><th>${escapeHtml(groupA.label)}</th><th>${escapeHtml(groupB.label)}</th></tr></thead>
@@ -2825,8 +3084,16 @@
                                 const changedFields = [...new Set([...fieldsA.keys(), ...fieldsB.keys()])]
                                         .filter(path => fieldsA.get(path) !== fieldsB.get(path));
                                 changedFieldCount += changedFields.length;
+                                const category = String(left.type || "other").toLowerCase();
+                                differenceCounts[category] = (differenceCounts[category] || 0) + changedFields.length;
                                 const executionTimeA = includeExecutionTime ? executionIntervalsA.get(left) : null;
                                 const executionTimeB = includeExecutionTime ? executionIntervalsB.get(right) : null;
+                                const executionDisplayA = includeExecutionTime
+                                        ? getExecutionIntervalDisplay(groupA, left, executionIntervalsA)
+                                        : null;
+                                const executionDisplayB = includeExecutionTime
+                                        ? getExecutionIntervalDisplay(groupB, right, executionIntervalsB)
+                                        : null;
                                 const hasComparableExecutionTime = executionTimeA != null && executionTimeB != null;
                                 const executionTimeDiffers = hasComparableExecutionTime &&
                                         executionTimeA !== executionTimeB;
@@ -2835,41 +3102,47 @@
                                 if (executionTimeDiffers)
                                         changedExecutionIntervalCount++;
                                 const title = getComparisonEntryLabel(left);
-                                if (!changedFields.length && !executionTimeDiffers) {
-                                        const timingSummary = includeExecutionTime
-                                                ? ` · ${hasComparableExecutionTime
-                                                        ? `Execution interval: ${formatExecutionDuration(executionTimeA)}`
-                                                        : "Execution interval unavailable for one or both groups"}`
-                                                : "";
+                                if (!changedFields.length && !executionTimeDiffers && !includeExecutionTime) {
                                         return `
-<div class="group-comparison-item">
-    <div class="group-comparison-item-title">${escapeHtml(title)} · No differences${escapeHtml(timingSummary)}</div>
+<div class="group-comparison-item" data-comparison-item data-kind="${escapeHtmlAttribute(category)}" data-different="false" data-timing="false">
+    <div class="group-comparison-item-title">
+        <span class="group-comparison-item-title-text">${escapeHtml(title)}</span>
+        <span class="group-comparison-status match">Match</span>
+    </div>
 </div>`;
                                 }
 
                                 const titleStatus = [
                                         changedFields.length
                                                 ? `${changedFields.length} differing field${changedFields.length === 1 ? "" : "s"}`
-                                                : "",
-                                        executionTimeDiffers ? "execution time differs" : ""
+                                                : includeExecutionTime ? "No field differences" : "",
+                                        executionTimeDiffers
+                                                ? "execution time differs"
+                                                : includeExecutionTime && hasComparableExecutionTime ? "timing matches" : ""
                                 ].filter(Boolean).join(" · ");
                                 const executionTimeRow = includeExecutionTime
                                         ? `<tr>
-            <td>Time since previous payload${executionTimeDiffers
-                ? ` (difference: ${escapeHtml(formatExecutionDifference(executionTimeB - executionTimeA))})`
-                : ""}</td>
-            <td class="${hasComparableExecutionTime
-                ? executionTimeDiffers ? "timing-different" : "timing-value"
-                : "missing-value"}">${escapeHtml(formatExecutionDuration(executionTimeA))}</td>
-            <td class="${hasComparableExecutionTime
-                ? executionTimeDiffers ? "timing-different" : "timing-value"
-                : "missing-value"}">${escapeHtml(formatExecutionDuration(executionTimeB))}</td>
+            <td>Time since previous payload</td>
+            <td class="${executionTimeDiffers
+                ? "timing-different"
+                : executionDisplayA.available ? "timing-value" : "timing-unavailable"}">${escapeHtml(executionDisplayA.value)}</td>
+            <td class="${executionTimeDiffers
+                ? "timing-different"
+                : executionDisplayB.available ? "timing-value" : "timing-unavailable"}">${escapeHtml(executionDisplayB.value)}</td>
         </tr>`
                                         : "";
 
                                 return `
-<div class="group-comparison-item">
-    <div class="group-comparison-item-title ${changedFields.length || executionTimeDiffers ? "different" : ""}">${escapeHtml(title)} · ${escapeHtml(titleStatus)}</div>
+<div class="group-comparison-item" data-comparison-item data-kind="${escapeHtmlAttribute(category)}" data-different="${String(Boolean(changedFields.length || executionTimeDiffers))}" data-timing="${String(includeExecutionTime)}">
+    <div class="group-comparison-item-title ${changedFields.length || executionTimeDiffers ? "different" : ""}">
+        <span class="group-comparison-item-title-text">${escapeHtml(title)}</span>
+        <span class="group-comparison-status ${changedFields.length || executionTimeDiffers
+                ? "different"
+                : hasComparableExecutionTime ? "match" : "timing-unavailable"}">${escapeHtml(titleStatus || "No differences")}</span>
+    </div>
+    ${executionTimeDiffers
+        ? `<div class="group-comparison-timing-alert">Timing difference: ${escapeHtml(formatExecutionDifference(executionTimeB - executionTimeA))}</div>`
+        : ""}
     <table class="group-comparison-table">
         <thead><tr><th>Field</th><th>${escapeHtml(groupA.label)}</th><th>${escapeHtml(groupB.label)}</th></tr></thead>
         <tbody>${changedFields.map(path => {
@@ -2885,38 +3158,64 @@
 </div>`;
                         });
 
-                        const changedPayloadCount = comparedPayloads.length - missingPayloadCount;
-                        const timingSummary = includeExecutionTime
-                                ? ` ${comparedExecutionIntervalCount} execution intervals compared, ${changedExecutionIntervalCount} different.`
-                                : "";
-                        const totalTimeSummary = hasComparableTotalTime
-                                ? ` Total transaction time difference: ${formatExecutionDifference(totalTimeB - totalTimeA)}.`
-                                : " Total transaction time unavailable (timestamps missing or invalid).";
-                        const totalTimeCards = `
-<div class="group-comparison-total-time" aria-label="Total transaction time comparison">
-    <div class="group-comparison-time-card">
-        <div class="group-comparison-time-label">${escapeHtml(groupA.label)} · Total time</div>
-        <div class="group-comparison-time-value">${escapeHtml(formatExecutionDuration(totalTimeA))}</div>
-    </div>
-    <div class="group-comparison-time-card">
-        <div class="group-comparison-time-label">${escapeHtml(groupB.label)} · Total time</div>
-        <div class="group-comparison-time-value">${escapeHtml(formatExecutionDuration(totalTimeB))}</div>
-    </div>
-    <div class="group-comparison-time-card ${totalTimeDiffers ? "different" : ""}">
-        <div class="group-comparison-time-label">Total time difference · B − A</div>
-        <div class="group-comparison-time-value">${escapeHtml(hasComparableTotalTime
-                ? formatExecutionDifference(totalTimeB - totalTimeA)
-                : "Unavailable")}</div>
-    </div>
+                        const differenceCount = missingPayloadCount + changedFieldCount;
+                        const totalTimeDifference = hasComparableTotalTime
+                                ? totalTimeB - totalTimeA
+                                : null;
+                        const comparisonMetrics = [
+                                `<div class="group-comparison-metric"><span>Payloads</span><strong>${comparedPayloads.length}</strong></div>`,
+                                `<div class="group-comparison-metric ${differenceCount ? "warning" : ""}"><span>Differences</span><strong>${differenceCount}</strong></div>`,
+                                includeExecutionTime
+                                        ? `<div class="group-comparison-metric ${changedExecutionIntervalCount ? "warning" : ""}"><span>Intervals differ</span><strong>${changedExecutionIntervalCount}/${comparedExecutionIntervalCount}</strong></div>`
+                                        : `<div class="group-comparison-metric"><span>Intervals differ</span><strong>Off</strong></div>`,
+                                `<div class="group-comparison-metric total-delta ${totalTimeDifference == null ? "" : totalTimeDifference < 0 ? "negative" : totalTimeDifference > 0 ? "positive" : ""}"><span>Total delta · B − A</span><strong>${escapeHtml(totalTimeDifference == null ? "Unavailable" : formatExecutionDifference(totalTimeDifference))}</strong><small>${escapeHtml(groupA.label)}: ${escapeHtml(formatExecutionDuration(totalTimeA))} &nbsp;→&nbsp; ${escapeHtml(groupB.label)}: ${escapeHtml(formatExecutionDuration(totalTimeB))}</small></div>`
+                        ].join("");
+                        const breakdownTypes = ["request", "response", "event"];
+                        Object.keys(differenceCounts).forEach(type => {
+                                if (!breakdownTypes.includes(type))
+                                        breakdownTypes.push(type);
+                        });
+                        const maxTypeDifference = Math.max(0, ...breakdownTypes.map(type => differenceCounts[type] || 0));
+                        const breakdownRows = breakdownTypes.map(type => {
+                                const count = differenceCounts[type] || 0;
+                                const width = maxTypeDifference ? count / maxTypeDifference * 100 : 0;
+                                return `<div class="group-comparison-breakdown-row">
+    <div class="group-comparison-breakdown-label"><span>${escapeHtml(type.toUpperCase())}</span><span>${count}</span></div>
+    <div class="group-comparison-breakdown-track" role="img" aria-label="${escapeHtmlAttribute(`${type}: ${count} differences`)}"><div class="group-comparison-breakdown-fill ${escapeHtmlAttribute(type)}" style="width: ${width}%"></div></div>
 </div>`;
-                        const summary = `${groupA.label} vs ${groupB.label}: ${comparedPayloads.length} payloads compared, ${missingPayloadCount} missing payload${missingPayloadCount === 1 ? "" : "s"}, ${changedFieldCount} differing field${changedFieldCount === 1 ? "" : "s"}.${totalTimeSummary}${timingSummary}`;
+                        }).join("");
+                        const comparisonFilters = `
+<div class="group-comparison-filters" role="group" aria-label="Filter comparison results">
+    <button type="button" class="group-comparison-filter" aria-pressed="true" onclick="setComparisonFilter('all', this)">All</button>
+    <button type="button" class="group-comparison-filter" aria-pressed="false" onclick="setComparisonFilter('differences', this)">Differences Only</button>
+    <button type="button" class="group-comparison-filter" aria-pressed="false" data-comparison-filter="timing"${includeExecutionTime ? "" : " disabled title=\"Enable Include execution time to use this filter\""} onclick="setComparisonFilter('timing', this)">Timing Only</button>
+    ${breakdownTypes.map(type => `<button type="button" class="group-comparison-filter" aria-pressed="false" onclick="setComparisonFilter('${escapeHtmlAttribute(type)}', this)">${escapeHtml(({ request: "Request", response: "Response", event: "Events" })[type] || type)}</button>`).join("")}
+</div>`;
+                        const hasDifferences = differenceCount > 0 || changedExecutionIntervalCount > 0;
                         content.innerHTML = `
-<div class="group-comparison-summary">${escapeHtml(summary)}</div>
-${totalTimeCards}
-${changedFieldCount || changedExecutionIntervalCount || missingPayloadCount
-        ? rows.filter(Boolean).join("")
-        : `<div class="group-comparison-identical">No differences found across ${changedPayloadCount} matching payloads.</div>`}`;
-                        results.hidden = false;
+<div class="group-comparison-summary">
+    <div class="group-comparison-summary-heading-wrap">
+        <span class="group-comparison-summary-icon" aria-hidden="true">⇄</span>
+        <div>
+            <div class="group-comparison-summary-heading">Comparison Overview</div>
+            <span class="group-comparison-summary-caption">A: ${escapeHtml(groupA.label)} &nbsp; · &nbsp; B: ${escapeHtml(groupB.label)}</span>
+        </div>
+    </div>
+    <div class="group-comparison-metrics">${comparisonMetrics}</div>
+</div>
+<section class="group-comparison-breakdown" aria-label="Difference Breakdown">
+    <h3>Difference Breakdown</h3>
+    <div class="group-comparison-breakdown-list">${breakdownRows}</div>
+</section>
+${comparisonFilters}
+${!hasDifferences
+        ? `<div class="group-comparison-identical">${includeExecutionTime
+                ? `No field or timing differences found across ${comparedPayloads.length} payloads.`
+                : `No differences found across ${comparedPayloads.length} matching payloads.`}</div>`
+        : ""}
+${rows.filter(Boolean).join("")}
+<div class="group-comparison-empty-filter" hidden></div>`;
+        results.hidden = false;
                         setResultsTab("comparePayloadTab");
                         results.scrollIntoView({ behavior: "smooth", block: "start" });
                 }
