@@ -675,29 +675,26 @@
                 }
 
                 .transaction-type-columns {
-                        display: grid;
-                        grid-template-columns: repeat(2, minmax(0, 1fr));
-                        gap: 24px;
-                }
-
-                .transaction-type-column {
-                        display: flex;
-                        flex-direction: column;
-                        gap: 8px;
-                        min-width: 0;
+                        columns: 360px;
+                        column-gap: 12px;
                 }
 
                 .transaction-request-group {
                         display: flex;
-                        flex-wrap: wrap;
+                        flex-wrap: nowrap;
                         align-items: flex-start;
                         gap: 8px;
-                        min-width: 0;
+                        width: max-content;
+                        max-width: 100%;
+                        min-width: max-content;
+                        margin-bottom: 8px;
+                        break-inside: avoid;
+                        -webkit-column-break-inside: avoid;
                 }
 
-                .transaction-type-column + .transaction-type-column {
-                        border-left: 2px solid var(--border);
-                        padding-left: 24px;
+                .transaction-request-group .transaction-type-filter {
+                        flex: 0 0 auto;
+                        white-space: nowrap;
                 }
 
                 .request-groups-panel {
@@ -705,6 +702,39 @@
                         border-radius: 0;
                         margin-bottom: 25px;
                         overflow: hidden;
+                }
+
+                .result-tabs {
+                        display: flex;
+                        gap: 2px;
+                        margin-top: 20px;
+                        border-bottom: 1px solid var(--border);
+                }
+
+                .result-tab {
+                        border-color: var(--border);
+                        border-bottom: 0;
+                        background: var(--panel);
+                        color: var(--muted);
+                }
+
+                .result-tab[aria-selected="true"] {
+                        background: var(--panel2);
+                        color: var(--accent);
+                        border-color: var(--accent);
+                }
+
+                .result-tab:focus-visible {
+                        outline: 2px solid var(--accent);
+                        outline-offset: 2px;
+                }
+
+                .result-tab-panel[hidden] {
+                        display: none;
+                }
+
+                .result-tab-panel {
+                        padding-top: 20px;
                 }
 
                 .request-groups-header {
@@ -779,6 +809,251 @@
 
                 .request-groups-content {
                         padding: 16px 16px 1px;
+                }
+
+                .group-comparison-controls {
+                        display: flex;
+                        flex-wrap: wrap;
+                        align-items: end;
+                        gap: 12px;
+                        padding: 20px;
+                        background: linear-gradient(135deg, rgba(18, 26, 44, .7), rgba(7, 11, 20, .45));
+                }
+
+                .group-comparison-panel-toggle {
+                        flex: 1 1 auto;
+                        justify-content: space-between;
+                        width: 100%;
+                }
+
+                .group-comparison-panel-content[hidden] {
+                        display: none;
+                }
+
+                .group-comparison-selectors {
+                        display: flex;
+                        flex: 1 1 420px;
+                        flex-wrap: wrap;
+                        align-items: end;
+                        gap: 12px;
+                }
+
+                .group-comparison-selectors > button {
+                        min-height: 38px;
+                        font-weight: 700;
+                        letter-spacing: .3px;
+                }
+
+                .group-comparison-time-option {
+                        display: inline-flex;
+                        min-height: 38px;
+                        align-items: center;
+                        gap: 8px;
+                        border: 1px solid var(--border);
+                        background: rgba(7, 11, 20, .65);
+                        color: var(--text);
+                        padding: 0 12px;
+                        font-size: 11px;
+                        cursor: pointer;
+                }
+
+                .group-comparison-time-option:hover {
+                        border-color: var(--accent);
+                        background: var(--panel2);
+                }
+
+                .group-comparison-time-option input {
+                        accent-color: var(--accent);
+                }
+
+                .group-comparison-selectors[hidden],
+                .group-comparison-results[hidden] {
+                        display: none;
+                }
+
+                .group-comparison-field {
+                        display: flex;
+                        flex: 1 1 180px;
+                        flex-direction: column;
+                        gap: 6px;
+                        min-width: 0;
+                        color: var(--muted);
+                        font-size: 11px;
+                }
+
+                .group-comparison-field select {
+                        width: 100%;
+                        min-width: 0;
+                        border: 1px solid var(--border);
+                        background: var(--bg);
+                        color: var(--text);
+                        font: inherit;
+                        padding: 9px 10px;
+                }
+
+                .group-comparison-field select:focus-visible,
+                .group-comparison-time-option input:focus-visible {
+                        outline: 2px solid var(--accent);
+                        outline-offset: 2px;
+                }
+
+                .group-comparison-results {
+                        margin-bottom: 25px;
+                }
+
+                .group-comparison-summary {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 8px;
+                        color: var(--muted);
+                        font-size: 12px;
+                        line-height: 1.6;
+                        padding: 16px;
+                        background: rgba(18, 26, 44, .42);
+                        border-bottom: 1px solid var(--border);
+                }
+
+                .group-comparison-total-time {
+                        display: grid;
+                        grid-template-columns: repeat(3, minmax(0, 1fr));
+                        gap: 10px;
+                        margin: 16px;
+                }
+
+                .group-comparison-time-card {
+                        min-width: 0;
+                        border: 1px solid var(--border);
+                        background: linear-gradient(145deg, rgba(18, 26, 44, .9), rgba(7, 11, 20, .85));
+                        padding: 14px 16px;
+                }
+
+                .group-comparison-time-card.different {
+                        border-color: rgba(255, 176, 32, .55);
+                        background: linear-gradient(145deg, rgba(255, 176, 32, .1), rgba(7, 11, 20, .85));
+                }
+
+                .group-comparison-time-label {
+                        color: var(--muted);
+                        font-size: 10px;
+                        letter-spacing: .7px;
+                        margin-bottom: 8px;
+                        text-transform: uppercase;
+                }
+
+                .group-comparison-time-value {
+                        color: var(--accent);
+                        font-size: 16px;
+                        font-weight: 700;
+                        overflow-wrap: anywhere;
+                }
+
+                .group-comparison-time-card.different .group-comparison-time-value {
+                        color: var(--warning);
+                }
+
+                @media (max-width: 650px) {
+                        .group-comparison-total-time {
+                                grid-template-columns: minmax(0, 1fr);
+                                margin: 12px 8px;
+                        }
+                }
+
+                .group-comparison-item {
+                        margin: 16px;
+                        border: 1px solid var(--border);
+                        background: rgba(7, 11, 20, .55);
+                        box-shadow: 0 5px 18px rgba(0, 0, 0, .16);
+                }
+
+                .group-comparison-item-title {
+                        padding: 10px 12px;
+                        background: var(--panel2);
+                        border-bottom: 1px solid var(--border);
+                        font-size: 12px;
+                        font-weight: 700;
+                }
+
+                .group-comparison-item-title.different {
+                        color: var(--warning);
+                }
+
+                .group-comparison-item-title.missing {
+                        color: var(--danger);
+                }
+
+                .group-comparison-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        table-layout: fixed;
+                        font-size: 11px;
+                }
+
+                .group-comparison-table th,
+                .group-comparison-table td {
+                        width: 33.333%;
+                        border-bottom: 1px solid var(--border);
+                        padding: 9px 12px;
+                        text-align: left;
+                        vertical-align: top;
+                        overflow-wrap: anywhere;
+                }
+
+                .group-comparison-table th {
+                        color: var(--accent);
+                        background: rgba(7, 11, 20, .55);
+                }
+
+                .group-comparison-table tr:last-child td {
+                        border-bottom: 0;
+                }
+
+                .group-comparison-table .different-value {
+                        background: rgba(255, 176, 32, .12);
+                        color: var(--warning);
+                }
+
+                .group-comparison-table .missing-value {
+                        background: rgba(255, 95, 86, .12);
+                        color: var(--danger);
+                        font-weight: 700;
+                }
+
+                .group-comparison-table .timing-value {
+                        color: var(--accent);
+                        font-weight: 700;
+                }
+
+                .group-comparison-table .timing-different {
+                        background: rgba(255, 176, 32, .12);
+                        color: var(--warning);
+                }
+
+                .group-comparison-table pre {
+                        margin: 0;
+                        color: inherit;
+                        font: inherit;
+                        white-space: pre-wrap;
+                        overflow-wrap: anywhere;
+                }
+
+                .group-comparison-identical {
+                        margin: 16px;
+                        padding: 14px;
+                        border: 1px solid rgba(40, 255, 136, .35);
+                        background: rgba(40, 255, 136, .04);
+                        color: var(--success);
+                        font-size: 12px;
+                }
+
+                @media (max-width: 650px) {
+                        .group-comparison-item {
+                                margin: 12px 8px;
+                                overflow-x: auto;
+                        }
+
+                        .group-comparison-table {
+                                min-width: 600px;
+                        }
                 }
 
                 .parsed-payloads-content {
@@ -1190,7 +1465,14 @@
                                 <button class="primary" id="parseLogsButton" onclick="pasteLogsFromClipboard()">
                                         Paste Logs
                                 </button>
-
+                                <button class="secondary" id="appendLogsButton" type="button"
+                                        onclick="appendLogsFromClipboard()" disabled>
+                                        Append Logs
+                                </button>
+                                <button class="secondary" id="clearLogsButton" type="button"
+                                        onclick="clearLogs()" disabled>
+                                        Clear Logs
+                                </button>
                         </div>
 
                         <div class="toolbar-exports">
@@ -1227,6 +1509,8 @@
                 let activeResultFilter = "all";
                 let activeFlowFilter = "all";
                 let activeTransactionFilter = "all";
+                let comparisonGroupA = "";
+                let comparisonGroupB = "";
 
                 const pasteSection = document.getElementById("pasteSection");
                 const deviceSection = document.getElementById("deviceSection");
@@ -1236,6 +1520,8 @@
                 const connectedDeviceInfo = document.getElementById("connectedDeviceInfo");
                 const readLogcatButton = document.getElementById("readLogcatButton");
                 const logInput = document.getElementById("logInput");
+                const appendLogsButton = document.getElementById("appendLogsButton");
+                const clearLogsButton = document.getElementById("clearLogsButton");
                 const searchWrapper = document.getElementById("searchWrapper");
                 const searchWrapperHome = document.getElementById("searchWrapperHome");
                 const pageMemoryValue = document.getElementById("pageMemoryValue");
@@ -1282,6 +1568,43 @@
                                 console.error("Could not read logs from the clipboard:", error);
                                 prepareManualPasteFallback();
                         }
+                }
+
+                function prepareManualAppendFallback() {
+                        if (logInput.value && !/\r?\n$/.test(logInput.value))
+                                logInput.value += "\n";
+                        clearParsedResults();
+                        logInput.focus();
+                        logInput.setSelectionRange(logInput.value.length, logInput.value.length);
+                        showToast("Paste the additional logs at the end of the existing text.");
+                }
+
+                async function appendLogsFromClipboard() {
+                        if (!navigator.clipboard?.readText) {
+                                prepareManualAppendFallback();
+                                return;
+                        }
+
+                        let text;
+                        try {
+                                text = await navigator.clipboard.readText();
+                        } catch (error) {
+                                console.error("Could not append logs from the clipboard:", error);
+                                prepareManualAppendFallback();
+                                return;
+                        }
+
+                        if (!text.trim()) {
+                                showToast("Clipboard is empty.");
+                                return;
+                        }
+
+                        const separator = logInput.value && !/\r?\n$/.test(logInput.value) ? "\n" : "";
+                        logInput.value += separator + text;
+                        clearParsedResults();
+                        parseLogs();
+                        logInput.focus();
+                        logInput.setSelectionRange(logInput.value.length, logInput.value.length);
                 }
 
                 function formatMemory(bytes) {
@@ -1408,6 +1731,8 @@
 
                                 try {
                                         logInput.value += `${JSON.parse(event.data)}\n`;
+                                        appendLogsButton.disabled = false;
+                                        clearLogsButton.disabled = false;
                                 } catch (error) {
                                         console.error("Could not read streamed Logcat line:", error);
                                         stopLiveReading("Received an invalid line from the ADB helper.");
@@ -1488,8 +1813,13 @@
                         activeResultFilter = "all";
                         activeFlowFilter = "all";
                         activeTransactionFilter = "all";
+                        comparisonGroupA = "";
+                        comparisonGroupB = "";
                         searchWrapperHome.appendChild(searchWrapper);
                         document.getElementById("results").replaceChildren();
+                        const hasLogs = Boolean(logInput.value.trim());
+                        appendLogsButton.disabled = !hasLogs;
+                        clearLogsButton.disabled = !hasLogs;
                         setResultControlsEnabled(false);
 
                         const searchInput = document.getElementById("searchInput");
@@ -1502,11 +1832,54 @@
                         activeSuggestionIndex = -1;
                 }
 
+                function clearLogs() {
+                        if (isLiveReading)
+                                stopLiveReading("Streams matching lines live from the ADB helper.", false, false);
+
+                        logInput.value = "";
+                        clearParsedResults();
+                        deviceStatus.classList.remove("error");
+                        connectedDeviceInfo.classList.remove("error");
+                        connectedDeviceInfo.textContent = "";
+                        deviceStatus.textContent = "Streams matching lines live from the ADB helper.";
+                }
+
                 function toggleParsedPayloads(button) {
                         const content = document.getElementById(button.getAttribute("aria-controls"));
                         const expanded = button.getAttribute("aria-expanded") === "true";
                         button.setAttribute("aria-expanded", String(!expanded));
                         content.hidden = expanded;
+                }
+
+                function setResultsTab(tabId, focusTab = false) {
+                        const tabs = [...document.querySelectorAll(".result-tab")];
+                        const selectedTab = tabs.find(tab => tab.getAttribute("aria-controls") === tabId);
+                        if (!selectedTab)
+                                return;
+
+                        tabs.forEach(tab => {
+                                const selected = tab === selectedTab;
+                                tab.setAttribute("aria-selected", String(selected));
+                                tab.tabIndex = selected ? 0 : -1;
+                                document.getElementById(tab.getAttribute("aria-controls")).hidden = !selected;
+                        });
+                        if (focusTab)
+                                selectedTab.focus();
+                }
+
+                function handleResultsTabKeydown(event) {
+                        const tabs = [...document.querySelectorAll(".result-tab")];
+                        const currentIndex = tabs.indexOf(event.target);
+                        if (currentIndex < 0 || !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key))
+                                return;
+
+                        event.preventDefault();
+                        const nextIndex = event.key === "Home"
+                                ? 0
+                                : event.key === "End"
+                                        ? tabs.length - 1
+                                        : (currentIndex + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+                        setResultsTab(tabs[nextIndex].getAttribute("aria-controls"), true);
                 }
 
                 function countBraces(text) {
@@ -2011,6 +2384,9 @@
                                 .trim();
 
                         if (term) {
+                                const parsedPayloadTab = document.getElementById("parsedPayloadTab");
+                                if (parsedPayloadTab?.hidden)
+                                        setResultsTab("parsedPayloadTab");
                                 const parsedPayloads = document.getElementById("parsedPayloadsContent");
                                 const parsedPayloadsToggle = document.querySelector(
                                         '[aria-controls="parsedPayloadsContent"]'
@@ -2208,6 +2584,343 @@
                         });
                         filterResults();
                 }
+
+                function updateRequestGroupComparisonSelection(changedGroup, groupId) {
+                        const groupASelect = document.getElementById("compareGroupA");
+                        const groupBSelect = document.getElementById("compareGroupB");
+                        const compareButton = document.getElementById("compareRequestGroupsButton");
+                        if (!groupASelect || !groupBSelect || !compareButton)
+                                return;
+
+                        if (changedGroup === "a") {
+                                comparisonGroupA = groupId;
+                                if (groupBSelect.value === groupId) {
+                                        groupBSelect.value = [...groupBSelect.options]
+                                                .find(option => option.value !== groupId)?.value || "";
+                                }
+                        } else {
+                                comparisonGroupB = groupId;
+                                if (groupASelect.value === groupId) {
+                                        groupASelect.value = [...groupASelect.options]
+                                                .find(option => option.value !== groupId)?.value || "";
+                                }
+                        }
+
+                        comparisonGroupA = groupASelect.value;
+                        comparisonGroupB = groupBSelect.value;
+                        compareButton.disabled = comparisonGroupA === comparisonGroupB;
+                        const results = document.getElementById("groupComparisonResults");
+                        if (results)
+                                results.hidden = true;
+                }
+
+                function flattenComparisonValue(value, path, fields) {
+                        if (Array.isArray(value)) {
+                                if (!value.length)
+                                        fields.set(path || "$", "[]");
+                                else
+                                        value.forEach((item, index) =>
+                                                flattenComparisonValue(item, `${path}[${index}]`, fields)
+                                        );
+                                return;
+                        }
+
+                        if (value && typeof value === "object") {
+                                const properties = Object.entries(value);
+                                if (!properties.length)
+                                        fields.set(path || "$", "{}");
+                                else
+                                        properties.forEach(([key, child]) =>
+                                                flattenComparisonValue(child, path ? `${path}.${key}` : key, fields)
+                                        );
+                                return;
+                        }
+
+                        fields.set(path || "$", JSON.stringify(value));
+                }
+
+                function getComparisonEntryLabel(entry) {
+                        return entry.valid
+                                ? getTitle(entry.parsedObj)
+                                : getTitleFromRawJson(entry.jsonText);
+                }
+
+                function getComparisonEntryKey(entry) {
+                        if (entry.type === "event" && entry.valid) {
+                                const event = entry.parsedObj.event || {};
+                                const resource = event.resource || event;
+                                return JSON.stringify([
+                                        entry.type,
+                                        resource.type || resource.txn_type || "",
+                                        resource.event_type || ""
+                                ]);
+                        }
+                        return JSON.stringify([entry.type, stripTypePrefix(getComparisonEntryLabel(entry)).toLowerCase()]);
+                }
+
+                function getComparisonFields(entry) {
+                        const fields = new Map();
+                        if (entry.valid)
+                                flattenComparisonValue(entry.parsedObj, "", fields);
+                        else
+                                fields.set("Invalid JSON", entry.jsonText);
+                        return fields;
+                }
+
+                function parseComparisonTimestamp(timestamp) {
+                        const match = String(timestamp || "").match(
+                                /^\s*(?:(\d{4})-(\d{2})-(\d{2})[T ]|(\d{2})-(\d{2})\s+)?(\d{2}):(\d{2}):(\d{2})(?:[.,](\d+))?(Z|[+-]\d{2}:?\d{2})?/
+                        );
+                        if (!match)
+                                return null;
+
+                        const milliseconds = Number(((match[9] || "") + "000").slice(0, 3));
+                        if (match[1]) {
+                                const parsed = Date.parse(String(timestamp).replace(",", "."));
+                                return Number.isFinite(parsed) ? { value: parsed, hasDate: true } : null;
+                        }
+
+                        if (match[4]) {
+                                const year = new Date().getFullYear();
+                                const month = match[4];
+                                const day = match[5];
+                                const dateTime = `${year}-${month}-${day}T${match[6]}:${match[7]}:${match[8]}.${String(milliseconds).padStart(3, "0")}${match[10] || ""}`;
+                                const parsed = Date.parse(dateTime);
+                                return Number.isFinite(parsed) ? { value: parsed, hasDate: true } : null;
+                        }
+
+                        return {
+                                value: Number(match[6]) * 3600000 +
+                                        Number(match[7]) * 60000 +
+                                        Number(match[8]) * 1000 +
+                                        milliseconds,
+                                hasDate: false
+                        };
+                }
+
+                function getExecutionIntervals(group) {
+                        const intervals = new Map();
+                        let previousTimestamp = null;
+                        group.entries.forEach(entry => {
+                                const currentTimestamp = parseComparisonTimestamp(entry.timestamp);
+                                let elapsed = null;
+                                if (previousTimestamp && currentTimestamp &&
+                                        previousTimestamp.hasDate === currentTimestamp.hasDate) {
+                                        elapsed = currentTimestamp.value - previousTimestamp.value;
+                                        if (!currentTimestamp.hasDate && elapsed < 0)
+                                                elapsed += 24 * 60 * 60 * 1000;
+                                        if (elapsed >= 0)
+                                                intervals.set(entry, elapsed);
+                                }
+                                previousTimestamp = currentTimestamp;
+                        });
+                        return intervals;
+                }
+
+                function getTransactionDuration(group) {
+                        const timestamps = group.entries
+                                .map(entry => parseComparisonTimestamp(entry.timestamp))
+                                .filter(Boolean);
+                        if (timestamps.length < 2)
+                                return null;
+
+                        const first = timestamps[0];
+                        const last = timestamps[timestamps.length - 1];
+                        if (first.hasDate !== last.hasDate)
+                                return null;
+
+                        let duration = last.value - first.value;
+                        if (!first.hasDate && duration < 0)
+                                duration += 24 * 60 * 60 * 1000;
+                        return duration >= 0 ? duration : null;
+                }
+
+                function formatExecutionDuration(milliseconds) {
+                        if (milliseconds == null)
+                                return "Unavailable (no previous payload timestamp)";
+                        if (milliseconds < 1000)
+                                return `${milliseconds} ms`;
+                        return `${(milliseconds / 1000).toFixed(3)} s`;
+                }
+
+                function formatExecutionDifference(milliseconds) {
+                        const sign = milliseconds > 0 ? "+" : milliseconds < 0 ? "-" : "";
+                        return `${sign}${formatExecutionDuration(Math.abs(milliseconds))}`;
+                }
+
+                function compareRequestGroups() {
+                        if (!lastParseResult)
+                                return;
+
+                        const groupA = lastParseResult.transactionGroups.find(group => group.id === comparisonGroupA);
+                        const groupB = lastParseResult.transactionGroups.find(group => group.id === comparisonGroupB);
+                        const results = document.getElementById("groupComparisonResults");
+                        const content = document.getElementById("groupComparisonContent");
+                        if (!groupA || !groupB || groupA.id === groupB.id || !results || !content)
+                                return;
+                        const totalTimeA = getTransactionDuration(groupA);
+                        const totalTimeB = getTransactionDuration(groupB);
+                        const hasComparableTotalTime = totalTimeA != null && totalTimeB != null;
+                        const totalTimeDiffers = hasComparableTotalTime && totalTimeA !== totalTimeB;
+                        const includeExecutionTime = document.getElementById("includeExecutionTime")?.checked || false;
+                        const executionIntervalsA = includeExecutionTime ? getExecutionIntervals(groupA) : new Map();
+                        const executionIntervalsB = includeExecutionTime ? getExecutionIntervals(groupB) : new Map();
+
+                        const collectEntries = group => {
+                                const buckets = new Map();
+                                group.entries.forEach(entry => {
+                                        const key = getComparisonEntryKey(entry);
+                                        if (!buckets.has(key))
+                                                buckets.set(key, []);
+                                        buckets.get(key).push(entry);
+                                });
+                                return buckets;
+                        };
+                        const entriesA = collectEntries(groupA);
+                        const entriesB = collectEntries(groupB);
+                        const keys = [...new Set([...entriesA.keys(), ...entriesB.keys()])];
+                        const comparedPayloads = [];
+                        let missingPayloadCount = 0;
+                        let changedFieldCount = 0;
+                        let comparedExecutionIntervalCount = 0;
+                        let changedExecutionIntervalCount = 0;
+
+                        keys.forEach(key => {
+                                const leftEntries = entriesA.get(key) || [];
+                                const rightEntries = entriesB.get(key) || [];
+                                const count = Math.max(leftEntries.length, rightEntries.length);
+                                for (let index = 0; index < count; index++) {
+                                        comparedPayloads.push({
+                                                left: leftEntries[index] || null,
+                                                right: rightEntries[index] || null
+                                        });
+                                }
+                        });
+
+                        const rows = comparedPayloads.map(({ left, right }) => {
+                                if (!left || !right) {
+                                        missingPayloadCount++;
+                                        const entry = left || right;
+                                        const missingGroup = left ? groupB : groupA;
+                                        return `
+<div class="group-comparison-item">
+    <div class="group-comparison-item-title missing">Missing ${escapeHtml(entry.type.toUpperCase())} in ${escapeHtml(missingGroup.label)} · ${escapeHtml(getComparisonEntryLabel(entry))}</div>
+    <table class="group-comparison-table">
+        <thead><tr><th>Payload</th><th>${escapeHtml(groupA.label)}</th><th>${escapeHtml(groupB.label)}</th></tr></thead>
+        <tbody><tr>
+            <td>Full payload</td>
+            ${left
+                ? `<td><pre>${escapeHtml(left.valid ? JSON.stringify(left.parsedObj, null, 2) : left.jsonText)}</pre></td>`
+                : `<td class="missing-value">Missing ${escapeHtml(entry.type)}</td>`}
+            ${right
+                ? `<td><pre>${escapeHtml(right.valid ? JSON.stringify(right.parsedObj, null, 2) : right.jsonText)}</pre></td>`
+                : `<td class="missing-value">Missing ${escapeHtml(entry.type)}</td>`}
+        </tr></tbody>
+    </table>
+</div>`;
+                                }
+
+                                const fieldsA = getComparisonFields(left);
+                                const fieldsB = getComparisonFields(right);
+                                const changedFields = [...new Set([...fieldsA.keys(), ...fieldsB.keys()])]
+                                        .filter(path => fieldsA.get(path) !== fieldsB.get(path));
+                                changedFieldCount += changedFields.length;
+                                const executionTimeA = includeExecutionTime ? executionIntervalsA.get(left) : null;
+                                const executionTimeB = includeExecutionTime ? executionIntervalsB.get(right) : null;
+                                const hasComparableExecutionTime = executionTimeA != null && executionTimeB != null;
+                                const executionTimeDiffers = hasComparableExecutionTime &&
+                                        executionTimeA !== executionTimeB;
+                                if (hasComparableExecutionTime)
+                                        comparedExecutionIntervalCount++;
+                                if (executionTimeDiffers)
+                                        changedExecutionIntervalCount++;
+                                const title = getComparisonEntryLabel(left);
+                                if (!changedFields.length && !executionTimeDiffers) {
+                                        const timingSummary = includeExecutionTime
+                                                ? ` · ${hasComparableExecutionTime
+                                                        ? `Execution interval: ${formatExecutionDuration(executionTimeA)}`
+                                                        : "Execution interval unavailable for one or both groups"}`
+                                                : "";
+                                        return `
+<div class="group-comparison-item">
+    <div class="group-comparison-item-title">${escapeHtml(title)} · No differences${escapeHtml(timingSummary)}</div>
+</div>`;
+                                }
+
+                                const titleStatus = [
+                                        changedFields.length
+                                                ? `${changedFields.length} differing field${changedFields.length === 1 ? "" : "s"}`
+                                                : "",
+                                        executionTimeDiffers ? "execution time differs" : ""
+                                ].filter(Boolean).join(" · ");
+                                const executionTimeRow = includeExecutionTime
+                                        ? `<tr>
+            <td>Time since previous payload${executionTimeDiffers
+                ? ` (difference: ${escapeHtml(formatExecutionDifference(executionTimeB - executionTimeA))})`
+                : ""}</td>
+            <td class="${hasComparableExecutionTime
+                ? executionTimeDiffers ? "timing-different" : "timing-value"
+                : "missing-value"}">${escapeHtml(formatExecutionDuration(executionTimeA))}</td>
+            <td class="${hasComparableExecutionTime
+                ? executionTimeDiffers ? "timing-different" : "timing-value"
+                : "missing-value"}">${escapeHtml(formatExecutionDuration(executionTimeB))}</td>
+        </tr>`
+                                        : "";
+
+                                return `
+<div class="group-comparison-item">
+    <div class="group-comparison-item-title ${changedFields.length || executionTimeDiffers ? "different" : ""}">${escapeHtml(title)} · ${escapeHtml(titleStatus)}</div>
+    <table class="group-comparison-table">
+        <thead><tr><th>Field</th><th>${escapeHtml(groupA.label)}</th><th>${escapeHtml(groupB.label)}</th></tr></thead>
+        <tbody>${changedFields.map(path => {
+                const hasA = fieldsA.has(path);
+                const hasB = fieldsB.has(path);
+                return `<tr>
+            <td>${escapeHtml(path)}</td>
+            <td class="${hasA ? "different-value" : "missing-value"}">${hasA ? `<pre>${escapeHtml(fieldsA.get(path))}</pre>` : "Missing field"}</td>
+            <td class="${hasB ? "different-value" : "missing-value"}">${hasB ? `<pre>${escapeHtml(fieldsB.get(path))}</pre>` : "Missing field"}</td>
+        </tr>`;
+        }).join("")}${executionTimeRow}</tbody>
+    </table>
+</div>`;
+                        });
+
+                        const changedPayloadCount = comparedPayloads.length - missingPayloadCount;
+                        const timingSummary = includeExecutionTime
+                                ? ` ${comparedExecutionIntervalCount} execution intervals compared, ${changedExecutionIntervalCount} different.`
+                                : "";
+                        const totalTimeSummary = hasComparableTotalTime
+                                ? ` Total transaction time difference: ${formatExecutionDifference(totalTimeB - totalTimeA)}.`
+                                : " Total transaction time unavailable (timestamps missing or invalid).";
+                        const totalTimeCards = `
+<div class="group-comparison-total-time" aria-label="Total transaction time comparison">
+    <div class="group-comparison-time-card">
+        <div class="group-comparison-time-label">${escapeHtml(groupA.label)} · Total time</div>
+        <div class="group-comparison-time-value">${escapeHtml(formatExecutionDuration(totalTimeA))}</div>
+    </div>
+    <div class="group-comparison-time-card">
+        <div class="group-comparison-time-label">${escapeHtml(groupB.label)} · Total time</div>
+        <div class="group-comparison-time-value">${escapeHtml(formatExecutionDuration(totalTimeB))}</div>
+    </div>
+    <div class="group-comparison-time-card ${totalTimeDiffers ? "different" : ""}">
+        <div class="group-comparison-time-label">Total time difference · B − A</div>
+        <div class="group-comparison-time-value">${escapeHtml(hasComparableTotalTime
+                ? formatExecutionDifference(totalTimeB - totalTimeA)
+                : "Unavailable")}</div>
+    </div>
+</div>`;
+                        const summary = `${groupA.label} vs ${groupB.label}: ${comparedPayloads.length} payloads compared, ${missingPayloadCount} missing payload${missingPayloadCount === 1 ? "" : "s"}, ${changedFieldCount} differing field${changedFieldCount === 1 ? "" : "s"}.${totalTimeSummary}${timingSummary}`;
+                        content.innerHTML = `
+<div class="group-comparison-summary">${escapeHtml(summary)}</div>
+${totalTimeCards}
+${changedFieldCount || changedExecutionIntervalCount || missingPayloadCount
+        ? rows.filter(Boolean).join("")
+        : `<div class="group-comparison-identical">No differences found across ${changedPayloadCount} matching payloads.</div>`}`;
+                        results.hidden = false;
+                        setResultsTab("comparePayloadTab");
+                        results.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+
                 function parseLogs() {
                         const text = document.getElementById("logInput").value;
                         const jsonBlocks = extractJsonObjects(text);
@@ -2307,22 +3020,12 @@
                                 });
                         }
 
-                        const transactionTypeCounts = new Map();
-                        transactionGroups.forEach(group => {
-                                const key = group.transactionType.toLowerCase();
-                                transactionTypeCounts.set(key, (transactionTypeCounts.get(key) || 0) + 1);
-                        });
-                        const transactionTypeOccurrences = new Map();
-                        transactionGroups.forEach(group => {
-                                const key = group.transactionType.toLowerCase();
-                                const occurrence = (transactionTypeOccurrences.get(key) || 0) + 1;
-                                transactionTypeOccurrences.set(key, occurrence);
+                        transactionGroups.forEach((group, index) => {
                                 const label = formatTransactionType(group.transactionType);
-                                group.label = group.transactionAmount
-                                        ? `${label} - ${group.transactionAmount}`
-                                        : transactionTypeCounts.get(key) > 1
-                                                ? `${label} (${occurrence})`
-                                                : label;
+                                const amountSuffix = group.transactionAmount
+                                        ? ` - ${group.transactionAmount}`
+                                        : "";
+                                group.label = `(${index + 1}) ${label}${amountSuffix}`;
                         });
 
                         const flowGroups = transactionGroups.length
@@ -2449,6 +3152,8 @@
                         };
                         activeResultFilter = "all";
                         activeFlowFilter = "all";
+                        comparisonGroupA = transactionGroups[0]?.id || "";
+                        comparisonGroupB = transactionGroups[1]?.id || "";
 
                         const transactionTypeFilters = transactionGroups.length > 1
                                 ? (() => {
@@ -2464,27 +3169,18 @@
                                                 currentTransaction = [group];
                                                 transactionBundles.push(currentTransaction);
                                         });
-                                        const columnBreak = Math.ceil(transactionBundles.length / 2);
-                                        const transactionColumns = [
-                                                transactionBundles.slice(0, columnBreak),
-                                                transactionBundles.slice(columnBreak)
-                                        ];
-
                                         const renderGroupButton = group => `
         <button type="button" class="transaction-type-filter" data-transaction-filter="${group.id}"
                 aria-pressed="${group.id === activeTransactionFilter}"
                 onclick="setTransactionFilter(this.dataset.transactionFilter)">${escapeHtml(group.label)}</button>`;
-                                        const renderColumn = groups => groups.map(group => `
-        <div class="transaction-request-group">${group.map(renderGroupButton).join("")}</div>`).join("");
+                                        const renderBundles = transactionBundles.map(groups => `
+        <div class="transaction-request-group">${groups.map(renderGroupButton).join("")}</div>`).join("");
                                         return `
 <div class="transaction-type-filters" role="group" aria-label="Filter results by transaction type">
     <button type="button" class="transaction-type-filter" data-transaction-filter="all"
             aria-pressed="${activeTransactionFilter === "all"}"
             onclick="setTransactionFilter(this.dataset.transactionFilter)">All</button>
-    <div class="transaction-type-columns">
-        <div class="transaction-type-column">${renderColumn(transactionColumns[0])}</div>
-        <div class="transaction-type-column">${renderColumn(transactionColumns[1])}</div>
-    </div>
+    <div class="transaction-type-columns">${renderBundles}</div>
 </div>`;
                                 })()
                                 : "";
@@ -2511,6 +3207,59 @@
     </div>
 </section>`
                                 : "";
+                        const requestGroupComparisonPanel = transactionGroups.length > 1
+                                ? `
+<section class="request-groups-panel" aria-label="Request Group Comparison Controls">
+    <div class="request-groups-header">
+        <button type="button" class="parsed-payloads-toggle group-comparison-panel-toggle"
+                aria-expanded="true" aria-controls="groupComparisonControlsContent"
+                onclick="toggleParsedPayloads(this)">
+            <span>Compare Request Groups</span>
+            <span class="parsed-payloads-toggle-icon" aria-hidden="true">▾</span>
+        </button>
+    </div>
+    <div id="groupComparisonControlsContent" class="group-comparison-panel-content">
+      <div class="group-comparison-controls">
+        <div id="groupComparisonSelectors" class="group-comparison-selectors">
+            <label class="group-comparison-field" for="compareGroupA">
+                Group A
+                <select id="compareGroupA" onchange="updateRequestGroupComparisonSelection('a', this.value)">
+                    ${transactionGroups.map((group, index) => `
+                    <option value="${escapeHtmlAttribute(group.id)}"${index === 0 ? " selected" : ""}>${escapeHtml(group.label)}</option>`).join("")}
+                </select>
+            </label>
+            <label class="group-comparison-field" for="compareGroupB">
+                Group B
+                <select id="compareGroupB" onchange="updateRequestGroupComparisonSelection('b', this.value)">
+                    ${transactionGroups.map((group, index) => `
+                    <option value="${escapeHtmlAttribute(group.id)}"${index === 1 ? " selected" : ""}>${escapeHtml(group.label)}</option>`).join("")}
+                </select>
+            </label>
+            <label class="group-comparison-time-option" for="includeExecutionTime">
+                <input type="checkbox" id="includeExecutionTime">
+                Include execution time
+            </label>
+            <button type="button" id="compareRequestGroupsButton" onclick="compareRequestGroups()">Compare Groups</button>
+        </div>
+      </div>
+    </div>
+</section>
+<section id="groupComparisonResults" class="request-groups-panel group-comparison-results" aria-label="Request Group Comparison Results" aria-live="polite" hidden>
+    <div class="request-groups-header">
+        <button type="button" class="parsed-payloads-toggle group-comparison-panel-toggle"
+                aria-expanded="true" aria-controls="groupComparisonContent"
+                onclick="toggleParsedPayloads(this)">
+            <span>Comparison Results</span>
+            <span class="parsed-payloads-toggle-icon" aria-hidden="true">▾</span>
+        </button>
+    </div>
+    <div id="groupComparisonContent"></div>
+</section>`
+                                : `
+<section class="request-groups-panel" aria-label="Request Group Comparison">
+    <div class="request-groups-header">Compare Request Groups</div>
+    <div class="request-groups-content">At least two request groups are needed to compare payloads.</div>
+</section>`;
 
                         const invalidSummary = `
 <button type="button" class="invalid-summary-card" data-filter="invalid" data-count="${invalidTotal}"
@@ -2587,10 +3336,19 @@
 </div>
     </div>
 </section>
-${requestGroupsPanel}
-${missingResponseSummary}
-${paymentIdleWarningSummary}
-`;
+    <div class="result-tabs" role="tablist" aria-label="Payload views" onkeydown="handleResultsTabKeydown(event)">
+        <button type="button" class="result-tab" id="parsedPayloadTabButton" role="tab"
+                aria-selected="true" aria-controls="parsedPayloadTab" tabindex="0"
+                onclick="setResultsTab('parsedPayloadTab')">Parsed Payloads</button>
+        <button type="button" class="result-tab" id="comparePayloadTabButton" role="tab"
+                aria-selected="false" aria-controls="comparePayloadTab" tabindex="-1"
+                onclick="setResultsTab('comparePayloadTab')">Compare Payload</button>
+    </div>
+    <div id="parsedPayloadTab" class="result-tab-panel" role="tabpanel" aria-labelledby="parsedPayloadTabButton">
+    ${requestGroupsPanel}
+    ${missingResponseSummary}
+    ${paymentIdleWarningSummary}
+    `;
 
                         if (entries.length > 0) {
                                 html += `
@@ -2731,7 +3489,19 @@ ${escapeHtml(JSON.stringify(parsedObj, null, 2))}
                                 html += `
     </div>
 </section>`;
+                        } else {
+                                html += `
+<section class="request-groups-panel parsed-payloads-panel" aria-label="Parsed Payloads">
+    <div class="request-groups-header">Parsed Payloads</div>
+    <div class="request-groups-content">No payloads found.</div>
+</section>`;
                         }
+                        html += `
+</div>
+<div id="comparePayloadTab" class="result-tab-panel" role="tabpanel"
+        aria-labelledby="comparePayloadTabButton" hidden>
+    ${requestGroupComparisonPanel}
+</div>`;
 
                         // ONE DOM UPDATE
                         searchWrapperHome.appendChild(searchWrapper);
@@ -2781,6 +3551,11 @@ ${escapeHtml(JSON.stringify(parsedObj, null, 2))}
                         const generatedAt = lastParseResult.generatedAt;
                         const reportResults = document.getElementById("results").cloneNode(true);
                         reportResults.querySelector("#searchWrapper")?.remove();
+                        reportResults.querySelector(".result-tabs")?.remove();
+                        reportResults.querySelector("#comparePayloadTab")?.remove();
+                        const parsedPayloadTab = reportResults.querySelector("#parsedPayloadTab");
+                        if (parsedPayloadTab)
+                                parsedPayloadTab.replaceWith(...parsedPayloadTab.childNodes);
                         const reportEntries = lastParseResult.entries;
                         const initialTransactionFilter = lastParseResult.transactionGroups.length
                                 ? activeTransactionFilter
