@@ -1383,6 +1383,10 @@
                         gap: 10px;
                 }
 
+                .json-block summary {
+                        padding: 10px 16px;
+                }
+
                 summary::-webkit-details-marker {
                         display: none;
                 }
@@ -1443,15 +1447,17 @@
                 }
 
                 .copy-btn {
+                        display: none;
                         background: transparent;
                         color: var(--accent);
                         border: 1px solid var(--accent);
-                        padding: 8px 12px;
-                        font-size: 11px;
-                        position: absolute;
-                        top: 10px;
-                        right: 15px;
-                        z-index: 10;
+                        padding: 5px 8px;
+                        font-size: 10px;
+                        flex-shrink: 0;
+                }
+
+                details[open] .copy-btn {
+                        display: inline-flex;
                 }
 
                 pre {
@@ -3713,13 +3719,12 @@ ${rows.filter(Boolean).join("")}
                     ${metadata ? `<span class="payload-meta">${escapeHtml(metadata)}</span>` : ""}
                 </span>
             </div>
+            <button
+                class="copy-btn floating-copy"
+                onclick="event.preventDefault(); event.stopPropagation(); copyJson(${index}, this)">
+                Copy
+            </button>
         </summary>
-
-        <button
-            class="copy-btn floating-copy"
-            onclick="copyJson(${index}, this)">
-            Copy
-        </button>
 
         <pre id="json-${index}">
 ${escapeHtml(JSON.stringify(parsedObj, null, 2))}
