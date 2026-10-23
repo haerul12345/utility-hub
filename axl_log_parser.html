@@ -507,7 +507,7 @@
                 .live-log-unparsed {
                         grid-column: 5;
                         padding-left: 5px;
-                        color: #26a69a;
+                        color: #9aaec8;
                 }
 
                 .live-log-output.compact .live-log-timestamp {
@@ -2115,12 +2115,27 @@
                         appendLogsButton.hidden = deviceMode;
                         clearLogsButton.hidden = deviceMode;
                         if (deviceMode) {
+                                logInput.value = "";
+                                clearParsedResults();
+                                clearLiveLogOutput();
+                                compactLiveLogToggle.checked = false;
+                                liveLogOutput.classList.remove("compact");
+                                liveLogOutput.hidden = false;
+                                document.getElementById("toggleLiveLogPanelButton")
+                                        .setAttribute("aria-expanded", "true");
+                                deviceStatus.classList.remove("error");
+                                connectedDeviceInfo.classList.remove("error");
+                                connectedDeviceInfo.textContent = "";
+                                deviceStatus.textContent = "Streams matching lines live from the ADB helper.";
+                                readLogcatButton.textContent = "Start Live Reading";
                                 startHelperMemoryUpdates();
                         } else {
                                 stopHelperMemoryUpdates();
                                 helperMemoryValue.textContent = "Switch to ADB mode to check the helper.";
                                 if (isLiveReading)
-                                        stopLiveReading("Live reading stopped.");
+                                        stopLiveReading("Live reading stopped.", false, false);
+                                logInput.value = "";
+                                clearLiveLogOutput();
                         }
                 });
 
@@ -2373,11 +2388,14 @@
                         liveLogLineCount = 0;
                         liveLogEntries = [];
                         liveLogWasTrimmed = false;
+                        logInput.value = "";
+                        clearParsedResults();
                         liveLogOutput.replaceChildren();
                         const placeholder = document.createElement("div");
                         placeholder.className = "live-log-placeholder";
-                        placeholder.textContent = "Waiting for live Logcat output...";
+                        placeholder.textContent = "Start live reading to see matching Logcat lines.";
                         liveLogOutput.appendChild(placeholder);
+                        liveLogOutput.scrollTop = 0;
                 }
 
                 function setResultControlsEnabled(enabled) {
