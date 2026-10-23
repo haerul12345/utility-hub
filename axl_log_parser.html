@@ -2376,6 +2376,19 @@
                                         }
                                 }
 
+                                if (eventType === "error" && resource.error_info) {
+                                        const errorInfo = resource.error_info;
+                                        const code = errorInfo.code == null ? "" : String(errorInfo.code).trim();
+                                        const message = typeof errorInfo.text === "string"
+                                                ? formatTransactionType(errorInfo.text.trim())
+                                                : "";
+                                        const details = [code, message].filter(Boolean).join(" - ");
+
+                                        if (details) {
+                                                return `EVENT - ${formatTransactionType(String(type || "UNKNOWN"))} - ${formatTransactionType(eventType)} - [${details}]`;
+                                        }
+                                }
+
                                 const screenName =
                                         resource.screen_info?.name;
 
@@ -4171,12 +4184,25 @@ ${reportHtmlEndTag}
                                 const eventType =
                                         text.match(/"event_type"\s*:\s*"([^"]+)"/)?.[1];
 
+                                const errorInfo =
+                                        text.match(/"error_info"\s*:\s*\{([^}]*)\}/)?.[1] || "";
+                                const errorCode =
+                                        errorInfo.match(/"code"\s*:\s*"?([^",}\s]+)"?/)?.[1];
                                 const eventText =
-                                        text.match(/"error_info"\s*:\s*\{[^}]*"text"\s*:\s*"([^"]+)"/)?.[1] ||
+                                        errorInfo.match(/"text"\s*:\s*"([^"]+)"/)?.[1] ||
                                         text.match(/"text"\s*:\s*"([^"]+)"/)?.[1];
 
                                 const receiptOwner =
                                         text.match(/"receipt_owner"\s*:\s*"([^"]+)"/)?.[1];
+
+                                if (eventType === "error" && (errorCode || eventText)) {
+                                        const details = [
+                                                errorCode,
+                                                eventText ? formatTransactionType(eventText.trim()) : ""
+                                        ].filter(Boolean).join(" - ");
+
+                                        return `EVENT - ${formatTransactionType(type || "UNKNOWN")} - ${formatTransactionType(eventType)} - [${details}]`;
+                                }
 
                                 if (eventType === "non_fatal_error_info" && eventText) {
                                         return `EVENT - ${eventType} - [${eventText}]`;
