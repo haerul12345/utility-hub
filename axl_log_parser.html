@@ -372,6 +372,195 @@
                         font-size: 12px;
                 }
 
+                .live-log-panel {
+                        margin: 0 0 20px;
+                        border: 1px solid var(--border);
+                        background: rgba(7, 11, 20, .95);
+                        box-shadow: inset 0 0 18px rgba(0, 212, 255, .04);
+                }
+
+                .live-log-panel[hidden] {
+                        display: none;
+                }
+
+                .live-log-header {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        flex-wrap: wrap;
+                        gap: 12px;
+                        padding: 12px 16px;
+                        background: var(--panel2);
+                        border-bottom: 1px solid var(--border);
+                        color: var(--text);
+                        font-size: 15px;
+                        font-weight: 600;
+                }
+
+                .live-log-controls {
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                }
+
+                .live-log-clear {
+                        padding: 5px 9px;
+                        font-size: 11px;
+                }
+
+                .live-log-compact-toggle {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        color: var(--text);
+                        font-size: 11px;
+                        cursor: pointer;
+                        white-space: nowrap;
+                }
+
+                .live-log-compact-toggle input {
+                        accent-color: var(--accent);
+                        margin: 0;
+                }
+
+                .live-log-output {
+                        height: min(42vh, 420px);
+                        min-height: 180px;
+                        overflow: auto;
+                        background: #1e1e1e;
+                        font-family: 'JetBrains Mono', monospace;
+                        font-size: 11px;
+                        line-height: 1.7;
+                        scrollbar-color: #526477 #1e1e1e;
+                }
+
+                .live-log-output[hidden] {
+                        display: none;
+                }
+
+                .live-log-row {
+                        display: grid;
+                        grid-template-columns: 190px 82px 120px 22px minmax(620px, 1fr);
+                        width: max-content;
+                        min-width: 100%;
+                        min-height: 19px;
+                        white-space: pre;
+                }
+
+                .live-log-output.compact .live-log-row {
+                        grid-template-columns: 105px 22px minmax(620px, 1fr);
+                }
+
+                .live-log-row > span {
+                        overflow: hidden;
+                        padding: 1px 5px;
+                        text-overflow: clip;
+                }
+
+                .live-log-timestamp {
+                        color: #a9b7c6;
+                }
+
+                .live-log-pid {
+                        color: #a9b7c6;
+                }
+
+                .live-log-tag {
+                        color: #d6a875;
+                }
+
+                .live-log-level {
+                        color: #fff;
+                        text-align: center;
+                        font-weight: 700;
+                }
+
+                .live-log-level-debug {
+                        background: #356b85;
+                }
+
+                .live-log-level-verbose {
+                        background: #66717d;
+                }
+
+                .live-log-level-info {
+                        background: #43805b;
+                }
+
+                .live-log-level-warn {
+                        background: #a8782c;
+                }
+
+                .live-log-level-error,
+                .live-log-level-fatal {
+                        background: #a94442;
+                }
+
+                .live-log-level-assert {
+                        background: #793d85;
+                }
+
+                .live-log-message {
+                        color: #26a69a;
+                }
+
+                .live-log-unparsed {
+                        grid-column: 5;
+                        padding-left: 5px;
+                        color: #26a69a;
+                }
+
+                .live-log-output.compact .live-log-timestamp {
+                        grid-column: 1;
+                }
+
+                .live-log-output.compact .live-log-pid,
+                .live-log-output.compact .live-log-tag {
+                        display: none;
+                }
+
+                .live-log-output.compact .live-log-level {
+                        grid-column: 2;
+                }
+
+                .live-log-output.compact .live-log-message,
+                .live-log-output.compact .live-log-unparsed {
+                        grid-column: 3;
+                        padding-left: 5px;
+                }
+
+                .live-log-output.compact .live-log-unparsed {
+                        padding-left: 18px;
+                }
+
+                .live-log-placeholder {
+                        padding: 10px 12px;
+                        color: var(--muted);
+                }
+
+                .live-log-trim-notice {
+                        position: sticky;
+                        top: 0;
+                        z-index: 1;
+                        background: #1e1e1e;
+                }
+
+                @media (max-width: 600px) {
+                        .live-log-header {
+                                align-items: flex-start;
+                        }
+
+                        .live-log-controls {
+                                flex-wrap: wrap;
+                                justify-content: flex-end;
+                                gap: 6px;
+                        }
+
+                        .live-log-output.compact .live-log-row {
+                                grid-template-columns: 100px 22px minmax(480px, 1fr);
+                        }
+                }
+
                 .toolbar {
                         display: flex;
                         align-items: center;
@@ -1671,6 +1860,28 @@
                         <div id="connectedDeviceInfo" class="device-info" aria-live="polite"></div>
                 </div>
 
+                <section id="liveLogPanel" class="live-log-panel" aria-label="Live Logcat output" hidden>
+                        <div class="live-log-header">
+                                <button id="toggleLiveLogPanelButton" type="button"
+                                        class="parsed-payloads-toggle" aria-controls="liveLogOutput"
+                                        aria-expanded="true" onclick="toggleLiveLogPanel(this)">
+                                        <span>Live Logcat Output</span>
+                                        <span class="parsed-payloads-toggle-icon" aria-hidden="true">▾</span>
+                                </button>
+                                <div class="live-log-controls">
+                                        <label class="live-log-compact-toggle">
+                                                <input id="compactLiveLogToggle" type="checkbox"
+                                                        onchange="setCompactLiveLogView(this.checked)">
+                                                Compact view
+                                        </label>
+                                        <button id="clearLiveLogButton" class="secondary live-log-clear" type="button"
+                                                onclick="clearLiveLogOutput()">Clear Output</button>
+                                </div>
+                        </div>
+                        <div id="liveLogOutput" class="live-log-output" role="log" aria-live="off">
+                                <div class="live-log-placeholder">Start live reading to see matching Logcat lines.</div>
+                        </div>
+                </section>
 
                 <div class="toolbar">
                         <div class="toolbar-actions">
@@ -1726,6 +1937,9 @@
 
                 const pasteSection = document.getElementById("pasteSection");
                 const deviceSection = document.getElementById("deviceSection");
+                const liveLogPanel = document.getElementById("liveLogPanel");
+                const liveLogOutput = document.getElementById("liveLogOutput");
+                const compactLiveLogToggle = document.getElementById("compactLiveLogToggle");
                 const modeToggle = document.getElementById("modeToggle");
                 const parseLogsButton = document.getElementById("parseLogsButton");
                 const deviceStatus = document.getElementById("deviceStatus");
@@ -1743,6 +1957,10 @@
                 let pageMemoryTimer = null;
                 let helperMemoryTimer = null;
                 let isLiveReading = false;
+                let liveLogLineCount = 0;
+                let liveLogEntries = [];
+                let liveLogWasTrimmed = false;
+                const maxLiveLogLines = 2000;
                 let isPageActive = true;
 
                 logInput.addEventListener("paste", () => {
@@ -1892,6 +2110,7 @@
                         const deviceMode = modeToggle.checked;
                         pasteSection.style.display = deviceMode ? "none" : "block";
                         deviceSection.style.display = deviceMode ? "block" : "none";
+                        liveLogPanel.hidden = !deviceMode;
                         parseLogsButton.hidden = deviceMode;
                         appendLogsButton.hidden = deviceMode;
                         clearLogsButton.hidden = deviceMode;
@@ -1921,7 +2140,7 @@
                                 startHelperMemoryUpdates();
                 });
 
-                function toggleLiveReading() {
+                async function toggleLiveReading() {
                         if (isLiveReading) {
                                 stopLiveReading("Live reading stopped.");
                                 return;
@@ -1930,11 +2149,32 @@
                         isLiveReading = true;
                         logInput.value = "";
                         clearParsedResults();
+                        clearLiveLogOutput();
                         readLogcatButton.textContent = "Stop Live Reading";
                         deviceStatus.classList.remove("error");
                         connectedDeviceInfo.classList.remove("error");
                         deviceStatus.textContent = "Connecting to the ADB helper...";
                         connectedDeviceInfo.textContent = "";
+
+                        try {
+                                const response = await fetch("http://localhost:9876/ping", {
+                                        cache: "no-store"
+                                });
+                                if (!response.ok)
+                                        throw new Error(`HTTP ${response.status}`);
+                        } catch (error) {
+                                if (isLiveReading) {
+                                        stopLiveReading(
+                                                `Cannot connect to the ADB helper. Run start_adb_helper.bat and try again (${error.message}).`,
+                                                true
+                                        );
+                                }
+                                return;
+                        }
+
+                        if (!isLiveReading)
+                                return;
+
                         liveReadSource = new EventSource("http://localhost:9876/stream");
                         liveReadSource.onopen = () => {
                                 deviceStatus.textContent = "Connected. Waiting for matching Logcat lines...";
@@ -1944,7 +2184,9 @@
                                         return;
 
                                 try {
-                                        logInput.value += `${JSON.parse(event.data)}\n`;
+                                        const logLines = JSON.parse(event.data);
+                                        logInput.value += `${logLines}\n`;
+                                        appendLiveLogOutput(logLines);
                                         appendLogsButton.disabled = false;
                                         clearLogsButton.disabled = false;
                                 } catch (error) {
@@ -1999,11 +2241,143 @@
                         deviceStatus.classList.toggle("error", failed);
                         connectedDeviceInfo.classList.toggle("error", failed);
                         if (failed)
-                                connectedDeviceInfo.textContent = "ADB device disconnected or Logcat failed.";
+                                connectedDeviceInfo.textContent = "Check that the ADB helper is running and the device is connected.";
                         else
                                 connectedDeviceInfo.textContent = "";
                         readLogcatButton.textContent = "Start Live Reading";
                         deviceStatus.textContent = status;
+                }
+
+                function appendLiveLogOutput(logLines) {
+                        const lines = String(logLines).split(/\r?\n/);
+                        if (lines[lines.length - 1] === "")
+                                lines.pop();
+
+                        if (!lines.length)
+                                return;
+
+                        if (liveLogLineCount === 0)
+                                liveLogOutput.replaceChildren();
+
+                        liveLogEntries.push(...lines);
+                        lines.forEach(line => liveLogOutput.appendChild(
+                                createLiveLogRow(line, compactLiveLogToggle.checked)
+                        ));
+
+                        const overflow = liveLogEntries.length - maxLiveLogLines;
+                        if (overflow > 0) {
+                                liveLogEntries.splice(0, overflow);
+                                liveLogOutput.querySelectorAll(".live-log-row")
+                                        .forEach((row, index) => {
+                                                if (index < overflow)
+                                                        row.remove();
+                                        });
+                                liveLogWasTrimmed = true;
+                        }
+
+                        if (liveLogWasTrimmed && !liveLogOutput.querySelector(".live-log-trim-notice")) {
+                                const notice = document.createElement("div");
+                                notice.className = "live-log-placeholder live-log-trim-notice";
+                                notice.textContent = `[Earlier output trimmed; showing the latest ${maxLiveLogLines} lines]`;
+                                liveLogOutput.prepend(notice);
+                        }
+
+                        liveLogLineCount = liveLogEntries.length;
+                        liveLogOutput.scrollTop = liveLogOutput.scrollHeight;
+                }
+
+                function createLiveLogRow(line, compact = compactLiveLogToggle.checked) {
+                        const row = document.createElement("div");
+                        row.className = "live-log-row";
+
+                        const match = line.match(
+                                /^\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2}\.\d+)\s+(\d+)\s+(\d+)\s+([VDIWEFAS])\s+(.+?):\s?(.*)$/
+                        );
+
+                        if (!match) {
+                                const message = document.createElement("span");
+                                message.className = "live-log-unparsed";
+                                message.textContent = line;
+                                row.appendChild(message);
+                                return row;
+                        }
+
+                        const [, date, time, pid, tid, level, tag, messageText] = match;
+                        const columns = [
+                                ["live-log-timestamp", compact ? time : `${date} ${time}`],
+                                ["live-log-pid", `${pid}-${tid}`],
+                                ["live-log-tag", tag.trim()],
+                                [`live-log-level live-log-level-${getLiveLogLevelName(level)}`, level],
+                                ["live-log-message", messageText]
+                        ];
+
+                        columns.forEach(([className, text]) => {
+                                const column = document.createElement("span");
+                                column.className = className;
+                                column.textContent = text;
+                                row.appendChild(column);
+                        });
+
+                        return row;
+                }
+
+                function setCompactLiveLogView(compact) {
+                        liveLogOutput.classList.toggle("compact", compact);
+                        const scrollToBottom = liveLogOutput.scrollTop >=
+                                liveLogOutput.scrollHeight - liveLogOutput.clientHeight - 4;
+                        liveLogOutput.replaceChildren();
+
+                        if (liveLogWasTrimmed) {
+                                const notice = document.createElement("div");
+                                notice.className = "live-log-placeholder live-log-trim-notice";
+                                notice.textContent = `[Earlier output trimmed; showing the latest ${maxLiveLogLines} lines]`;
+                                liveLogOutput.appendChild(notice);
+                        }
+
+                        if (!liveLogEntries.length) {
+                                const placeholder = document.createElement("div");
+                                placeholder.className = "live-log-placeholder";
+                                placeholder.textContent = "Waiting for live Logcat output...";
+                                liveLogOutput.appendChild(placeholder);
+                        } else {
+                                const fragment = document.createDocumentFragment();
+                                liveLogEntries.forEach(line =>
+                                        fragment.appendChild(createLiveLogRow(line, compact))
+                                );
+                                liveLogOutput.appendChild(fragment);
+                        }
+
+                        if (scrollToBottom)
+                                liveLogOutput.scrollTop = liveLogOutput.scrollHeight;
+                }
+
+                function toggleLiveLogPanel(button) {
+                        const expanded = button.getAttribute("aria-expanded") === "true";
+                        button.setAttribute("aria-expanded", String(!expanded));
+                        liveLogOutput.hidden = expanded;
+                }
+
+                function getLiveLogLevelName(level) {
+                        return ({
+                                V: "verbose",
+                                D: "debug",
+                                I: "info",
+                                W: "warn",
+                                E: "error",
+                                F: "fatal",
+                                A: "assert"
+                        })[level] || "debug";
+                }
+
+                function clearLiveLogOutput() {
+                        liveLogLineCount = 0;
+                        liveLogEntries = [];
+                        liveLogWasTrimmed = false;
+                        liveLogOutput.replaceChildren();
+                        const placeholder = document.createElement("div");
+                        placeholder.className = "live-log-placeholder";
+                        placeholder.textContent = "Waiting for live Logcat output...";
+                        liveLogOutput.appendChild(placeholder);
                 }
 
                 function setResultControlsEnabled(enabled) {

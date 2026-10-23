@@ -228,7 +228,7 @@ const server = http.createServer((req, res) => {
     sendSse(res, "device", device);
     adb = spawn(
       "adb",
-      ["-s", device.serial, "logcat", "-v", "threadtime", "-b", "all", "-T", "1"],
+      ["-s", device.serial, "logcat", "-v", "threadtime", "-v", "year", "-b", "all", "-T", "1"],
       { windowsHide: true }
     );
     let adbErrorOutput = "";
