@@ -1776,6 +1776,47 @@
                         opacity: 1;
                         transform: translateY(0);
                 }
+
+                .scroll-to-top {
+                        position: fixed;
+                        right: 24px;
+                        bottom: 24px;
+                        z-index: 1000;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 36px;
+                        height: 36px;
+                        padding: 0;
+                        color: var(--accent);
+                        background: rgba(13, 19, 33, .92);
+                        border: 1px solid rgba(0, 212, 255, .55);
+                        border-radius: 50%;
+                        transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+                }
+
+                .scroll-to-top:hover {
+                        background: rgba(0, 212, 255, .12);
+                        box-shadow: 0 0 14px rgba(0, 212, 255, .25);
+                        transform: translateY(-2px);
+                }
+
+                .scroll-to-top:focus-visible {
+                        outline: 2px solid var(--accent);
+                        outline-offset: 3px;
+                }
+
+                .scroll-to-top svg {
+                        width: 22px;
+                        height: 22px;
+                }
+
+                @media (max-width: 600px) {
+                        .scroll-to-top {
+                                right: 16px;
+                                bottom: 16px;
+                        }
+                }
         </style>
 </head>
 
@@ -4735,6 +4776,16 @@ ${reportHtmlEndTag}
 
 
         </script>
+
+        <button id="scrollToTopButton" class="scroll-to-top" type="button"
+                onclick="window.scrollTo(0, 0)" aria-label="Scroll to top"
+                title="Scroll to top">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 19V5" />
+                        <path d="m5 12 7-7 7 7" />
+                </svg>
+        </button>
 
         <div id="toast" class="toast">
                 JSON copied to clipboard
