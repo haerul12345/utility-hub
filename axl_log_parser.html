@@ -2305,7 +2305,8 @@
                 }
 
                 function appendLiveLogOutput(logLines) {
-                        const lines = String(logLines).split(/\r?\n/);
+                        const lines = String(logLines).split(/\r?\n/)
+                                .filter(line => getLiveLogcatMatch(line));
                         if (lines[lines.length - 1] === "")
                                 lines.pop();
 
@@ -2346,9 +2347,7 @@
                         const row = document.createElement("div");
                         row.className = "live-log-row";
 
-                        const match = line.match(
-                                /^\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2}\.\d+)\s+(\d+)\s+(\d+)\s+([VDIWEFAS])\s+(.+?):\s?(.*)$/
-                        );
+                        const match = getLiveLogcatMatch(line);
 
                         if (!match) {
                                 const message = document.createElement("span");
@@ -2375,6 +2374,12 @@
                         });
 
                         return row;
+                }
+
+                function getLiveLogcatMatch(line) {
+                        return line.match(
+                                /^\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2}\.\d+)\s+(\d+)\s+(\d+)\s+([VDIWEFAS])\s+(.+?):\s?(.*)$/
+                        );
                 }
 
                 function setCompactLiveLogView(compact) {
