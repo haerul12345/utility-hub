@@ -2305,8 +2305,55 @@
                 }
 
                 function appendLiveLogOutput(logLines) {
-                        const lines = String(logLines).split(/\r?\n/)
-                                .filter(line => getLiveLogcatMatch(line));
+                        const lines = [];
+                        let receivingPayload = false;
+                        let payloadBraceCount = 0;
+
+                        String(logLines).split(/\r?\n/).forEach(line => {
+                                const match = getLiveLogcatMatch(line);
+                                if (match) {
+                                        lines.push(line);
+                                        const received = match[7].match(
+                                                /\b(?:client\s+)?received:\s*(.*)$/i
+                                        );
+                                        receivingPayload = Boolean(received);
+                                        payloadBraceCount = 0;
+
+                                        if (received) {
+                                                const payloadStart = received[1].indexOf("{");
+                                                if (payloadStart >= 0) {
+                                                        payloadBraceCount = countBraces(
+                                                                received[1].slice(payloadStart)
+                                                        );
+                                                        receivingPayload = payloadBraceCount > 0;
+                                                }
+                                        }
+                                        return;
+                                }
+
+                                if (!receivingPayload || !line.trim())
+                                        return;
+
+                                const payloadStart = payloadBraceCount > 0
+                                        ? 0
+                                        : line.indexOf("{");
+                                if (payloadStart < 0)
+                                        return;
+
+                                const payloadLine = line.slice(payloadStart);
+                                if (isReceivedProcessingTrace(payloadLine)) {
+                                        receivingPayload = false;
+                                        return;
+                                }
+
+                                lines.push(payloadLine);
+                                payloadBraceCount += countBraces(payloadLine);
+                                if (payloadBraceCount <= 0) {
+                                        payloadBraceCount = 0;
+                                        receivingPayload = false;
+                                }
+                        });
+
                         if (lines[lines.length - 1] === "")
                                 lines.pop();
 
@@ -2380,6 +2427,10 @@
                         return line.match(
                                 /^\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2}\.\d+)\s+(\d+)\s+(\d+)\s+([VDIWEFAS])\s+(.+?):\s?(.*)$/
                         );
+                }
+
+                function isReceivedProcessingTrace(line) {
+                        return /^\s*(?:processReceivedMessage|processEventMessage|assign\s+txn_type\s*=|<--event:)/i.test(line);
                 }
 
                 function setCompactLiveLogView(compact) {
@@ -4226,7 +4277,7 @@ ${escapeHtml(JSON.stringify(parsedObj, null, 2))}
             </div>
         </summary>
 
-        <pre>${escapeHtml(jsonText.substring(0, 5000))}</pre>
+        <pre>${escapeHtml(removeProcessingTraceFromInvalidJson(jsonText).substring(0, 5000))}</pre>
 
     </details>
 </div>`;
@@ -4586,6 +4637,13 @@ ${reportHtmlEndTag}
                         link.remove();
                         showToast(extension === "html" ? "HTML report download started" : "JSON export download started");
                         setTimeout(() => URL.revokeObjectURL(url), 1000);
+                }
+
+                function removeProcessingTraceFromInvalidJson(text) {
+                        return text.replace(
+                                /^\s*(?:processReceivedMessage|processEventMessage|assign\s+txn_type\s*=|<--event:).*?(?:\r?\n|$)/gim,
+                                ""
+                        );
                 }
 
                 function getTitleFromRawJson(text) {

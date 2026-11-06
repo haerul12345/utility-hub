@@ -75,6 +75,11 @@ function parseLogcatEntry(line) {
     : null;
 }
 
+function isReceivedProcessingTrace(text) {
+  const message = parseLogcatEntry(text)?.message || text;
+  return /^\s*(?:processReceivedMessage|processEventMessage|assign\s+txn_type\s*=|<--event:)/i.test(message);
+}
+
 function countJsonBraces(text) {
   let count = 0;
   let inString = false;
@@ -179,12 +184,15 @@ const server = http.createServer((req, res) => {
   };
 
   const finishReceivedPayload = () => {
-    if (receivedPayload && !clientClosed)
+    if (receivedPayload && receivedPayload.lines.length > 1 && !clientClosed)
       sendSse(res, "message", receivedPayload.lines.join("\n"));
     receivedPayload = null;
   };
 
   const appendReceivedPayload = text => {
+    if (isReceivedProcessingTrace(text))
+      return;
+
     receivedPayload.lines.push(text);
     receivedPayload.braceCount += countJsonBraces(text);
     if (receivedPayload.braceCount <= 0)
@@ -249,8 +257,15 @@ const server = http.createServer((req, res) => {
 
         if (receivedPayload) {
           if (!entry) {
-            if (!receivedPayload.waitingForMessage && line.trim())
+            if (receivedPayload.waitingForMessage) {
+              const payloadStart = line.indexOf("{");
+              if (payloadStart >= 0) {
+                receivedPayload.waitingForMessage = false;
+                appendReceivedPayload(line.slice(payloadStart));
+              }
+            } else if (line.trim()) {
               appendReceivedPayload(line);
+            }
             continue;
           }
 
@@ -269,8 +284,6 @@ const server = http.createServer((req, res) => {
                 receivedPayload.braceCount += countJsonBraces(messageMatch[1]);
                 if (receivedPayload.braceCount <= 0)
                   finishReceivedPayload();
-              } else {
-                receivedPayload = null;
               }
             } else {
               appendReceivedPayload(entry.message);
@@ -303,6 +316,16 @@ const server = http.createServer((req, res) => {
               receivedPayload.braceCount = countJsonBraces(inlineMessage[1]);
               if (receivedPayload.braceCount <= 0)
                 finishReceivedPayload();
+            } else {
+              const payloadStart = receivedHeader[1].indexOf("{");
+              if (payloadStart >= 0) {
+                const payload = receivedHeader[1].slice(payloadStart);
+                receivedPayload.lines.push(payload);
+                receivedPayload.waitingForMessage = false;
+                receivedPayload.braceCount = countJsonBraces(payload);
+                if (receivedPayload.braceCount <= 0)
+                  finishReceivedPayload();
+              }
             }
             continue;
           }

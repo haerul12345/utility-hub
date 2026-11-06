@@ -500,7 +500,7 @@
                 <div class="divider"></div>
 
                 <div class="chip">FORMAT</div>
-                <p class="muted">Creates a standard dummy Track 2 string with a valid Luhn checksum, editable expiry, and fixed service code.</p>
+                <p class="muted">Creates dummy Track 1 and Track 2 strings with a valid Luhn checksum, editable expiry, and fixed sample cardholder name.</p>
             </section>
 
             <section class="module">
@@ -578,7 +578,7 @@
             fallback();
         }
 
-        function renderOutput(pan, track2, isValid) {
+        function renderOutput(pan, track1, track2, isValid) {
             const output = document.getElementById('output');
             const checkMarkup = isValid ? '<span class="ok">YES</span> <span class="ok">✓</span>' : '<span class="warning">NO</span> <span class="warning">✕</span>';
 
@@ -606,6 +606,16 @@
                             <div class="terminal-label">Luhn Valid</div>
                         </div>
                         <div class="output-value status">${checkMarkup}</div>
+                    </div>
+
+                    <div class="output-item">
+                        <div class="output-meta">
+                            <div class="terminal-label">Track 1 · INGENICO/TEST</div>
+                            <button class="copy-btn" type="button" data-copy="${track1}" aria-label="Copy Track 1">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.75A2.75 2.75 0 0 1 11.75 7h6.5A2.75 2.75 0 0 1 21 9.75v6.5A2.75 2.75 0 0 1 18.25 19h-6.5A2.75 2.75 0 0 1 9 16.25v-6.5ZM5 14.25A2.75 2.75 0 0 1 7.75 11.5h.75v6.5A3.75 3.75 0 0 0 12.25 22h6.5A2.75 2.75 0 0 1 16 24.75v-.75h-6.5A3.75 3.75 0 0 1 5.75 20.25v-6Z"/></svg>
+                            </button>
+                        </div>
+                        <div class="output-value track2">${track1}</div>
                     </div>
 
                     <div class="output-item">
@@ -757,10 +767,11 @@
             const expiry = expiryMatch[1] + expiryMatch[2];
             const serviceCode = '101';
             const discretionaryData = '0000000000';
+            const track1 = '%B' + pan + '^INGENICO/TEST^' + expiry + serviceCode + discretionaryData + '?';
             const track2 = ';' + pan + '=' + expiry + serviceCode + discretionaryData + '?';
             const isValid = validateLuhn(pan);
 
-            renderOutput(pan, track2, isValid);
+            renderOutput(pan, track1, track2, isValid);
         }
     </script>
 </body>
